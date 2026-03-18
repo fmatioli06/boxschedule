@@ -40,21 +40,29 @@ body{font-family:'Figtree',sans-serif;background:var(--bg);color:var(--text);min
 
 header{background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;box-shadow:0 1px 8px rgba(0,0,0,.06);}
 .header-inner{max-width:1200px;margin:0 auto;padding:0 16px;height:52px;display:flex;align-items:center;gap:10px;}
-.logo{font-family:'Bebas Neue',cursive;font-size:22px;letter-spacing:3px;color:var(--accent);flex-shrink:0;line-height:1;}
+.logo{font-family:'Bebas Neue',cursive;font-size:20px;letter-spacing:2px;color:var(--accent);flex-shrink:0;line-height:1;white-space:nowrap;}
 .logo span{color:var(--text3);}
 .week-nav{display:flex;align-items:center;gap:6px;flex:1;justify-content:center;}
 .nav-btn{background:var(--surface2);border:1.5px solid var(--border);color:var(--text2);width:30px;height:30px;border-radius:7px;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0;}
 .nav-btn:hover{border-color:var(--accent);color:var(--accent);}
-.week-lbl{font-family:'DM Mono',monospace;font-size:11px;color:var(--text2);min-width:130px;text-align:center;white-space:nowrap;}
+.week-lbl{font-family:'DM Mono',monospace;font-size:11px;color:var(--text2);min-width:120px;text-align:center;white-space:nowrap;}
 .header-right{display:flex;align-items:center;gap:8px;flex-shrink:0;}
-.sync-dot{width:7px;height:7px;border-radius:50%;background:var(--text3);flex-shrink:0;transition:background .3s;}
+.sync-pill{display:flex;align-items:center;gap:5px;background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:3px 9px;font-size:10px;font-weight:600;color:var(--text3);white-space:nowrap;}
+.sync-dot{width:6px;height:6px;border-radius:50%;background:var(--text3);flex-shrink:0;transition:background .3s;}
 .sync-dot.syncing{background:var(--accent);animation:pulse .8s ease infinite;}
 .sync-dot.ok{background:var(--green);}
 .sync-dot.err{background:var(--red);}
+.sync-label{transition:color .3s;}
+.sync-dot.syncing ~ .sync-label{color:var(--accent);}
+.sync-dot.ok ~ .sync-label{color:var(--green);}
+.sync-dot.err ~ .sync-label{color:var(--red);}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
 .user-pill{display:flex;align-items:center;gap:6px;background:var(--surface2);border:1.5px solid var(--border);border-radius:20px;padding:4px 10px 4px 6px;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;white-space:nowrap;}
 .user-pill:hover{border-color:var(--accent);}
 .user-dot{width:9px;height:9px;border-radius:50%;}
+
+/* hide sync label text on small screens, show dot only */
+@media(max-width:480px){.sync-label{display:none;}.sync-pill{padding:3px 6px;}}
 
 .bottom-tabs{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);display:flex;z-index:100;box-shadow:0 -2px 12px rgba(0,0,0,.06);}
 .btab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 4px 10px;gap:3px;border:none;background:transparent;cursor:pointer;color:var(--text3);font-family:'Figtree',sans-serif;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;transition:all .15s;}
@@ -114,7 +122,6 @@ tbody td:first-child{font-family:'DM Mono',monospace;font-size:10px;font-weight:
 .avail-slot.no::after{content:'✕';color:var(--red);font-size:15px;opacity:.6;}
 .avail-slot.bk{background:#f0efe9;cursor:default;}
 
-/* HC overview — named labels */
 .hc-slot{width:100%;min-height:46px;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:3px;padding:4px;background:var(--surface);}
 .hc-slot.bk{background:#f0efe9;}
 .coach-label{display:inline-flex;align-items:center;gap:3px;border-radius:4px;padding:2px 5px;font-family:'Figtree',sans-serif;font-size:9px;font-weight:700;white-space:nowrap;line-height:1.2;}
@@ -194,14 +201,17 @@ select{width:100%;background:var(--surface2);border:1.5px solid var(--border);co
 <div id="app">
   <header>
     <div class="header-inner">
-      <div class="logo">Box<span>Sched</span></div>
+      <div class="logo">Box<span>Schedule</span></div>
       <div class="week-nav">
         <button class="nav-btn" onclick="changeWeek(-1)">‹</button>
         <div class="week-lbl" id="weekLbl"></div>
         <button class="nav-btn" onclick="changeWeek(1)">›</button>
       </div>
       <div class="header-right">
-        <div class="sync-dot" id="syncDot"></div>
+        <div class="sync-pill">
+          <div class="sync-dot" id="syncDot"></div>
+          <span class="sync-label" id="syncLabel">Ready</span>
+        </div>
         <div class="user-pill" onclick="goSplash()">
           <div class="user-dot" id="userDot"></div>
           <span id="userName"></span>
@@ -248,7 +258,7 @@ select{width:100%;background:var(--surface2);border:1.5px solid var(--border);co
           </div>
         </div>
         <div class="legend">
-          <div class="leg-item"><div class="leg-sw" style="background:var(--green-bg);border:1px solid var(--green)"></div>Available (name shown bold)</div>
+          <div class="leg-item"><div class="leg-sw" style="background:var(--green-bg);border:1px solid var(--green)"></div>Available (name shown)</div>
           <div class="leg-item"><div class="leg-sw" style="background:var(--surface3)"></div>Unavailable (faded)</div>
         </div>
         <div class="avail-wrap"><table class="avail-tbl" id="hcAvailTbl"></table></div>
@@ -298,15 +308,11 @@ select{width:100%;background:var(--surface2);border:1.5px solid var(--border);co
 
 <script>
 // ─── SUPABASE CONFIG ─────────────────────────────────
-// Credentials are stored here directly so the app works from any browser.
-// If you ever need to update these, paste your new values here and
-// re-upload to GitHub (Settings → API in your Supabase project).
 const SUPABASE_URL      = 'https://ahaqybgwhvfgqpcpomtw.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFoYXF5Ymd3aHZmZ3FwY3BvbXR3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4NDMxNTEsImV4cCI6MjA4OTQxOTE1MX0.Zghu5uEbORud9T6S7toDeWxZhKytfx6Y_ks_-iuDOSo';
 
-// ─── SUPABASE CLIENT ─────────────────────────────────
-const sb = {
-  get h(){ return {'Content-Type':'application/json','apikey':SUPABASE_ANON_KEY,'Authorization':'Bearer '+SUPABASE_ANON_KEY,'Prefer':'return=representation'}; },
+const sb={
+  get h(){return{'Content-Type':'application/json','apikey':SUPABASE_ANON_KEY,'Authorization':'Bearer '+SUPABASE_ANON_KEY,'Prefer':'return=representation'};},
   async select(t,p=''){const r=await fetch(`${SUPABASE_URL}/rest/v1/${t}?${p}`,{headers:sb.h});if(!r.ok)throw new Error(await r.text());return r.json();},
   async upsert(t,rows){const r=await fetch(`${SUPABASE_URL}/rest/v1/${t}`,{method:'POST',headers:{...sb.h,'Prefer':'resolution=merge-duplicates,return=minimal'},body:JSON.stringify(rows)});if(!r.ok)throw new Error(await r.text());},
   async del(t,p){const r=await fetch(`${SUPABASE_URL}/rest/v1/${t}?${p}`,{method:'DELETE',headers:sb.h});if(!r.ok)throw new Error(await r.text());}
@@ -329,7 +335,7 @@ const S={
     {id:4,name:'Nick',   color:'#2980b9',role:'Coach'},
     {id:5,name:'Felipe', color:'#8e44ad',role:'Coach'},
     {id:6,name:'Josh',   color:'#d35400',role:'Coach'},
-    {id:7,name:'Marissa',color:'#c0392b',role:'Coach'},
+    {id:7,name:'Marissa',color:'#b03060',role:'Coach'},
     {id:8,name:'Brennan',color:'#16a085',role:'Coach'},
     {id:9,name:'Emily',  color:'#b7950b',role:'Coach'},
     {id:10,name:'Steven',color:'#27ae60',role:'Coach'},
@@ -349,11 +355,11 @@ function updateWeekLbl(){
   ['availWeekChip','hcAvailWeekChip'].forEach(id=>{if(g(id))g(id).textContent='Week of '+fmtF(ds[0]);});
 }
 
-// ─── DB LOAD ─────────────────────────────────────────
+// ─── DB ──────────────────────────────────────────────
 async function loadWeekFromDB(){
   const key=wKey();
-  setSyncing('syncing');
-  showLoader('Loading…');
+  setSyncing('syncing','Loading…');
+  showLoader('Loading schedule…');
   try{
     const sr=await sb.select('schedule',`week=eq.${key}&select=day_index,time_index,coach_name`);
     if(!S.schedule[key])S.schedule[key]={};
@@ -364,8 +370,8 @@ async function loadWeekFromDB(){
     const ar=await sb.select('availability',ap);
     if(!S.availability[key])S.availability[key]={};
     ar.forEach(r=>{if(!S.availability[key][r.coach_name])S.availability[key][r.coach_name]={};S.availability[key][r.coach_name][`${r.day_index}_${r.time_index}`]=r.available;});
-    setSyncing('ok');
-  }catch(err){console.error(err);setSyncing('err');showToast('Load error: '+err.message,'err');}
+    setSyncing('ok','Synced');
+  }catch(err){console.error(err);setSyncing('err','Error');showToast('Load error: '+err.message,'err');}
   hideLoader();
 }
 
@@ -374,26 +380,26 @@ async function saveScheduleSlot(dIdx,tIdx,coachName){
   if(!S.schedule[key])S.schedule[key]={};
   if(!S.schedule[key][dIdx])S.schedule[key][dIdx]={};
   S.schedule[key][dIdx][tIdx]=coachName||null;
-  setSyncing('syncing');
+  setSyncing('syncing','Saving…');
   try{
     if(coachName)await sb.upsert('schedule',[{week:key,day_index:dIdx,time_index:tIdx,coach_name:coachName}]);
     else await sb.del('schedule',`week=eq.${key}&day_index=eq.${dIdx}&time_index=eq.${tIdx}`);
-    setSyncing('ok');
-  }catch(err){console.error(err);setSyncing('err');showToast('Save error: '+err.message,'err');}
+    setSyncing('ok','Saved');
+  }catch(err){console.error(err);setSyncing('err','Error');showToast('Save error: '+err.message,'err');}
 }
 
 async function saveMyAvail(){
   const coach=byId(S.curCoachId);if(!coach)return;
   const key=wKey();
   g('saveAvailBtn').disabled=true;
-  setSyncing('syncing');showLoader('Saving availability…');
+  setSyncing('syncing','Saving…');showLoader('Saving availability…');
   try{
     const rows=[];
     CLASS_TIMES.forEach((_,t)=>DAYS.forEach((_,d)=>{if(!isBk(d,t))rows.push({week:key,coach_name:coach.name,day_index:d,time_index:t,available:isAvail(coach.name,d,t)});}));
     await sb.del('availability',`week=eq.${key}&coach_name=eq.${encodeURIComponent(coach.name)}`);
     await sb.upsert('availability',rows);
-    setSyncing('ok');showToast('Availability saved ✓','ok');
-  }catch(err){console.error(err);setSyncing('err');showToast('Save error: '+err.message,'err');}
+    setSyncing('ok','Saved');showToast('Availability saved ✓','ok');
+  }catch(err){console.error(err);setSyncing('err','Error');showToast('Save error: '+err.message,'err');}
   g('saveAvailBtn').disabled=false;hideLoader();
 }
 
@@ -582,7 +588,10 @@ document.querySelectorAll('.overlay').forEach(o=>o.addEventListener('click',e=>{
 function showToast(msg,type='ok'){const t=g('toast');t.textContent=msg;t.className='toast '+(type||'ok');t.style.display='block';clearTimeout(t._t);t._t=setTimeout(()=>t.style.display='none',2600);}
 function showLoader(msg){g('loadingMsg').textContent=msg;g('loadingOverlay').style.display='flex';}
 function hideLoader(){g('loadingOverlay').style.display='none';}
-function setSyncing(s){g('syncDot').className='sync-dot '+s;}
+function setSyncing(state,label){
+  g('syncDot').className='sync-dot '+state;
+  g('syncLabel').textContent=label;
+}
 
 // ─── INIT ────────────────────────────────────────────
 hideLoader();
