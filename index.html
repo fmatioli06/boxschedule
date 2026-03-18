@@ -125,7 +125,7 @@ tbody td:first-child{font-family:'DM Mono',monospace;font-size:10px;font-weight:
 .hc-slot{width:100%;min-height:46px;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:3px;padding:4px;background:var(--surface);}
 .hc-slot.bk{background:#f0efe9;}
 .coach-label{display:inline-flex;align-items:center;gap:3px;border-radius:4px;padding:2px 5px;font-family:'Figtree',sans-serif;font-size:9px;font-weight:700;white-space:nowrap;line-height:1.2;}
-.coach-label.off{opacity:.2;}
+
 .cl-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
 
 .coaches-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;}
@@ -263,8 +263,8 @@ select{width:100%;background:var(--surface2);border:1.5px solid var(--border);co
           </div>
         </div>
         <div class="legend">
-          <div class="leg-item"><div class="leg-sw" style="background:var(--green-bg);border:1px solid var(--green)"></div>Available (name shown)</div>
-          <div class="leg-item"><div class="leg-sw" style="background:var(--surface3)"></div>Unavailable (faded)</div>
+          <div class="leg-item"><div class="leg-sw" style="background:var(--green-bg);border:1px solid var(--green)"></div>Name shown = available this week</div>
+          <div class="leg-item"><div class="leg-sw" style="background:var(--surface3)"></div>Empty cell = no one available</div>
         </div>
         <div class="avail-wrap"><table class="avail-tbl" id="hcAvailTbl"></table></div>
       </div>
@@ -521,13 +521,15 @@ function renderHcAvail(){
     html+=`<tr><td style="padding:0 10px 0 0;height:46px">${CLASS_TIMES[tIdx]}</td>`;
     DAYS.forEach((_,dIdx)=>{
       if(isBk(dIdx,tIdx)){html+='<td><div class="hc-slot bk"></div></td>';return;}
-      const labels=vis.map(c=>{
-        const av=isAvail(c.name,dIdx,tIdx);
+      // Only show coaches who ARE available — hide unavailable ones entirely
+      const availCoaches=vis.filter(c=>isAvail(c.name,dIdx,tIdx));
+      const labels=availCoaches.map(c=>{
         const hex=c.color.replace('#','');
         const r=parseInt(hex.slice(0,2),16),gr=parseInt(hex.slice(2,4),16),b=parseInt(hex.slice(4,6),16);
-        return`<span class="coach-label ${av?'':'off'}" style="background:${av?`rgba(${r},${gr},${b},0.12)`:'transparent'};color:${c.color}" title="${c.name}: ${av?'Available':'Unavailable'}"><span class="cl-dot" style="background:${c.color}"></span>${c.name}</span>`;
+        return`<span class="coach-label" style="background:rgba(${r},${gr},${b},0.12);color:${c.color}" title="${c.name}: Available"><span class="cl-dot" style="background:${c.color}"></span>${c.name}</span>`;
       }).join('');
-      html+=`<td><div class="hc-slot">${labels}</div></td>`;
+      const emptyMsg=availCoaches.length===0?'<span style="font-size:9px;color:var(--text3)">—</span>':'';
+      html+=`<td><div class="hc-slot">${labels||emptyMsg}</div></td>`;
     });
     html+='</tr>';
   });
