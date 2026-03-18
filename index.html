@@ -224,8 +224,12 @@ select{width:100%;background:var(--surface2);border:1.5px solid var(--border);co
     <div class="view active" id="view-schedule">
       <div class="section-head">
         <span class="section-title">Schedule</span>
-        <button class="btn ghost" onclick="exportCSV()" style="font-size:12px;padding:6px 12px;">⬇ CSV</button>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <button class="btn ghost" id="copySchedBtn" onclick="copyPrevWeekSchedule()" style="font-size:12px;padding:6px 12px;display:none">📋 Copy Last Week</button>
+          <button class="btn ghost" onclick="exportCSV()" style="font-size:12px;padding:6px 12px;">⬇ CSV</button>
+        </div>
       </div>
+      <div id="copyResultBanner" style="display:none;background:var(--green-bg);border:1px solid var(--green-bdr);border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:13px;color:var(--green);font-weight:600;"></div>
       <div class="summary-bar" id="summaryBar"></div>
       <div class="tbl-wrap">
         <table><thead id="schedHead"></thead><tbody id="schedBody"></tbody></table>
@@ -244,7 +248,8 @@ select{width:100%;background:var(--surface2);border:1.5px solid var(--border);co
           <div class="leg-item" style="margin-left:auto"><span style="color:var(--red);font-size:10px;font-weight:700">✕ DAY OFF</span><span style="font-size:10px;color:var(--text3);margin-left:3px">= mark whole day off</span></div>
         </div>
         <div class="avail-wrap"><table class="avail-tbl" id="coachAvailTbl"></table></div>
-        <div style="display:flex;gap:8px;margin-top:14px;justify-content:flex-end;">
+        <div style="display:flex;gap:8px;margin-top:14px;justify-content:flex-end;flex-wrap:wrap;">
+          <button class="btn ghost" onclick="copyPrevWeekAvail()" id="copyAvailBtn">📋 Copy Last Week</button>
           <button class="btn ghost" onclick="clearMyAvail()">Clear All</button>
           <button class="btn" id="saveAvailBtn" onclick="saveMyAvail()">💾 Save Availability</button>
         </div>
@@ -438,7 +443,10 @@ async function enterAs(coachId,isHC){
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   g('view-schedule').classList.add('active');
   // Seed historical schedule data on first HC login
-  if(isHC) await seedScheduleIfEmpty();
+  if(isHC) {
+    await seedScheduleIfEmpty();
+    g('copySchedBtn').style.display = 'inline-flex';
+  }
   await loadWeekFromDB();renderAll();
 }
 
@@ -594,6 +602,138 @@ function hideLoader(){g('loadingOverlay').style.display='none';}
 function setSyncing(state,label){
   g('syncDot').className='sync-dot '+state;
   g('syncLabel').textContent=label;
+}
+
+// ─── COPY PREV WEEK SCHEDULE (Head Coach) ────────────
+async function copyPrevWeekSchedule() {
+  const prevKey = wKey(S.weekOffset - 1);
+  const curKey  = wKey(S.weekOffset);
+
+  const btn = g('copySchedBtn');
+  btn.disabled = true;
+  setSyncing('syncing', 'Copying…');
+  showLoader('Loading prev week schedule…');
+
+  try {
+    // Load previous week schedule from Supabase
+    const prevRows = await sb.select('schedule', `week=eq.${prevKey}&select=day_index,time_index,coach_name`);
+
+    if (prevRows.length === 0) {
+      showToast('No schedule found for last week', 'err');
+      btn.disabled = false; hideLoader(); setSyncing('ok', 'Ready');
+      return;
+    }
+
+    // Load current week availability for ALL coaches from Supabase
+    const availRows = await sb.select('availability', `week=eq.${curKey}&select=coach_name,day_index,time_index,available`);
+    // Build a quick lookup: availMap[coachName][d_t] = bool
+    const availMap = {};
+    availRows.forEach(r => {
+      if (!availMap[r.coach_name]) availMap[r.coach_name] = {};
+      availMap[r.coach_name][`${r.day_index}_${r.time_index}`] = r.available;
+    });
+
+    // Ensure current week local cache exists
+    if (!S.schedule[curKey]) S.schedule[curKey] = {};
+
+    let copied = 0, skipped = 0;
+    const rowsToSave = [];
+
+    prevRows.forEach(({ day_index: d, time_index: t, coach_name: coach }) => {
+      if (!coach || isBk(d, t)) return;
+
+      // Check if coach is available this week
+      // If no availability record exists for this coach, default to available
+      const coachAvail = availMap[coach] || null;
+      let available = true;
+      if (coachAvail) {
+        const val = coachAvail[`${d}_${t}`];
+        available = val !== false; // undefined = default available, false = unavailable
+      }
+
+      if (available) {
+        // Copy the assignment
+        if (!S.schedule[curKey][d]) S.schedule[curKey][d] = {};
+        S.schedule[curKey][d][t] = coach;
+        rowsToSave.push({ week: curKey, day_index: d, time_index: t, coach_name: coach });
+        copied++;
+      } else {
+        skipped++;
+      }
+    });
+
+    // Save copied slots to Supabase
+    if (rowsToSave.length > 0) {
+      await sb.upsert('schedule', rowsToSave);
+    }
+
+    setSyncing('ok', 'Saved');
+    renderSchedule();
+
+    // Show result banner
+    const banner = g('copyResultBanner');
+    banner.textContent = `✓ Copied ${copied} slot${copied !== 1 ? 's' : ''} from last week. ${skipped > 0 ? `${skipped} slot${skipped !== 1 ? 's' : ''} left blank (coach unavailable this week).` : 'All coaches are available!'}`;
+    banner.style.display = 'block';
+    setTimeout(() => banner.style.display = 'none', 6000);
+
+  } catch(err) {
+    console.error(err);
+    setSyncing('err', 'Error');
+    showToast('Copy failed: ' + err.message, 'err');
+  }
+
+  btn.disabled = false;
+  hideLoader();
+}
+
+// ─── COPY PREV WEEK AVAILABILITY (Coach) ─────────────
+async function copyPrevWeekAvail() {
+  const coach = byId(S.curCoachId); if (!coach) return;
+  const prevKey = wKey(S.weekOffset - 1);
+  const curKey  = wKey(S.weekOffset);
+
+  const btn = g('copyAvailBtn');
+  btn.disabled = true;
+  setSyncing('syncing', 'Loading…');
+  showLoader('Loading prev week availability…');
+
+  try {
+    // Load previous week availability for this coach
+    const prevRows = await sb.select('availability',
+      `week=eq.${prevKey}&coach_name=eq.${encodeURIComponent(coach.name)}&select=day_index,time_index,available`
+    );
+
+    if (prevRows.length === 0) {
+      showToast('No availability found for last week', 'err');
+      btn.disabled = false; hideLoader(); setSyncing('ok', 'Ready');
+      return;
+    }
+
+    // Apply to local state for current week
+    if (!S.availability[curKey]) S.availability[curKey] = {};
+    if (!S.availability[curKey][coach.name]) S.availability[curKey][coach.name] = {};
+
+    // First default all to true (available)
+    CLASS_TIMES.forEach((_, t) => DAYS.forEach((_, d) => {
+      if (!isBk(d, t)) S.availability[curKey][coach.name][`${d}_${t}`] = true;
+    }));
+
+    // Then apply prev week values
+    prevRows.forEach(r => {
+      S.availability[curKey][coach.name][`${r.day_index}_${r.time_index}`] = r.available;
+    });
+
+    renderCoachAvail();
+    showToast('Last week copied — review and hit Save ✓', 'ok');
+
+  } catch(err) {
+    console.error(err);
+    setSyncing('err', 'Error');
+    showToast('Copy failed: ' + err.message, 'err');
+  }
+
+  btn.disabled = false;
+  hideLoader();
 }
 
 // ─── SEED: pre-load schedule from screenshots ────────
