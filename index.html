@@ -7,14 +7,16 @@
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Figtree:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg:#f4f3f0;--surface:#ffffff;--surface2:#f9f8f6;--surface3:#eeede9;
-  --border:#e2e0da;--border2:#d0cec7;
-  --accent:#d94f2b;--green:#1a9e5c;
-  --green-bg:rgba(26,158,92,.08);--green-bdr:rgba(26,158,92,.3);
-  --red:#d94f2b;--red-bg:rgba(217,79,43,.07);--red-bdr:rgba(217,79,43,.25);
-  --text:#1a1814;--text2:#6b6760;--text3:#aaa8a2;
-  --shadow:0 1px 3px rgba(0,0,0,.08),0 4px 16px rgba(0,0,0,.04);
-  --shadow-lg:0 4px 24px rgba(0,0,0,.1);
+  /* Palette: 033047 / 304C62 / 5C677D / D9D9D9 / F4F3EE */
+  --bg:#f4f3ee;--surface:#ffffff;--surface2:#f0eff9;--surface3:#d9d9d9;
+  --border:#d9d9d9;--border2:#c4c4c4;
+  --accent:#033047;--accent2:#304c62;
+  --green:#1a7a4a;
+  --green-bg:rgba(26,122,74,.08);--green-bdr:rgba(26,122,74,.3);
+  --red:#a63228;--red-bg:rgba(166,50,40,.07);--red-bdr:rgba(166,50,40,.25);
+  --text:#033047;--text2:#304c62;--text3:#5c677d;
+  --shadow:0 1px 3px rgba(3,48,71,.08),0 4px 16px rgba(3,48,71,.05);
+  --shadow-lg:0 4px 24px rgba(3,48,71,.12);
 }
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
 body{font-family:'Figtree',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:15px;line-height:1.4;}
@@ -32,8 +34,8 @@ body{font-family:'Figtree',sans-serif;background:var(--bg);color:var(--text);min
 .coach-pick-btn{display:flex;align-items:center;gap:8px;background:var(--surface);border:1.5px solid var(--border);color:var(--text);font-family:'Figtree',sans-serif;font-size:14px;font-weight:600;padding:10px 18px;border-radius:10px;cursor:pointer;transition:all .15s;box-shadow:var(--shadow);}
 .coach-pick-btn:hover,.coach-pick-btn:active{border-color:var(--accent);color:var(--accent);transform:translateY(-1px);}
 .coach-pick-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
-.hc-btn{background:var(--accent);color:#fff;border:none;font-family:'Figtree',sans-serif;font-size:14px;font-weight:700;padding:12px 28px;border-radius:10px;cursor:pointer;transition:all .15s;animation:fadeUp .5s .4s ease both;box-shadow:0 4px 16px rgba(217,79,43,.3);}
-.hc-btn:hover{transform:translateY(-1px);}
+.hc-btn{background:var(--accent);color:#fff;border:none;font-family:'Figtree',sans-serif;font-size:14px;font-weight:700;padding:12px 28px;border-radius:10px;cursor:pointer;transition:all .15s;animation:fadeUp .5s .4s ease both;box-shadow:0 4px 16px rgba(3,48,71,.25);}
+.hc-btn:hover{transform:translateY(-1px);box-shadow:0 6px 24px rgba(3,48,71,.35);}
 @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 
 #app{display:none;min-height:100vh;}
@@ -83,10 +85,53 @@ main{max-width:1200px;margin:0 auto;padding:16px 12px 80px;}
 .btn:disabled{opacity:.4;cursor:not-allowed;transform:none!important;}
 
 .summary-bar{display:grid;grid-template-columns:repeat(5,1fr);background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:14px;box-shadow:var(--shadow);}
+.compact-top{margin-bottom:10px;}
+.compact-card{padding:12px;}
+.compact-card .health-title{margin-bottom:8px;font-size:14px;}
+.compact-board{margin-top:10px;}
+.compact-board .coverage-item{padding:10px 12px;}
+.compact-board .coverage-board-head{margin-bottom:8px;}
 .sum-stat{padding:12px 10px;border-right:1px solid var(--border);display:flex;flex-direction:column;gap:2px;text-align:center;}
 .sum-stat:last-child{border-right:none;}
 .sum-num{font-family:'Bebas Neue',cursive;font-size:24px;color:var(--accent);line-height:1;}
 .sum-lbl{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;font-weight:600;}
+.health-panel{display:grid;grid-template-columns:1.4fr .8fr;gap:12px;margin-bottom:14px;}
+.health-card,.fairness-card,.mobile-schedule{background:var(--surface);border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow);}
+.health-card,.fairness-card{padding:14px;}
+.health-title{font-family:'Bebas Neue',cursive;font-size:16px;letter-spacing:1.5px;color:var(--text2);margin-bottom:8px;}
+.health-list{display:flex;flex-direction:column;gap:8px;}
+.health-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 10px;border-radius:8px;background:var(--surface2);font-size:12px;}
+.health-row strong{color:var(--accent);}
+.health-empty{font-size:12px;color:var(--text3);font-style:italic;}
+.health-badge{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;padding:4px 7px;border-radius:999px;background:var(--red-bg);color:var(--red);border:1px solid var(--red-bdr);white-space:nowrap;}
+.fairness-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;}
+.fairness-item{padding:9px 10px;border-radius:8px;background:var(--surface2);font-size:12px;}
+.fairness-item strong{display:block;color:var(--accent);font-size:13px;margin-bottom:2px;}
+.fairness-item .mini-note{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.4px;}
+.ops-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 10px;border-radius:8px;background:var(--surface2);font-size:12px;margin-bottom:8px;}
+.ops-row:last-child{margin-bottom:0;}
+.ops-meta{display:flex;flex-direction:column;gap:3px;}
+.ops-meta strong{color:var(--accent);}
+.ops-sub{font-size:11px;color:var(--text3);}
+.cover-chip{display:inline-flex;align-items:center;gap:6px;padding:4px 8px;border-radius:999px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;border:1px solid var(--border);background:var(--surface);color:var(--text2);}
+.cover-chip.waiting{color:var(--red);background:var(--red-bg);border-color:var(--red-bdr);}
+.cover-chip.ready{color:var(--green);background:var(--green-bg);border-color:var(--green-bdr);}
+.coverage-tag{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--red);}
+.chip.has-cover{gap:7px;padding-right:8px;}
+.chip-cover-badge{display:inline-flex;align-items:center;padding:2px 6px;border-radius:999px;background:var(--red-bg);border:1px solid var(--red-bdr);color:var(--red);font-size:9px;font-weight:700;line-height:1;text-transform:uppercase;letter-spacing:.35px;}
+.coverage-callout-items{display:flex;gap:6px;flex-wrap:wrap;align-items:center;}
+.coverage-mini-item{display:inline-flex;align-items:center;gap:5px;padding:4px 8px;border-radius:999px;background:var(--surface2);border:1px solid var(--border);font-size:11px;color:var(--text2);}
+.coverage-mini-item strong{color:var(--accent);font-weight:700;}
+.coverage-callout-text{font-size:12px;font-weight:600;color:var(--text2);}
+.coverage-board{margin-top:14px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px;box-shadow:var(--shadow);}
+.coverage-board-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px;flex-wrap:wrap;}
+.coverage-item{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);}
+.coverage-item:last-child{border-bottom:none;padding-bottom:0;}
+.coverage-main{display:flex;flex-direction:column;gap:3px;}
+.coverage-title{font-size:13px;font-weight:700;color:var(--accent);}
+.coverage-sub{font-size:11px;color:var(--text3);}
+.coverage-actions{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;}
+.inactive-pill{display:inline-flex;align-items:center;gap:5px;padding:4px 8px;border-radius:999px;border:1px solid var(--red-bdr);background:var(--red-bg);color:var(--red);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;}
 
 .tbl-wrap{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow-x:auto;box-shadow:var(--shadow);-webkit-overflow-scrolling:touch;}
 table{width:100%;border-collapse:collapse;min-width:520px;}
@@ -162,10 +207,28 @@ select{width:100%;background:var(--surface2);border:1.5px solid var(--border);co
 .assign-list{display:flex;flex-direction:column;gap:5px;max-height:50vh;overflow-y:auto;-webkit-overflow-scrolling:touch;}
 .assign-item{display:flex;align-items:center;gap:10px;padding:12px;background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;cursor:pointer;transition:all .12s;}
 .assign-item.selected{border-color:var(--green);background:var(--green-bg);}
+.assign-item.recommended{border-color:var(--accent);background:rgba(3,48,71,.06);}
+.assign-rank{width:24px;height:24px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;background:var(--surface);border:1px solid var(--border);font-size:10px;font-weight:700;color:var(--text2);flex-shrink:0;}
 .assign-name{flex:1;font-size:14px;font-weight:600;}
+.assign-meta{display:flex;flex-direction:column;align-items:flex-end;gap:3px;}
 .assign-avail{font-size:11px;font-weight:600;}
+.assign-load{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.4px;}
 .assign-check{color:var(--green);font-size:14px;opacity:0;font-weight:700;}
 .assign-item.selected .assign-check{opacity:1;}
+.quick-hint{font-size:11px;color:var(--text3);margin:-6px 0 12px;}
+.mobile-schedule{display:none;padding:12px;}
+.mobile-day{border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:10px;}
+.mobile-day-head{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:var(--surface2);font-family:'Bebas Neue',cursive;letter-spacing:1px;font-size:16px;color:var(--text2);}
+.mobile-day-body{padding:8px 10px;display:flex;flex-direction:column;gap:8px;}
+.mobile-slot{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);}
+.mobile-slot:last-child{border-bottom:none;}
+.mobile-time{font-family:'DM Mono',monospace;font-size:11px;color:var(--accent);min-width:74px;}
+.mobile-actions{display:flex;justify-content:flex-end;gap:6px;flex:1;flex-wrap:wrap;}
+.load-status{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:4px 7px;border-radius:999px;border:1px solid var(--border);}
+.load-status.over{color:var(--red);background:var(--red-bg);border-color:var(--red-bdr);}
+.load-status.under{color:var(--green);background:var(--green-bg);border-color:var(--green-bdr);}
+.load-status.even{color:var(--accent);background:rgba(3,48,71,.06);border-color:rgba(3,48,71,.15);}
+@media(max-width:700px){.summary-bar{grid-template-columns:repeat(3,1fr);} .health-panel{grid-template-columns:1fr;} .fairness-grid{grid-template-columns:1fr 1fr;} .compact-card{padding:10px;} .tbl-wrap{display:none;} .mobile-schedule{display:block;} .section-head{align-items:flex-start;flex-direction:column;} .ops-metrics{grid-template-columns:repeat(2,1fr);} }
 
 .avail-top{display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
 .week-chip{font-family:'DM Mono',monospace;font-size:10px;color:var(--text2);background:var(--surface);border:1.5px solid var(--border);padding:5px 10px;border-radius:6px;font-weight:500;}
@@ -173,9 +236,34 @@ select{width:100%;background:var(--surface2);border:1.5px solid var(--border);co
 .leg-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text2);font-weight:500;}
 .leg-sw{width:10px;height:10px;border-radius:2px;flex-shrink:0;}
 
+.note-card{background:var(--surface);border:1.5px solid var(--border);border-radius:10px;padding:14px 16px;position:relative;}
+.note-card-name{font-family:'Bebas Neue',cursive;font-size:14px;letter-spacing:1px;margin-bottom:4px;}
+.note-card-text{font-size:13px;color:var(--text);line-height:1.5;}
+.note-card-week{font-family:'DM Mono',monospace;font-size:10px;color:var(--text3);margin-top:6px;}
 .toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--text);color:#fff;border-radius:20px;padding:10px 20px;font-size:13px;font-weight:600;z-index:999;display:none;animation:fadeUp .2s ease;white-space:nowrap;box-shadow:var(--shadow-lg);}
 .toast.ok{background:var(--green);}
 .toast.err{background:var(--red);}
+
+
+.coach-snapshot{display:none;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:10px 12px;margin-bottom:12px;box-shadow:var(--shadow);} 
+.coach-snapshot.show{display:block;}
+.coach-snap-hint{margin-top:8px;font-size:11px;color:var(--text3);}
+.coach-snap-hint strong{color:var(--accent);font-weight:700;}
+.coverage-callout{display:none;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:8px 10px;margin-bottom:10px;font-size:12px;color:var(--text2);box-shadow:var(--shadow);}
+.coverage-callout.show{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;}
+.coverage-callout .cover-chip{flex-shrink:0;}
+.ops-metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px;}
+.ops-metric{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:10px 12px;box-shadow:var(--shadow);}
+.ops-metric-num{font-family:'Bebas Neue',cursive;font-size:24px;line-height:1;color:var(--accent);}
+.ops-metric-lbl{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.7px;font-weight:700;margin-top:4px;}
+.ops-metric-sub{font-size:11px;color:var(--text2);margin-top:4px;}
+.coach-snap-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px;}
+.coach-snap-title{font-family:'Bebas Neue',cursive;font-size:16px;letter-spacing:1.5px;color:var(--text2);line-height:1;}
+.coach-snap-count{font-family:'DM Mono',monospace;font-size:11px;color:var(--text3);white-space:nowrap;}
+.coach-snap-list{display:flex;flex-wrap:wrap;gap:6px;}
+.coach-snap-item{display:inline-flex;align-items:center;gap:6px;background:var(--surface2);border:1px solid var(--border);border-radius:18px;padding:5px 9px;font-size:11px;font-weight:600;color:var(--text2);}
+.coach-snap-empty{font-size:12px;color:var(--text3);}
+@media(max-width:600px){.coach-snapshot{padding:9px 10px;margin-bottom:10px;}.coach-snap-top{margin-bottom:7px;}.coach-snap-list{gap:5px;}.coach-snap-item{font-size:10px;padding:4px 8px;}}
 
 ::-webkit-scrollbar{width:4px;height:4px;}
 ::-webkit-scrollbar-track{background:transparent;}
@@ -230,9 +318,43 @@ select{width:100%;background:var(--surface2);border:1.5px solid var(--border);co
         </div>
       </div>
       <div id="copyResultBanner" style="display:none;background:var(--green-bg);border:1px solid var(--green-bdr);border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:13px;color:var(--green);font-weight:600;"></div>
-      <div class="summary-bar" id="summaryBar"></div>
+      <div class="coverage-callout" id="coverageCallout"></div>
+      <div class="coach-snapshot" id="coachSnapshot">
+        <div class="coach-snap-top">
+          <div class="coach-snap-title">My Week Snapshot</div>
+          <div class="coach-snap-count" id="coachSnapshotCount"></div>
+        </div>
+        <div class="coach-snap-list" id="coachSnapshotList"></div>
+        
+      </div>
+      <div class="mobile-schedule" id="mobileSchedule"></div>
       <div class="tbl-wrap">
         <table><thead id="schedHead"></thead><tbody id="schedBody"></tbody></table>
+      </div>
+    </div>
+
+    <div class="view" id="view-ops">
+      <div class="section-head">
+        <span class="section-title">Operations</span>
+        <span class="week-chip" id="opsWeekChip"></span>
+      </div>
+      <div class="ops-metrics" id="opsMetrics"></div>
+      <div class="health-panel compact-top">
+        <div class="health-card compact-card">
+          <div class="health-title">Schedule Health</div>
+          <div class="health-list" id="healthList"></div>
+        </div>
+        <div class="fairness-card compact-card">
+          <div class="health-title" id="opsTitle">Coverage Snapshot</div>
+          <div id="opsPanel"></div>
+        </div>
+      </div>
+      <div class="coverage-board compact-board">
+        <div class="coverage-board-head">
+          <span class="section-title" style="font-size:16px;" id="coverageBoardTitle">Coverage Board</span>
+          <span class="week-chip" id="coverageWeekChip"></span>
+        </div>
+        <div id="coverageBoardList"></div>
       </div>
     </div>
 
@@ -253,6 +375,16 @@ select{width:100%;background:var(--surface2);border:1.5px solid var(--border);co
           <button class="btn ghost" onclick="clearMyAvail()">Clear All</button>
           <button class="btn" id="saveAvailBtn" onclick="saveMyAvail()">💾 Save Availability</button>
         </div>
+        <!-- COACH NOTES -->
+        <div style="margin-top:20px;">
+          <div style="font-family:'Bebas Neue',cursive;font-size:16px;letter-spacing:2px;color:var(--text2);margin-bottom:8px;">📝 Note to Head Coach</div>
+          <div style="font-size:12px;color:var(--text3);margin-bottom:8px;">Leave a note about this week — schedule requests, conflicts, anything the head coach should know.</div>
+          <textarea id="coachNoteInput" placeholder="e.g. Can you avoid scheduling me at 5:30 AM on Wednesday this week?" style="width:100%;min-height:80px;background:var(--surface);border:1.5px solid var(--border);border-radius:8px;padding:10px 12px;font-family:'Figtree',sans-serif;font-size:13px;color:var(--text);resize:vertical;outline:none;transition:border-color .15s;" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'"></textarea>
+          <div style="display:flex;justify-content:flex-end;margin-top:8px;">
+            <button class="btn" onclick="saveCoachNote()" id="saveNoteBtn">💬 Send Note</button>
+          </div>
+          <div id="noteConfirm" style="display:none;margin-top:8px;font-size:12px;color:var(--green);font-weight:600;">✓ Note sent to head coach</div>
+        </div>
       </div>
       <div id="hcAvailView" style="display:none">
         <div class="avail-top">
@@ -267,6 +399,13 @@ select{width:100%;background:var(--surface2);border:1.5px solid var(--border);co
           <div class="leg-item"><div class="leg-sw" style="background:var(--surface3)"></div>Empty cell = no one available</div>
         </div>
         <div class="avail-wrap"><table class="avail-tbl" id="hcAvailTbl"></table></div>
+        <!-- HC NOTES PANEL -->
+        <div style="margin-top:20px;">
+          <div style="font-family:'Bebas Neue',cursive;font-size:16px;letter-spacing:2px;color:var(--text2);margin-bottom:12px;">📝 Coach Notes This Week</div>
+          <div id="hcNotesList" style="display:flex;flex-direction:column;gap:10px;">
+            <div style="font-size:13px;color:var(--text3)">Loading notes…</div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -286,6 +425,7 @@ select{width:100%;background:var(--surface2);border:1.5px solid var(--border);co
   <div class="modal">
     <span class="modal-handle"></span>
     <div class="modal-title" id="assignTitle">Assign Coach</div>
+    <div class="quick-hint">Available coaches are sorted to the top. Lighter schedules are shown first to help you choose faster.</div>
     <div class="assign-list" id="assignList"></div>
     <div class="modal-actions">
       <button class="btn ghost" onclick="closeOverlay('assignOverlay')">Cancel</button>
@@ -306,6 +446,16 @@ select{width:100%;background:var(--surface2);border:1.5px solid var(--border);co
       <button class="btn ghost" onclick="closeOverlay('coachOverlay')">Cancel</button>
       <button class="btn" id="coachSaveBtn" onclick="saveCoach()">Add</button>
     </div>
+  </div>
+</div>
+
+<div class="overlay" id="coverageOverlay">
+  <div class="modal">
+    <span class="modal-handle"></span>
+    <div class="modal-title" id="coverageModalTitle">Coverage</div>
+    <div class="quick-hint" id="coverageModalHint">Put your class up for coverage or cancel the request.</div>
+    <div id="coverageModalBody"></div>
+    <div class="modal-actions" id="coverageModalActions"></div>
   </div>
 </div>
 
@@ -331,22 +481,26 @@ const SAT_BK=new Set(['5:30 AM','6:30 AM','12:15 PM','4:45 PM','6:15 PM']);
 function isBk(d,t){return d===5&&SAT_BK.has(CLASS_TIMES[t]);}
 
 // ─── STATE ───────────────────────────────────────────
+// Default coaches — used as seed if Supabase coaches table is empty
+const DEFAULT_COACHES = [
+  {id:1, name:'Tyler',    color:'#033047',role:'Head Coach'},
+  {id:2, name:'Hannah',   color:'#2e8b57',role:'Coach'},
+  {id:3, name:'Laura',    color:'#c0392b',role:'Coach'},
+  {id:4, name:'Nick',     color:'#2980b9',role:'Coach'},
+  {id:5, name:'Felipe',   color:'#8e44ad',role:'Coach'},
+  {id:6, name:'Josh',     color:'#d35400',role:'Coach'},
+  {id:7, name:'Marissa',  color:'#b03060',role:'Coach'},
+  {id:8, name:'Brennan',  color:'#16a085',role:'Coach'},
+  {id:9, name:'Emily',    color:'#b7950b',role:'Coach'},
+  {id:10,name:'Steven',   color:'#27ae60',role:'Coach'},
+  {id:11,name:'Sara Beth',color:'#e74c8b',role:'Coach'},
+  {id:12,name:'KJ',       color:'#5b7fdb',role:'Coach'},
+];
+
 const S={
-  weekOffset:0,isHC:false,curCoachId:null,nextId:12,
-  coaches:[
-    {id:1, name:'Tyler',    color:'#c87533',role:'Head Coach'},
-    {id:2, name:'Hannah',   color:'#2e8b57',role:'Coach'},
-    {id:3, name:'Laura',    color:'#c0392b',role:'Coach'},
-    {id:4, name:'Nick',     color:'#2980b9',role:'Coach'},
-    {id:5, name:'Felipe',   color:'#8e44ad',role:'Coach'},
-    {id:6, name:'Josh',     color:'#d35400',role:'Coach'},
-    {id:7, name:'Marissa',  color:'#b03060',role:'Coach'},
-    {id:8, name:'Brennan',  color:'#16a085',role:'Coach'},
-    {id:9, name:'Emily',    color:'#b7950b',role:'Coach'},
-    {id:10,name:'Steven',   color:'#27ae60',role:'Coach'},
-    {id:11,name:'Sara Beth',color:'#e74c8b',role:'Coach'},
-  ],
-  schedule:{},availability:{},
+  weekOffset:0,isHC:false,curCoachId:null,nextId:13,
+  coaches: JSON.parse(JSON.stringify(DEFAULT_COACHES)).map(c=>({...c,active:true})), // start with defaults, replaced on load
+  schedule:{},availability:{},notes:{},coverage:{},
 };
 
 // ─── WEEK HELPERS ────────────────────────────────────
@@ -358,10 +512,57 @@ function fmtF(d){return(d.getMonth()+1)+'/'+d.getDate()+'/'+d.getFullYear();}
 function updateWeekLbl(){
   const ds=wDates();
   g('weekLbl').textContent=fmt(ds[0])+' – '+fmt(ds[5]);
-  ['availWeekChip','hcAvailWeekChip'].forEach(id=>{if(g(id))g(id).textContent='Week of '+fmtF(ds[0]);});
+  ['availWeekChip','hcAvailWeekChip','opsWeekChip','coverageWeekChip'].forEach(id=>{if(g(id))g(id).textContent='Week of '+fmtF(ds[0]);});
 }
 
 // ─── DB ──────────────────────────────────────────────
+
+// Load coaches from Supabase — called once on app start
+async function loadCoachesFromDB(){
+  try{
+    let rows=[];
+    try{
+      rows = await sb.select('coaches','select=id,name,color,role,active&order=id.asc');
+    }catch(err){
+      rows = await sb.select('coaches','select=id,name,color,role&order=id.asc');
+    }
+    if(rows && rows.length > 0){
+      S.coaches = rows.map(c=>({...c, active:c.active !== false}));
+      S.nextId = Math.max(...rows.map(c=>c.id)) + 1;
+    } else {
+      const seeded = DEFAULT_COACHES.map(c=>({...c,active:true}));
+      try{ await sb.upsert('coaches', seeded); } catch(e){ try{ await sb.upsert('coaches', DEFAULT_COACHES); }catch(_){ } }
+      S.coaches = JSON.parse(JSON.stringify(seeded));
+      S.nextId = 13;
+    }
+  }catch(e){
+    console.warn('Coaches table not ready yet:', e.message);
+    S.coaches = JSON.parse(JSON.stringify(DEFAULT_COACHES)).map(c=>({...c,active:true}));
+  }
+}
+
+async function saveCoachToDB(coach){
+  try{
+    try{
+      await sb.upsert('coaches',[{id:coach.id,name:coach.name,color:coach.color,role:coach.role,active:coach.active !== false}]);
+    }catch(err){
+      await sb.upsert('coaches',[{id:coach.id,name:coach.name,color:coach.color,role:coach.role}]);
+    }
+  }catch(e){
+    console.warn('Could not save coach to DB:', e.message);
+    showToast('Coach saved locally only — coaches table not set up','err');
+  }
+}
+
+async function toggleCoachActiveInDB(coach){
+  try{
+    await sb.upsert('coaches',[{id:coach.id,name:coach.name,color:coach.color,role:coach.role,active:coach.active !== false}]);
+  }catch(e){
+    console.warn('Could not save coach active state:', e.message);
+    showToast('Status changed locally only — add active column in Supabase to persist','err');
+  }
+}
+
 async function loadWeekFromDB(){
   const key=wKey();
   setSyncing('syncing','Loading…');
@@ -376,6 +577,25 @@ async function loadWeekFromDB(){
     const ar=await sb.select('availability',ap);
     if(!S.availability[key])S.availability[key]={};
     ar.forEach(r=>{if(!S.availability[key][r.coach_name])S.availability[key][r.coach_name]={};S.availability[key][r.coach_name][`${r.day_index}_${r.time_index}`]=r.available;});
+    // Load notes for this week (graceful — table may not exist yet)
+    try{
+      const noteRows=await sb.select('notes',`week=eq.${key}&select=coach_name,note,created_at`);
+      if(!S.notes)S.notes={};
+      S.notes[key]=noteRows;
+    }catch(e){
+      if(!S.notes)S.notes={};
+      S.notes[key]=[];
+      console.warn('Notes table not set up yet — run SQL in Supabase to enable notes.');
+    }
+    try{
+      const coverageRows=await sb.select('coverage_requests',`week=eq.${key}&select=week,day_index,time_index,requested_by,volunteer_name,status,created_at`);
+      if(!S.coverage)S.coverage={};
+      S.coverage[key]=coverageRows;
+    }catch(e){
+      if(!S.coverage)S.coverage={};
+      S.coverage[key]=S.coverage[key]||[];
+      console.warn('Coverage table not set up yet — run SQL in Supabase to enable coverage requests.');
+    }
     setSyncing('ok','Synced');
   }catch(err){console.error(err);setSyncing('err','Error');showToast('Load error: '+err.message,'err');}
   hideLoader();
@@ -413,6 +633,45 @@ async function saveMyAvail(){
 function getSlot(d,t){return S.schedule[wKey()]?.[d]?.[t]??null;}
 function byId(id){return S.coaches.find(c=>c.id===id);}
 function byName(n){return S.coaches.find(c=>c.name===n);}
+function isCoachActive(coach){return coach && coach.active !== false;}
+function activeCoaches(){return S.coaches.filter(isCoachActive);}
+function getCoverageRequests(key=wKey()){if(!S.coverage[key])S.coverage[key]=[];return S.coverage[key];}
+function getCoverageRequest(d,t,key=wKey()){return getCoverageRequests(key).find(r=>r.day_index===d&&r.time_index===t&&r.status!=='approved')||null;}
+function getAnyCoverageRecord(d,t,key=wKey()){return getCoverageRequests(key).find(r=>r.day_index===d&&r.time_index===t)||null;}
+function coverageStatusLabel(req){if(!req)return ''; return req.volunteer_name ? 'Volunteer ready' : 'Waiting for cover';}
+async function saveCoverageRow(row){
+  const key=row.week||wKey();
+  row.week=key;
+  setSyncing('syncing','Saving…');
+  try{
+    await sb.upsert('coverage_requests',[row]);
+    const list=getCoverageRequests(key);
+    const idx=list.findIndex(r=>r.day_index===row.day_index&&r.time_index===row.time_index);
+    if(idx>=0)list[idx]={...list[idx],...row}; else list.push({...row});
+    setSyncing('ok','Saved');
+    return true;
+  }catch(err){
+    console.warn('Coverage save issue:', err.message);
+    const list=getCoverageRequests(key);
+    const idx=list.findIndex(r=>r.day_index===row.day_index&&r.time_index===row.time_index);
+    if(idx>=0)list[idx]={...list[idx],...row}; else list.push({...row});
+    setSyncing('ok','Saved');
+    showToast('Coverage saved locally only — add coverage_requests table to persist','err');
+    return false;
+  }
+}
+async function deleteCoverageRow(d,t,key=wKey()){
+  setSyncing('syncing','Saving…');
+  try{
+    await sb.del('coverage_requests',`week=eq.${key}&day_index=eq.${d}&time_index=eq.${t}`);
+  }catch(err){
+    console.warn('Coverage delete issue:', err.message);
+  }
+  if(S.coverage[key])S.coverage[key]=S.coverage[key].filter(r=>!(r.day_index===d&&r.time_index===t));
+  setSyncing('ok','Saved');
+}
+function coachClassCount(name,key=wKey()){let count=0;CLASS_TIMES.forEach((_,t)=>DAYS.forEach((_,d)=>{if(!isBk(d,t)&&S.schedule[key]?.[d]?.[t]===name)count++;}));return count;}
+function getLoadStatus(count,avg){if(count>avg+1)return 'over'; if(count<avg-1)return 'under'; return 'even';}
 function ensureAvail(name){
   const k=wKey();
   if(!S.availability[k])S.availability[k]={};
@@ -431,22 +690,27 @@ function toggleDayOff(name,dIdx){
 
 // ─── SPLASH ──────────────────────────────────────────
 function buildSplash(){
-  g('splashCoaches').innerHTML=S.coaches.map(c=>`<button class="coach-pick-btn" onclick="enterAs(${c.id},false)"><span class="coach-pick-dot" style="background:${c.color}"></span>${c.name}</button>`).join('');
+  g('splashCoaches').innerHTML=activeCoaches().map(c=>`<button class="coach-pick-btn" onclick="enterAs(${c.id},false)"><span class="coach-pick-dot" style="background:${c.color}"></span>${c.name}</button>`).join('');
 }
 
 async function enterAs(coachId,isHC){
   S.isHC=isHC;S.curCoachId=coachId;
   g('splash').style.display='none';g('app').style.display='block';
-  if(isHC){g('userDot').style.background='#1a9e5c';g('userName').textContent='Head Coach';}
-  else{const c=byId(coachId);g('userDot').style.background=c.color;g('userName').textContent=c.name;}
+  if(isHC){
+    g('userDot').style.background='#1a7a4a';
+    g('userName').textContent='Head Coach';
+    g('copySchedBtn').style.display='inline-flex'; // HC only
+  } else {
+    const c=byId(coachId);
+    g('userDot').style.background=c.color;
+    g('userName').textContent=c.name;
+    g('copySchedBtn').style.display='none'; // coaches cannot copy schedule
+  }
   activeTab='schedule';buildTabs();updateWeekLbl();
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   g('view-schedule').classList.add('active');
   // Seed historical schedule data on first HC login
-  if(isHC) {
-    await seedScheduleIfEmpty();
-    g('copySchedBtn').style.display = 'inline-flex';
-  }
+  if(isHC) await seedScheduleIfEmpty();
   await loadWeekFromDB();renderAll();
 }
 
@@ -454,7 +718,7 @@ function goSplash(){g('splash').style.display='flex';g('app').style.display='non
 
 // ─── TABS ────────────────────────────────────────────
 const COACH_TABS=[{id:'schedule',label:'Schedule',icon:'📅'},{id:'availability',label:'Availability',icon:'✋'}];
-const HC_TABS=[{id:'schedule',label:'Schedule',icon:'📅'},{id:'availability',label:'Overview',icon:'👥'},{id:'coaches',label:'Coaches',icon:'⚡'}];
+const HC_TABS=[{id:'schedule',label:'Schedule',icon:'📅'},{id:'ops',label:'Ops',icon:'📌'},{id:'availability',label:'Overview',icon:'👥'},{id:'coaches',label:'Coaches',icon:'⚡'}];
 let activeTab='schedule';
 
 function buildTabs(){
@@ -473,23 +737,143 @@ async function switchTab(id,btn){
 // ─── RENDER: SCHEDULE ────────────────────────────────
 function renderSchedule(){
   const dates=wDates(),today=new Date();today.setHours(0,0,0,0);
+  const active=activeCoaches();
+  g('coverageWeekChip').textContent='Week of '+fmtF(dates[0]);
   g('schedHead').innerHTML='<tr><th>TIME</th>'+dates.map((d,i)=>`<th style="${d.getTime()===today.getTime()?'color:var(--accent)':''}">${DAY_SHORT[i]}<br><span style="font-size:8px;font-weight:400">${fmt(d)}</span></th>`).join('')+'</tr>';
   g('schedBody').innerHTML=CLASS_TIMES.map((_,tIdx)=>`<tr><td>${CLASS_TIMES[tIdx]}</td>`+DAYS.map((_,dIdx)=>{
     if(isBk(dIdx,tIdx))return'<td class="blackout-cell"></td>';
     const cName=getSlot(dIdx,tIdx),c=cName?byName(cName):null;
-    if(c){const clk=S.isHC?`onclick="openCellModal(${dIdx},${tIdx})"` :'';return`<td><span class="chip" style="border-color:${c.color}40;background:${c.color}12" ${clk}><span class="chip-dot" style="background:${c.color}"></span>${c.name}</span></td>`;}
-    if(S.isHC)return`<td><button class="add-slot-btn" onclick="openCellModal(${dIdx},${tIdx})">+</button></td>`;
+    const coverage=getAnyCoverageRecord(dIdx,tIdx);
+    if(c){
+      const coverageMark=coverage?`<span class="chip-cover-badge">cover</span>`:'';
+      if(S.isHC){
+        return`<td><span class="chip ${coverage?'has-cover':''}" style="border-color:${c.color}40;background:${c.color}12" onclick="openCellModal(${dIdx},${tIdx})"><span class="chip-dot" style="background:${c.color}"></span>${c.name}${coverageMark}</span></td>`;
+      }
+      const me=byId(S.curCoachId);
+      const mine=me&&c.name===me.name;
+      if(mine){
+        return`<td><span class="chip ${coverage?'has-cover':''}" style="border-color:${c.color}40;background:${c.color}12" onclick="openCoverageModal(${dIdx},${tIdx})"><span class="chip-dot" style="background:${c.color}"></span>${c.name}${coverageMark}</span></td>`;
+      }
+      return`<td><span class="chip ${coverage?'has-cover':''}" style="border-color:${c.color}40;background:${c.color}12"><span class="chip-dot" style="background:${c.color}"></span>${c.name}${coverageMark}</span></td>`;
+    }
+    if(S.isHC)return`<td><button class="add-slot-btn" onclick="openCellModal(${dIdx},${tIdx})" title="Choose coach">+</button></td>`;
     return'<td><span style="color:var(--text3);font-size:13px">—</span></td>';
   }).join('')+'</tr>').join('');
-  let filled=0,total=0;const cnt={};
-  CLASS_TIMES.forEach((_,t)=>DAYS.forEach((_,d)=>{if(isBk(d,t))return;total++;const n=getSlot(d,t);if(n){filled++;cnt[n]=(cnt[n]||0)+1;}}));
+
+  let filled=0,total=0;const cnt={};const openSlots=[];const problemSlots=[];
+  CLASS_TIMES.forEach((_,t)=>DAYS.forEach((_,d)=>{
+    if(isBk(d,t))return;
+    total++;
+    const n=getSlot(d,t);
+    if(n){filled++;cnt[n]=(cnt[n]||0)+1;}
+    else{
+      openSlots.push({d,t});
+      const available=active.filter(c=>isAvail(c.name,d,t));
+      if(available.length===0)problemSlots.push({d,t,label:'No one available'});
+      else if(available.length===1)problemSlots.push({d,t,label:'Only 1 coach free'});
+    }
+  }));
   const top=Object.entries(cnt).sort((a,b)=>b[1]-a[1])[0];
-  g('summaryBar').innerHTML=`
+  const openCoverage=getCoverageRequests().filter(r=>r.status!=='approved');
+  const readyCoverage=openCoverage.filter(r=>r.volunteer_name);
+  if(g('summaryBar')) g('summaryBar').innerHTML=`
     <div class="sum-stat"><div class="sum-num">${filled}</div><div class="sum-lbl">Filled</div></div>
     <div class="sum-stat"><div class="sum-num" style="color:var(--red)">${total-filled}</div><div class="sum-lbl">Open</div></div>
-    <div class="sum-stat"><div class="sum-num">${total}</div><div class="sum-lbl">Total</div></div>
-    <div class="sum-stat"><div class="sum-num" style="font-size:16px;padding-top:3px">${top?top[0]:'—'}</div><div class="sum-lbl">Most</div></div>
-    <div class="sum-stat"><div class="sum-num">${S.coaches.length}</div><div class="sum-lbl">Coaches</div></div>`;
+    <div class="sum-stat"><div class="sum-num">${problemSlots.length}</div><div class="sum-lbl">Hot Spots</div></div>
+    <div class="sum-stat"><div class="sum-num">${openCoverage.length}</div><div class="sum-lbl">Coverage</div></div>
+    <div class="sum-stat"><div class="sum-num" style="font-size:16px;padding-top:3px">${top?top[0]:'—'}</div><div class="sum-lbl">Most</div></div>`;
+
+  const health=problemSlots.concat(openSlots.filter(os=>!problemSlots.find(ps=>ps.d===os.d&&ps.t===os.t)).slice(0,Math.max(0,3-problemSlots.length)).map(os=>({...os,label:'Open slot'}))).slice(0,3);
+  if(g('healthList')) g('healthList').innerHTML = health.length ? health.map(item=>`<div class="health-row"><div><strong>${DAY_SHORT[item.d]} ${CLASS_TIMES[item.t]}</strong><div style="font-size:11px;color:var(--text3)">${item.label}</div></div><span class="health-badge">Needs eyes</span></div>`).join('') : '<div class="health-empty">Everything looks solid this week.</div>';
+
+  if(S.isHC && g('opsPanel')){
+    const activeCoaches=S.coaches.filter(c=>c.active!==false);
+    const noteCount=((S.notes&&S.notes[wKey()])||[]).length;
+    const coachesWithoutClasses=activeCoaches.filter(c=>!cnt[c.name]).length;
+    if(g('opsMetrics')) g('opsMetrics').innerHTML=`
+      <div class="ops-metric"><div class="ops-metric-num">${filled}/${total}</div><div class="ops-metric-lbl">Scheduled</div><div class="ops-metric-sub">${total-filled===0?'Full week covered':'Classes assigned so far'}</div></div>
+      <div class="ops-metric"><div class="ops-metric-num">${total-filled}</div><div class="ops-metric-lbl">Open Slots</div><div class="ops-metric-sub">${problemSlots.length ? problemSlots.length+' need attention' : 'All open classes this week'}</div></div>
+      <div class="ops-metric"><div class="ops-metric-num">${openCoverage.length}</div><div class="ops-metric-lbl">Coverage Requests</div><div class="ops-metric-sub">${readyCoverage.length?readyCoverage.length+' ready to approve':'Nothing waiting right now'}</div></div>
+      <div class="ops-metric"><div class="ops-metric-num">${noteCount}</div><div class="ops-metric-lbl">Coach Notes</div><div class="ops-metric-sub">${coachesWithoutClasses} active coach${coachesWithoutClasses===1?'':'es'} without classes</div></div>`;
+    g('opsTitle').textContent='Coverage Snapshot';
+    g('opsPanel').innerHTML=`
+      <div class="ops-row"><div class="ops-meta"><strong>${openCoverage.length} request${openCoverage.length===1?'':'s'} open</strong><span class="ops-sub">Coaches asking for coverage this week</span></div><span class="cover-chip ${openCoverage.length?'waiting':''}">${openCoverage.length?'Active':'Quiet'}</span></div>
+      <div class="ops-row"><div class="ops-meta"><strong>${readyCoverage.length} ready for approval</strong><span class="ops-sub">A volunteer is waiting on head coach signoff</span></div><span class="cover-chip ${readyCoverage.length?'ready':''}">${readyCoverage.length?'Needs approval':'None ready'}</span></div>
+      <div class="ops-row"><div class="ops-meta"><strong>${total-filled} open class${total-filled===1?'':'es'}</strong><span class="ops-sub">Still unassigned on the schedule</span></div><span class="cover-chip ${total-filled?'waiting':''}">${total-filled?'Open slots':'All filled'}</span></div>`;
+  } else if(g('opsMetrics')) {
+    g('opsMetrics').innerHTML='';
+  }
+
+  const callout=g('coverageCallout');
+  if(callout){
+    if(S.isHC){
+      callout.className='coverage-callout';
+      callout.innerHTML='';
+    }else{
+      const me=byId(S.curCoachId);
+      const openCoverage=getCoverageRequests().filter(r=>r.status!=='approved');
+      const myOpenCoverage=openCoverage.filter(r=>r.requested_by===me?.name).length;
+      const visibleCoverage=openCoverage.filter(r=>r.requested_by!==me?.name).sort((a,b)=>a.day_index-b.day_index||a.time_index-b.time_index);
+      if(visibleCoverage.length){
+        const preview=visibleCoverage.slice(0,2).map(r=>`<span class="coverage-mini-item"><strong>${r.requested_by}</strong> ${DAY_SHORT[r.day_index]} ${CLASS_TIMES[r.time_index]}</span>`).join('');
+        callout.className='coverage-callout show';
+        callout.innerHTML=`<span class="coverage-callout-text">Coverage needed</span><div class="coverage-callout-items">${preview}</div><span class="cover-chip waiting">${visibleCoverage.length} open</span>`;
+      }else if(myOpenCoverage){
+        callout.className='coverage-callout show';
+        callout.innerHTML=`<span class="coverage-callout-text">Your coverage requests</span><span class="cover-chip waiting">${myOpenCoverage} open</span>`;
+      }else{
+        callout.className='coverage-callout';
+        callout.innerHTML='';
+      }
+    }
+  }
+
+  const snap = g('coachSnapshot');
+  if(snap){
+    if(S.isHC){
+      snap.classList.remove('show');
+    }else{
+      const me=byId(S.curCoachId);
+      const mySlots=[];
+      DAYS.forEach((day,dIdx)=>CLASS_TIMES.forEach((time,tIdx)=>{
+        if(isBk(dIdx,tIdx))return;
+        if(getSlot(dIdx,tIdx)===me?.name){
+          const req=getAnyCoverageRecord(dIdx,tIdx);
+          mySlots.push({label:`${DAY_SHORT[dIdx]} ${time}`, coverage:!!req});
+        }
+      }));
+      g('coachSnapshotCount').textContent=`${mySlots.length} class${mySlots.length===1?'':'es'} this week`;
+      g('coachSnapshotList').innerHTML = mySlots.length
+        ? mySlots.map(item=>`<span class="coach-snap-item">${item.label}${item.coverage?'<span class="chip-cover-badge" style="margin-left:4px;">cover</span>':''}</span>`).join('')
+        : '<div class="coach-snap-empty">No classes assigned this week yet.</div>';
+      snap.classList.add('show');
+    }
+  }
+
+  const mobileHtml = DAYS.map((day,dIdx)=>{
+    const slots=CLASS_TIMES.map((time,tIdx)=>{
+      if(isBk(dIdx,tIdx)) return '';
+      const cName=getSlot(dIdx,tIdx), c=cName?byName(cName):null, coverage=getAnyCoverageRecord(dIdx,tIdx);
+      let action='';
+      if(c){
+        if(S.isHC){
+          action=`<span class="chip ${coverage?'has-cover':''}" style="border-color:${c.color}40;background:${c.color}12" onclick="openCellModal(${dIdx},${tIdx})"><span class="chip-dot" style="background:${c.color}"></span>${c.name}</span>${coverage?'<span class="chip-cover-badge">cover</span>':''}`;
+        }else{
+          const me=byId(S.curCoachId);
+          const mine=me&&c.name===me.name;
+          action=`<span class="chip ${coverage?'has-cover':''}" style="border-color:${c.color}40;background:${c.color}12" ${mine?`onclick="openCoverageModal(${dIdx},${tIdx})"`:''}><span class="chip-dot" style="background:${c.color}"></span>${c.name}${coverage?'<span class="chip-cover-badge">cover</span>':''}</span>`;
+        }
+      }else if(S.isHC){
+        action=`<button class="btn ghost" style="padding:6px 10px;font-size:11px;" onclick="openCellModal(${dIdx},${tIdx})">Choose Coach</button>`;
+      }else{
+        action='<span style="color:var(--text3);font-size:13px">—</span>';
+      }
+      return `<div class="mobile-slot"><div class="mobile-time">${time}</div><div class="mobile-actions">${action}</div></div>`;
+    }).join('');
+    return `<div class="mobile-day"><div class="mobile-day-head"><span>${day}</span><span style="font-size:11px;font-family:'DM Mono',monospace;letter-spacing:0;">${fmt(dates[dIdx])}</span></div><div class="mobile-day-body">${slots}</div></div>`;
+  }).join('');
+  g('mobileSchedule').innerHTML=mobileHtml;
+  renderCoverageBoard();
 }
 
 // ─── RENDER: COACH AVAIL ─────────────────────────────
@@ -509,6 +893,7 @@ function renderCoachAvail(){
   });
   g('coachAvailTbl').innerHTML=html+'</tbody>';
   if(g('availWeekChip'))g('availWeekChip').textContent='Week of '+fmtF(wDates()[0]);
+  loadCoachNoteInput();
 }
 
 // ─── RENDER: HC OVERVIEW ─────────────────────────────
@@ -535,19 +920,24 @@ function renderHcAvail(){
   });
   g('hcAvailTbl').innerHTML=html+'</tbody>';
   if(g('hcAvailWeekChip'))g('hcAvailWeekChip').textContent='Week of '+fmtF(dates[0]);
+  renderHcNotes();
 }
 
 // ─── RENDER: COACHES ─────────────────────────────────
 function renderCoaches(){
   g('coachesGrid').innerHTML=S.coaches.map(c=>{
-    let classes=0;CLASS_TIMES.forEach((_,t)=>DAYS.forEach((_,d)=>{if(getSlot(d,t)===c.name)classes++;}));
+    let classes=coachClassCount(c.name);
     const ac=Object.values(ensureAvail(c.name)).filter(Boolean).length;
-    return`<div class="coach-card"><div class="coach-card-bar" style="background:${c.color}"></div><div class="coach-card-name" style="color:${c.color}">${c.name}</div><div class="coach-card-role">${c.role||'Coach'}</div><div class="coach-mini-stats"><div class="cm-stat"><div class="cm-num" style="color:${c.color}">${classes}</div><div class="cm-lbl">Classes</div></div><div class="cm-stat"><div class="cm-num">${ac}</div><div class="cm-lbl">Avail</div></div></div><div class="card-actions"><button class="mini-btn" onclick="openEditCoach(${c.id})">Edit</button><button class="mini-btn del" onclick="deleteCoach(${c.id})">Remove</button></div></div>`;
+    const inactive = c.active===false;
+    return`<div class="coach-card" style="${inactive?'opacity:.72;':''}"><div class="coach-card-bar" style="background:${c.color}"></div><div class="coach-card-name" style="color:${c.color}">${c.name}</div>${inactive?'<div class="inactive-pill">Inactive</div>':''}<div class="coach-card-role">${c.role||'Coach'}</div><div class="coach-mini-stats"><div class="cm-stat"><div class="cm-num" style="color:${c.color}">${classes}</div><div class="cm-lbl">Classes</div></div><div class="cm-stat"><div class="cm-num">${ac}</div><div class="cm-lbl">Avail</div></div></div><div class="card-actions" style="margin-top:12px"><button class="mini-btn" onclick="openEditCoach(${c.id})">Edit</button><button class="mini-btn ${inactive?'':'del'}" onclick="toggleCoachActive(${c.id})">${inactive?'Reactivate':'Deactivate'}</button></div></div>`;
   }).join('');
 }
 
 function renderAll(){
   renderSchedule();
+  if(g('view-ops') && g('view-ops').classList.contains('active') && S.isHC){
+    renderCoverageBoard();
+  }
   if(g('view-availability').classList.contains('active')){
     if(S.isHC){g('coachAvailView').style.display='none';g('hcAvailView').style.display='block';renderHcAvail();}
     else{g('coachAvailView').style.display='block';g('hcAvailView').style.display='none';renderCoachAvail();}
@@ -561,9 +951,19 @@ function openCellModal(dIdx,tIdx){
   assignTarget={dIdx,tIdx};
   g('assignTitle').textContent=DAYS[dIdx]+' · '+CLASS_TIMES[tIdx];
   const current=getSlot(dIdx,tIdx);assignSelected=current;
-  g('assignList').innerHTML=S.coaches.map(c=>{
-    const av=isAvail(c.name,dIdx,tIdx),sel=c.name===current;
-    return`<div class="assign-item ${sel?'selected':''}" onclick="selAssign('${c.name}',this)"><span class="chip-dot" style="background:${c.color};width:12px;height:12px;border-radius:50%;flex-shrink:0"></span><span class="assign-name">${c.name}</span><span class="assign-avail" style="color:${av?'var(--green)':'var(--text3)'}">${av?'✓ available':''}</span><span class="assign-check">✓</span></div>`;
+  const ranked=activeCoaches().map(c=>({
+    coach:c,
+    available:isAvail(c.name,dIdx,tIdx),
+    load:coachClassCount(c.name)
+  })).sort((a,b)=>{
+    if(a.available!==b.available)return a.available?-1:1;
+    if(a.load!==b.load)return a.load-b.load;
+    return a.coach.name.localeCompare(b.coach.name);
+  });
+  const recommended=ranked.find(r=>r.available);
+  g('assignList').innerHTML=ranked.map((item,idx)=>{
+    const c=item.coach,av=item.available,sel=c.name===current;
+    return`<div class="assign-item ${sel?'selected':''} ${recommended&&recommended.coach.name===c.name?'recommended':''}" onclick="selAssign('${c.name}',this)"><span class="assign-rank">${idx+1}</span><span class="chip-dot" style="background:${c.color};width:12px;height:12px;border-radius:50%;flex-shrink:0"></span><span class="assign-name">${c.name}</span><div class="assign-meta"><span class="assign-avail" style="color:${av?'var(--green)':'var(--text3)'}">${av?'✓ available':'Unavailable'}</span><span class="assign-load">${item.load} classes this week</span></div><span class="assign-check">✓</span></div>`;
   }).join('');
   openOverlay('assignOverlay');
 }
@@ -575,13 +975,112 @@ async function doRemove(){if(!assignTarget)return;closeOverlay('assignOverlay');
 let editCoachId=null;
 function openAddCoach(){editCoachId=null;g('coachModalTitle').textContent='Add Coach';g('coachSaveBtn').textContent='Add';g('cName').value='';g('cRole').value='Coach';g('cColor').value='#d94f2b';openOverlay('coachOverlay');}
 function openEditCoach(id){editCoachId=id;const c=byId(id);g('coachModalTitle').textContent='Edit Coach';g('coachSaveBtn').textContent='Save';g('cName').value=c.name;g('cRole').value=c.role;g('cColor').value=c.color;openOverlay('coachOverlay');}
-function saveCoach(){
+async function saveCoach(){
   const name=g('cName').value.trim();if(!name){showToast('Enter a name','err');return;}
-  if(editCoachId){const c=byId(editCoachId);c.name=name;c.role=g('cRole').value.trim()||'Coach';c.color=g('cColor').value;showToast('Updated ✓','ok');}
-  else{S.coaches.push({id:S.nextId++,name,role:g('cRole').value.trim()||'Coach',color:g('cColor').value});showToast(name+' added ✓','ok');}
+  let coach;
+  if(editCoachId){
+    const c=byId(editCoachId);
+    c.name=name;c.role=g('cRole').value.trim()||'Coach';c.color=g('cColor').value;
+    coach=c;
+    showToast('Updated ✓','ok');
+  }else{
+    coach={id:S.nextId++,name,role:g('cRole').value.trim()||'Coach',color:g('cColor').value,active:true};
+    S.coaches.push(coach);
+    showToast(name+' added ✓','ok');
+  }
+  await saveCoachToDB(coach);
   closeOverlay('coachOverlay');buildSplash();renderCoaches();renderSchedule();
 }
-function deleteCoach(id){if(!confirm('Remove this coach?'))return;S.coaches=S.coaches.filter(c=>c.id!==id);renderCoaches();renderSchedule();buildSplash();}
+async function toggleCoachActive(id){
+  const coach=byId(id);
+  if(!coach)return;
+  const turningOff=coach.active !== false;
+  const msg=turningOff ? `Deactivate ${coach.name}? They will stay in old schedules but disappear from the splash screen and future assignment lists.` : `Reactivate ${coach.name}?`;
+  if(!confirm(msg))return;
+  coach.active = !turningOff;
+  await toggleCoachActiveInDB(coach);
+  showToast(turningOff ? 'Coach deactivated' : 'Coach reactivated','ok');
+  renderCoaches();renderSchedule();buildSplash();
+}
+
+let coverageTarget=null;
+function openCoverageModal(dIdx,tIdx){
+  const me=byId(S.curCoachId);
+  if(!me)return;
+  const assigned=getSlot(dIdx,tIdx);
+  if(assigned!==me.name)return;
+  coverageTarget={dIdx,tIdx};
+  const req=getAnyCoverageRecord(dIdx,tIdx);
+  g('coverageModalTitle').textContent=`${DAYS[dIdx]} · ${CLASS_TIMES[tIdx]}`;
+  g('coverageModalHint').textContent=req ? 'You can leave this request open or cancel it.' : 'Put this class up for coverage if you need someone to take it.';
+  g('coverageModalBody').innerHTML=`<div class="ops-row"><div class="ops-meta"><strong>${me.name}</strong><span class="ops-sub">Assigned coach for this class</span></div><span class="cover-chip ${req&&req.volunteer_name?'ready':(req?'waiting':'')}">${req?coverageStatusLabel(req):'No request yet'}</span></div>${req&&req.volunteer_name?`<div class="ops-row"><div class="ops-meta"><strong>${req.volunteer_name}</strong><span class="ops-sub">Volunteer waiting on head coach approval</span></div><span class="cover-chip ready">Volunteer ready</span></div>`:''}`;
+  g('coverageModalActions').innerHTML=req ? `<button class="btn ghost" onclick="closeOverlay('coverageOverlay')">Close</button><button class="btn red-btn" onclick="cancelCoverageRequest()">Cancel Request</button>` : `<button class="btn ghost" onclick="closeOverlay('coverageOverlay')">Close</button><button class="btn" onclick="createCoverageRequest()">Request Coverage</button>`;
+  openOverlay('coverageOverlay');
+}
+async function createCoverageRequest(){
+  const me=byId(S.curCoachId); if(!me||!coverageTarget)return;
+  const row={week:wKey(),day_index:coverageTarget.dIdx,time_index:coverageTarget.tIdx,requested_by:me.name,volunteer_name:null,status:'open',created_at:new Date().toISOString()};
+  await saveCoverageRow(row);
+  closeOverlay('coverageOverlay');
+  renderAll();
+  showToast('Coverage requested','ok');
+}
+async function cancelCoverageRequest(){
+  if(!coverageTarget)return;
+  await deleteCoverageRow(coverageTarget.dIdx,coverageTarget.tIdx);
+  closeOverlay('coverageOverlay');
+  renderAll();
+  showToast('Coverage request removed','ok');
+}
+async function volunteerForCoverage(dIdx,tIdx){
+  const me=byId(S.curCoachId); if(!me)return;
+  const req=getAnyCoverageRecord(dIdx,tIdx);
+  if(!req || req.requested_by===me.name)return;
+  await saveCoverageRow({...req, volunteer_name:me.name, status:'open'});
+  renderAll();
+  showToast('You offered to cover','ok');
+}
+async function removeVolunteer(dIdx,tIdx){
+  const me=byId(S.curCoachId); if(!me)return;
+  const req=getAnyCoverageRecord(dIdx,tIdx);
+  if(!req || req.volunteer_name!==me.name)return;
+  await saveCoverageRow({...req, volunteer_name:null, status:'open'});
+  renderAll();
+  showToast('You are no longer covering','ok');
+}
+async function approveCoverage(dIdx,tIdx){
+  const req=getAnyCoverageRecord(dIdx,tIdx);
+  if(!req || !req.volunteer_name)return;
+  await saveScheduleSlot(dIdx,tIdx,req.volunteer_name);
+  await deleteCoverageRow(dIdx,tIdx);
+  renderAll();
+  showToast('Coverage approved','ok');
+}
+function renderCoverageBoard(){
+  const list=g('coverageBoardList'); if(!list)return;
+  const items=getCoverageRequests().filter(r=>r.status!=='approved').sort((a,b)=>a.day_index-b.day_index||a.time_index-b.time_index);
+  if(S.isHC){
+    g('coverageBoardTitle').textContent='Coverage Board';
+    if(items.length===0){ list.innerHTML='<div class="health-empty">No coverage requests this week.</div>'; return; }
+    list.innerHTML=items.map(req=>`<div class="coverage-item"><div class="coverage-main"><div class="coverage-title">${DAY_SHORT[req.day_index]} ${CLASS_TIMES[req.time_index]}</div><div class="coverage-sub">${req.requested_by} needs coverage${req.volunteer_name?` • ${req.volunteer_name} volunteered`:''}</div></div><div class="coverage-actions">${req.volunteer_name?`<button class="btn" style="padding:6px 10px;font-size:11px;" onclick="approveCoverage(${req.day_index},${req.time_index})">Approve</button>`:'<span class="cover-chip waiting">Waiting</span>'}</div></div>`).join('');
+    return;
+  }
+  const me=byId(S.curCoachId);
+  g('coverageBoardTitle').textContent='Coverage Board';
+  const visible=items.filter(req=>req.requested_by!==me?.name);
+  if(visible.length===0){ list.innerHTML='<div class="health-empty">No open coverage requests from other coaches right now.</div>'; return; }
+  list.innerHTML=visible.map(req=>{
+    const canCover=isAvail(me.name,req.day_index,req.time_index);
+    const already=req.volunteer_name===me.name;
+    const someoneElse=req.volunteer_name && req.volunteer_name!==me.name;
+    let action='';
+    if(already) action=`<button class="btn ghost" style="padding:6px 10px;font-size:11px;" onclick="removeVolunteer(${req.day_index},${req.time_index})">Undo Cover</button>`;
+    else if(someoneElse) action=`<span class="cover-chip ready">${req.volunteer_name} offered</span>`;
+    else if(canCover) action=`<button class="btn" style="padding:6px 10px;font-size:11px;" onclick="volunteerForCoverage(${req.day_index},${req.time_index})">I Can Cover</button>`;
+    else action='<span class="cover-chip waiting">Unavailable</span>';
+    return `<div class="coverage-item"><div class="coverage-main"><div class="coverage-title">${DAY_SHORT[req.day_index]} ${CLASS_TIMES[req.time_index]}</div><div class="coverage-sub">${req.requested_by} needs coverage</div></div><div class="coverage-actions">${action}</div></div>`;
+  }).join('');
+}
 
 function clearMyAvail(){const c=byId(S.curCoachId);if(!c)return;const av=ensureAvail(c.name);CLASS_TIMES.forEach((_,t)=>DAYS.forEach((_,d)=>{if(!isBk(d,t))av[`${d}_${t}`]=false;}));renderCoachAvail();}
 async function changeWeek(dir){S.weekOffset+=dir;updateWeekLbl();await loadWeekFromDB();renderAll();}
@@ -738,6 +1237,61 @@ async function copyPrevWeekAvail() {
   hideLoader();
 }
 
+// ─── COACH NOTES ─────────────────────────────────────
+async function saveCoachNote(){
+  const coach=byId(S.curCoachId);if(!coach)return;
+  const note=g('coachNoteInput').value.trim();
+  if(!note){showToast('Write something first','err');return;}
+  const key=wKey();
+  g('saveNoteBtn').disabled=true;
+  setSyncing('syncing','Saving…');
+  try{
+    await sb.upsert('notes',[{week:key,coach_name:coach.name,note,created_at:new Date().toISOString()}]);
+    // Update local cache
+    if(!S.notes)S.notes={};
+    if(!S.notes[key])S.notes[key]=[];
+    // Replace or add
+    const idx=S.notes[key].findIndex(n=>n.coach_name===coach.name);
+    if(idx>=0)S.notes[key][idx]={week:key,coach_name:coach.name,note};
+    else S.notes[key].push({week:key,coach_name:coach.name,note});
+    setSyncing('ok','Saved');
+    g('noteConfirm').style.display='block';
+    setTimeout(()=>{if(g('noteConfirm'))g('noteConfirm').style.display='none';},3000);
+    showToast('Note sent ✓','ok');
+  }catch(err){
+    console.error(err);setSyncing('err','Error');
+    const msg = err.message.includes('notes') ? 'Notes table not set up yet — run SQL in Supabase first' : 'Save error: '+err.message;
+    showToast(msg,'err');
+  }
+  g('saveNoteBtn').disabled=false;
+}
+
+function loadCoachNoteInput(){
+  const coach=byId(S.curCoachId);if(!coach)return;
+  const key=wKey();
+  const existing=(S.notes&&S.notes[key]||[]).find(n=>n.coach_name===coach.name);
+  if(g('coachNoteInput'))g('coachNoteInput').value=existing?existing.note:'';
+}
+
+function renderHcNotes(){
+  const key=wKey();
+  const notes=(S.notes&&S.notes[key])||[];
+  const list=g('hcNotesList');if(!list)return;
+  if(notes.length===0){
+    list.innerHTML='<div style="font-size:13px;color:var(--text3);font-style:italic">No notes from coaches this week.</div>';
+    return;
+  }
+  list.innerHTML=notes.map(n=>{
+    const c=byName(n.coach_name);
+    const color=c?c.color:'var(--accent)';
+    return`<div class="note-card" style="border-left:4px solid ${color}">
+      <div class="note-card-name" style="color:${color}">${n.coach_name}</div>
+      <div class="note-card-text">${n.note}</div>
+      <div class="note-card-week">Week of ${fmtF(wDates()[0])}</div>
+    </div>`;
+  }).join('');
+}
+
 // ─── SEED: pre-load schedule from screenshots ────────
 // Runs once when head coach logs in if those weeks are empty.
 const SEED_DATA = {
@@ -780,6 +1334,11 @@ const SEED_DATA = {
 };
 
 async function seedScheduleIfEmpty() {
+  // Ensure notes table exists by trying to select from it
+  // (table created via Supabase SQL — see setup guide)
+  // Coaches table check
+  try { await sb.select('coaches','limit=1'); } catch(e) { console.warn('Coaches table not set up. Run SQL in Supabase.'); }
+  try { await sb.select('notes','limit=1'); } catch(e) { console.warn('Notes table may not exist yet. Run: CREATE TABLE notes (week TEXT NOT NULL, coach_name TEXT NOT NULL, note TEXT, created_at TEXT, PRIMARY KEY (week, coach_name)); GRANT ALL ON TABLE notes TO anon, authenticated; ALTER TABLE notes ENABLE ROW LEVEL SECURITY; CREATE POLICY public_notes ON notes FOR ALL TO anon, authenticated USING (true) WITH CHECK (true);'); }
   for (const [weekKey, slots] of Object.entries(SEED_DATA)) {
     try {
       // Check if any rows already exist for this week
@@ -799,9 +1358,13 @@ async function seedScheduleIfEmpty() {
 }
 
 // ─── INIT ────────────────────────────────────────────
-hideLoader();
-g('splash').style.display='flex';
-buildSplash();
+(async()=>{
+  showLoader('Loading coaches…');
+  await loadCoachesFromDB();
+  hideLoader();
+  g('splash').style.display='flex';
+  buildSplash();
+})();
 </script>
 </body>
 </html>
