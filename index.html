@@ -521,6 +521,7 @@ const S={
   weekOffset:0,isHC:false,curCoachId:null,nextId:13,
   coaches: JSON.parse(JSON.stringify(DEFAULT_COACHES)).map(c=>({...c,active:true})), // start with defaults, replaced on load
   schedule:{},availability:{},notes:{},coverage:{},
+  monthlyClassCounts:{}, // { coachName: count } for current calendar month
 };
 
 // ─── WEEK HELPERS ────────────────────────────────────
@@ -649,6 +650,25 @@ async function saveMyAvail(){
   g('saveAvailBtn').disabled=false;hideLoader();
 }
 
+// ─── MONTHLY CLASS COUNTS ─────────────────────────────
+// Fetches all schedule rows in the current calendar month and tallies per coach.
+async function loadMonthlyClassCounts(){
+  const now=new Date();
+  const y=now.getFullYear(), m=now.getMonth();
+  // Build ISO strings for first and last day of the month
+  const monthStart=new Date(y,m,1).toISOString().slice(0,10);
+  const monthEnd=new Date(y,m+1,0).toISOString().slice(0,10); // last day of month
+  try{
+    const rows=await sb.select('schedule',`week=gte.${monthStart}&week=lte.${monthEnd}&select=coach_name`);
+    const counts={};
+    rows.forEach(r=>{ if(r.coach_name){ counts[r.coach_name]=(counts[r.coach_name]||0)+1; } });
+    S.monthlyClassCounts=counts;
+  }catch(e){
+    console.warn('Could not load monthly counts:',e.message);
+    S.monthlyClassCounts={};
+  }
+}
+
 // ─── LOCAL DATA ──────────────────────────────────────
 function getSlot(d,t){return S.schedule[wKey()]?.[d]?.[t]??null;}
 function byId(id){return S.coaches.find(c=>c.id===id);}
@@ -751,7 +771,9 @@ async function switchTab(id,btn){
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   g('view-'+id).classList.add('active');
   document.querySelectorAll('.btab').forEach(t=>t.classList.remove('active'));
-  btn.classList.add('active');renderAll();
+  btn.classList.add('active');
+  if(id==='coaches') await loadMonthlyClassCounts();
+  renderAll();
 }
 
 // ─── RENDER: SCHEDULE ────────────────────────────────
@@ -945,11 +967,30 @@ function renderHcAvail(){
 
 // ─── RENDER: COACHES ─────────────────────────────────
 function renderCoaches(){
+  const now=new Date();
+  const monthName=now.toLocaleString('default',{month:'short'}).toUpperCase();
   g('coachesGrid').innerHTML=S.coaches.map(c=>{
-    let classes=coachClassCount(c.name);
+    const weekClasses=coachClassCount(c.name);
+    const monthClasses=S.monthlyClassCounts[c.name]||0;
     const ac=Object.values(ensureAvail(c.name)).filter(Boolean).length;
-    const inactive = c.active===false;
-    return`<div class="coach-card" style="${inactive?'opacity:.72;':''}"><div class="coach-card-bar" style="background:${c.color}"></div><div class="coach-card-name" style="color:${c.color}">${c.name}</div>${inactive?'<div class="inactive-pill">Inactive</div>':''}<div class="coach-card-role">${c.role||'Coach'}</div><div class="coach-mini-stats"><div class="cm-stat"><div class="cm-num" style="color:${c.color}">${classes}</div><div class="cm-lbl">Classes</div></div><div class="cm-stat"><div class="cm-num">${ac}</div><div class="cm-lbl">Avail</div></div></div><div class="card-actions" style="margin-top:12px"><button class="mini-btn" onclick="openEditCoach(${c.id})">Edit</button><button class="mini-btn ${inactive?'':'del'}" onclick="toggleCoachActive(${c.id})">${inactive?'Reactivate':'Deactivate'}</button></div></div>`;
+    const inactive=c.active===false;
+    // Color-code monthly count: 0 = muted, 1–9 = normal, 10+ = accent
+    const mColor=monthClasses===0?'var(--text3)':(monthClasses>=10?c.color:'var(--text2)');
+    return`<div class="coach-card" style="${inactive?'opacity:.72;':''}">
+      <div class="coach-card-bar" style="background:${c.color}"></div>
+      <div class="coach-card-name" style="color:${c.color}">${c.name}</div>
+      ${inactive?'<div class="inactive-pill">Inactive</div>':''}
+      <div class="coach-card-role">${c.role||'Coach'}</div>
+      <div class="coach-mini-stats">
+        <div class="cm-stat"><div class="cm-num" style="color:${c.color}">${weekClasses}</div><div class="cm-lbl">This Week</div></div>
+        <div class="cm-stat"><div class="cm-num" style="color:${mColor}">${monthClasses}</div><div class="cm-lbl">${monthName} Total</div></div>
+        <div class="cm-stat"><div class="cm-num">${ac}</div><div class="cm-lbl">Avail Slots</div></div>
+      </div>
+      <div class="card-actions" style="margin-top:12px">
+        <button class="mini-btn" onclick="openEditCoach(${c.id})">Edit</button>
+        <button class="mini-btn ${inactive?'':'del'}" onclick="toggleCoachActive(${c.id})">${inactive?'Reactivate':'Deactivate'}</button>
+      </div>
+    </div>`;
   }).join('');
 }
 
