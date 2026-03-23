@@ -660,13 +660,13 @@ async function saveMyAvail(){
 }
 
 // ─── MONTHLY CLASS COUNTS ─────────────────────────────
-// Fetches all schedule rows in the current calendar month and tallies per coach.
+// Fetches all schedule rows for the month of the currently viewed week.
 async function loadMonthlyClassCounts(){
-  const now=new Date();
-  const y=now.getFullYear(), m=now.getMonth();
-  // Build ISO strings for first and last day of the month
+  // Derive month from the Monday of the viewed week, not today
+  const viewedMonday=getMon(S.weekOffset);
+  const y=viewedMonday.getFullYear(), m=viewedMonday.getMonth();
   const monthStart=new Date(y,m,1).toISOString().slice(0,10);
-  const monthEnd=new Date(y,m+1,0).toISOString().slice(0,10); // last day of month
+  const monthEnd=new Date(y,m+1,0).toISOString().slice(0,10);
   try{
     const rows=await sb.select('schedule',`week=gte.${monthStart}&week=lte.${monthEnd}&select=coach_name`);
     const counts={};
@@ -1028,9 +1028,9 @@ function renderMonthlyAnalytics(){
   const title=g('monthlyAnalyticsTitle');
   if(!panel||!list)return;
 
-  const now=new Date();
-  const monthName=now.toLocaleString('default',{month:'long'});
-  const year=now.getFullYear();
+  const viewedMonday=getMon(S.weekOffset);
+  const monthName=viewedMonday.toLocaleString('default',{month:'long'});
+  const year=viewedMonday.getFullYear();
   if(chip) chip.textContent=`${monthName} ${year}`;
   if(title) title.textContent=`${monthName} Classes`;
 
@@ -1207,7 +1207,17 @@ function renderCoverageBoard(){
 }
 
 function clearMyAvail(){const c=byId(S.curCoachId);if(!c)return;const av=ensureAvail(c.name);CLASS_TIMES.forEach((_,t)=>DAYS.forEach((_,d)=>{if(!isBk(d,t))av[`${d}_${t}`]=false;}));renderCoachAvail();}
-async function changeWeek(dir){S.weekOffset+=dir;updateWeekLbl();await loadWeekFromDB();renderAll();}
+async function changeWeek(dir){
+  const prevMonth=getMon(S.weekOffset).getMonth();
+  S.weekOffset+=dir;
+  updateWeekLbl();
+  // If the month changed, reload monthly counts
+  const newMonth=getMon(S.weekOffset).getMonth();
+  if(newMonth!==prevMonth||(activeTab==='ops'||activeTab==='coaches')){
+    await loadMonthlyClassCounts();
+  }
+  await loadWeekFromDB();renderAll();
+}
 
 function exportCSV(){
   const dates=wDates();let csv='Time,'+dates.map((d,i)=>DAYS[i]+' '+fmt(d)).join(',')+'\n';
