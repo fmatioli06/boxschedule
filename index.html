@@ -341,11 +341,13 @@ select{width:100%;background:var(--surface2);border:1.5px solid var(--border);co
       <div class="coach-snapshot" id="coachSnapshot">
         <div class="coach-snap-top">
           <div class="coach-snap-title">My Week Snapshot</div>
-          <div class="coach-snap-count" id="coachSnapshotCount"></div>
+          <div style="display:flex;gap:12px;align-items:center;">
+            <div class="coach-snap-count" id="coachSnapshotCount"></div>
+            <div class="coach-snap-count" id="coachSnapshotMonth" style="color:var(--text3)"></div>
+          </div>
         </div>
         <div class="coach-snap-list" id="coachSnapshotList"></div>
         <div class="coach-snap-hint">Tap one of your classes to request coverage.</div>
-        
       </div>
       <div class="mobile-schedule" id="mobileSchedule"></div>
       <div class="tbl-wrap">
@@ -375,6 +377,13 @@ select{width:100%;background:var(--surface2);border:1.5px solid var(--border);co
           <span class="week-chip" id="coverageWeekChip"></span>
         </div>
         <div id="coverageBoardList"></div>
+      </div>
+      <div class="coverage-board compact-board" style="margin-top:14px;" id="monthlyAnalyticsPanel">
+        <div class="coverage-board-head">
+          <span class="section-title" style="font-size:16px;" id="monthlyAnalyticsTitle">Monthly Classes</span>
+          <span class="week-chip" id="monthlyAnalyticsChip"></span>
+        </div>
+        <div id="monthlyAnalyticsList"></div>
       </div>
     </div>
 
@@ -735,22 +744,23 @@ function buildSplash(){
 
 async function enterAs(coachId,isHC){
   S.isHC=isHC;S.curCoachId=coachId;
+  S.weekOffset=0; // always open on current week
   g('splash').style.display='none';g('app').style.display='block';
   if(isHC){
     g('userDot').style.background='#1a7a4a';
     g('userName').textContent='Head Coach';
-    g('copySchedBtn').style.display='inline-flex'; // HC only
+    g('copySchedBtn').style.display='inline-flex';
   } else {
     const c=byId(coachId);
     g('userDot').style.background=c.color;
     g('userName').textContent=c.name;
-    g('copySchedBtn').style.display='none'; // coaches cannot copy schedule
+    g('copySchedBtn').style.display='none';
   }
   activeTab='schedule';buildTabs();updateWeekLbl();
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   g('view-schedule').classList.add('active');
-  // Seed historical schedule data on first HC login
   if(isHC) await seedScheduleIfEmpty();
+  await loadMonthlyClassCounts(); // load for both HC and coaches on login
   await loadWeekFromDB();renderAll();
 }
 
@@ -772,7 +782,7 @@ async function switchTab(id,btn){
   g('view-'+id).classList.add('active');
   document.querySelectorAll('.btab').forEach(t=>t.classList.remove('active'));
   btn.classList.add('active');
-  if(id==='coaches') await loadMonthlyClassCounts();
+  if(id==='coaches'||id==='ops') await loadMonthlyClassCounts();
   renderAll();
 }
 
@@ -884,7 +894,10 @@ function renderSchedule(){
           mySlots.push({label:`${DAY_SHORT[dIdx]} ${time}`, coverage:!!req});
         }
       }));
+      const monthName=new Date().toLocaleString('default',{month:'long'});
+      const myMonthCount=(S.monthlyClassCounts&&me)?S.monthlyClassCounts[me.name]||0:0;
       g('coachSnapshotCount').textContent=`${mySlots.length} class${mySlots.length===1?'':'es'} this week`;
+      g('coachSnapshotMonth').textContent=`${myMonthCount} in ${monthName}`;
       g('coachSnapshotList').innerHTML = mySlots.length
         ? mySlots.map(item=>`<span class="coach-snap-item">${item.label}${item.coverage?'<span class="chip-cover-badge" style="margin-left:4px;">cover</span>':''}</span>`).join('')
         : '<div class="coach-snap-empty">No classes assigned this week yet.</div>';
@@ -998,12 +1011,62 @@ function renderAll(){
   renderSchedule();
   if(g('view-ops') && g('view-ops').classList.contains('active') && S.isHC){
     renderCoverageBoard();
+    renderMonthlyAnalytics();
   }
   if(g('view-availability').classList.contains('active')){
     if(S.isHC){g('coachAvailView').style.display='none';g('hcAvailView').style.display='block';renderHcAvail();}
     else{g('coachAvailView').style.display='block';g('hcAvailView').style.display='none';renderCoachAvail();}
   }
   if(g('view-coaches').classList.contains('active'))renderCoaches();
+}
+
+// ─── MONTHLY ANALYTICS (HC only, Ops tab) ────────────
+function renderMonthlyAnalytics(){
+  const panel=g('monthlyAnalyticsPanel');
+  const list=g('monthlyAnalyticsList');
+  const chip=g('monthlyAnalyticsChip');
+  const title=g('monthlyAnalyticsTitle');
+  if(!panel||!list)return;
+
+  const now=new Date();
+  const monthName=now.toLocaleString('default',{month:'long'});
+  const year=now.getFullYear();
+  if(chip) chip.textContent=`${monthName} ${year}`;
+  if(title) title.textContent=`${monthName} Classes`;
+
+  const counts=S.monthlyClassCounts||{};
+  const coaches=S.coaches.filter(c=>c.active!==false);
+
+  if(Object.keys(counts).length===0){
+    list.innerHTML='<div class="health-empty" style="padding:10px 0">Loading monthly data… open the Coaches tab or wait a moment.</div>';
+    return;
+  }
+
+  // Sort by count descending
+  const sorted=coaches.map(c=>({
+    coach:c,
+    count:counts[c.name]||0
+  })).sort((a,b)=>b.count-a.count);
+
+  const max=sorted[0]?.count||1;
+
+  list.innerHTML=sorted.map(({coach:c,count})=>{
+    const pct=Math.round((count/max)*100);
+    const barColor=count===0?'var(--border2)':c.color;
+    return`<div class="coverage-item" style="flex-direction:column;align-items:stretch;gap:6px;padding:10px 0;">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="width:10px;height:10px;border-radius:50%;background:${c.color};flex-shrink:0;display:inline-block;"></span>
+          <span style="font-size:13px;font-weight:700;color:var(--accent)">${c.name}</span>
+          <span style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px">${c.role||'Coach'}</span>
+        </div>
+        <span style="font-family:'DM Mono',monospace;font-size:14px;font-weight:500;color:${count===0?'var(--text3)':c.color}">${count}</span>
+      </div>
+      <div style="height:5px;background:var(--border);border-radius:3px;overflow:hidden;">
+        <div style="height:100%;width:${pct}%;background:${barColor};border-radius:3px;transition:width .3s;"></div>
+      </div>
+    </div>`;
+  }).join('');
 }
 
 // ─── ASSIGN MODAL ────────────────────────────────────
