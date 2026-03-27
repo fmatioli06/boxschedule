@@ -422,13 +422,6 @@ select{width:100%;background:var(--surface2);border:1.5px solid var(--border);co
         </div>
         <div id="monthlyAnalyticsList"></div>
       </div>
-      <div class="coverage-board compact-board" style="margin-top:14px;" id="ptSummaryPanel">
-        <div class="coverage-board-head">
-          <span class="section-title" style="font-size:16px;">PT Hours</span>
-          <span class="week-chip" id="ptSummaryChip"></span>
-        </div>
-        <div id="ptSummaryBody"></div>
-      </div>
     </div>
 
     <div class="view" id="view-availability">
@@ -488,6 +481,16 @@ select{width:100%;background:var(--surface2);border:1.5px solid var(--border);co
         <button class="btn" onclick="openAddCoach()">+ Add</button>
       </div>
       <div class="coaches-grid" id="coachesGrid"></div>
+    </div>
+
+    <div class="view" id="view-pt-hc">
+      <div class="section-head">
+        <span class="section-title">PT Hours</span>
+        <span class="week-chip" id="ptHcWeekChip"></span>
+      </div>
+      <div id="ptSummaryPanel">
+        <div id="ptSummaryBody"></div>
+      </div>
     </div>
 
     <div class="view" id="view-pt">
@@ -856,7 +859,7 @@ function goSplash(){g('splash').style.display='flex';g('app').style.display='non
 
 // ─── TABS ────────────────────────────────────────────
 const COACH_TABS=[{id:'schedule',label:'Schedule',icon:'📅'},{id:'availability',label:'Availability',icon:'✋'},{id:'pt',label:'PT Hours',icon:'💪'}];
-const HC_TABS=[{id:'schedule',label:'Schedule',icon:'📅'},{id:'ops',label:'Ops',icon:'📌'},{id:'availability',label:'Overview',icon:'👥'},{id:'coaches',label:'Coaches',icon:'⚡'}];
+const HC_TABS=[{id:'schedule',label:'Schedule',icon:'📅'},{id:'ops',label:'Ops',icon:'📌'},{id:'availability',label:'Overview',icon:'👥'},{id:'coaches',label:'Coaches',icon:'⚡'},{id:'pt-hc',label:'PT Hours',icon:'💪'}];
 let activeTab='schedule';
 
 function buildTabs(){
@@ -871,8 +874,7 @@ async function switchTab(id,btn){
   document.querySelectorAll('.btab').forEach(t=>t.classList.remove('active'));
   btn.classList.add('active');
   if(id==='coaches'||id==='ops') await loadMonthlyClassCounts();
-  if(id==='pt') await loadPtSessions();
-  if(id==='ops') await loadPtSessions();
+  if(id==='pt'||id==='pt-hc') await loadPtSessions();
   renderAll();
 }
 
@@ -1099,11 +1101,11 @@ function renderCoaches(){
 
 function renderAll(){
   renderSchedule();
-  if(g('view-ops') && g('view-ops').classList.contains('active') && S.isHC){
+  if(g('view-ops')&&g('view-ops').classList.contains('active')&&S.isHC){
     renderCoverageBoard();
     renderMonthlyAnalytics();
-    renderPtSummary();
   }
+  if(g('view-pt-hc')&&g('view-pt-hc').classList.contains('active'))renderPtSummary();
   if(g('view-availability').classList.contains('active')){
     if(S.isHC){g('coachAvailView').style.display='none';g('hcAvailView').style.display='block';renderHcAvail();}
     else{g('coachAvailView').style.display='block';g('hcAvailView').style.display='none';renderCoachAvail();}
@@ -1235,7 +1237,7 @@ async function deletePtSession(id){
     setSyncing('ok','Saved');
     showToast('Session removed','ok');
     renderPtView();
-    if(g('view-ops')&&g('view-ops').classList.contains('active'))renderPtSummary();
+    if(g('view-pt-hc')&&g('view-pt-hc').classList.contains('active'))renderPtSummary();
   }catch(e){
     console.error(e);setSyncing('err','Error');showToast('Delete error: '+e.message,'err');
   }
@@ -1287,7 +1289,7 @@ function renderPtView(){
 
 function renderPtSummary(){
   const body=g('ptSummaryBody'); if(!body)return;
-  const chip=g('ptSummaryChip');
+  const chip=g('ptHcWeekChip');
   const {weekStart,weekEnd}=ptWeekRange();
   const {monthStart,monthEnd}=ptMonthRange();
   const viewedMonday=getMon(S.weekOffset);
