@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>BoxSchedule</title>
+<title>BoxSchedule — Gym</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Figtree:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -274,6 +274,43 @@ select{width:100%;background:var(--surface2);border:1.5px solid var(--border);co
 ::-webkit-scrollbar-track{background:transparent;}
 ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
 
+/* ── PT Hours ── */
+.pt-form{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px;box-shadow:var(--shadow);}
+.pt-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;}
+@media(max-width:500px){.pt-form-grid{grid-template-columns:1fr;}}
+.pt-dur-row{display:flex;gap:8px;margin-bottom:12px;}
+.pt-dur-btn{flex:1;background:var(--surface2);border:1.5px solid var(--border);color:var(--text2);font-family:'Figtree',sans-serif;font-size:13px;font-weight:600;padding:9px 6px;border-radius:8px;cursor:pointer;transition:all .15s;text-align:center;}
+.pt-dur-btn.selected{border-color:var(--accent);background:rgba(3,48,71,.07);color:var(--accent);}
+.pt-entries{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;box-shadow:var(--shadow);}
+.pt-entry-head{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--surface2);border-bottom:1px solid var(--border);}
+.pt-entry-head-title{font-family:'Bebas Neue',cursive;font-size:15px;letter-spacing:1.5px;color:var(--text2);}
+.pt-entry-head-count{font-family:'DM Mono',monospace;font-size:10px;color:var(--text3);}
+.pt-entry-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 14px;border-bottom:1px solid var(--border);}
+.pt-entry-row:last-child{border-bottom:none;}
+.pt-entry-main{display:flex;flex-direction:column;gap:2px;}
+.pt-entry-member{font-size:13px;font-weight:700;color:var(--accent);}
+.pt-entry-meta{font-size:11px;color:var(--text3);}
+.pt-entry-dur{font-family:'DM Mono',monospace;font-size:12px;font-weight:500;color:var(--text2);white-space:nowrap;}
+.pt-del-btn{background:transparent;border:none;color:var(--text3);font-size:16px;cursor:pointer;padding:4px;border-radius:4px;transition:color .12s;line-height:1;}
+.pt-del-btn:hover{color:var(--red);}
+.pt-empty{padding:14px;font-size:13px;color:var(--text3);font-style:italic;}
+.pt-summary-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px;}
+@media(max-width:600px){.pt-summary-grid{grid-template-columns:repeat(2,1fr);}}
+.pt-sum-card{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 12px;}
+.pt-sum-num{font-family:'Bebas Neue',cursive;font-size:22px;line-height:1;color:var(--accent);}
+.pt-sum-lbl{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.7px;font-weight:700;margin-top:3px;}
+.pt-coach-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);}
+.pt-coach-row:last-child{border-bottom:none;}
+.pt-coach-name{display:flex;align-items:center;gap:7px;flex:1;min-width:80px;}
+.pt-coach-stats{display:grid;grid-template-columns:repeat(4,52px);gap:4px;flex-shrink:0;}
+.pt-coach-stat{text-align:center;}
+.pt-coach-stat-num{font-family:'DM Mono',monospace;font-size:12px;font-weight:500;color:var(--text2);}
+.pt-coach-stat-lbl{font-size:8px;color:var(--text3);text-transform:uppercase;letter-spacing:.3px;}
+.pt-coach-header{display:flex;align-items:center;gap:10px;padding:0 0 6px;border-bottom:1px solid var(--border);margin-bottom:2px;}
+.pt-coach-header-spacer{flex:1;min-width:80px;}
+.pt-coach-header-labels{display:grid;grid-template-columns:repeat(4,52px);gap:4px;flex-shrink:0;}
+.pt-coach-header-lbl{text-align:center;font-size:8px;color:var(--text3);text-transform:uppercase;letter-spacing:.3px;font-weight:700;}
+
   .mobile-chip{
     display:inline-flex;
     align-items:center;
@@ -385,6 +422,13 @@ select{width:100%;background:var(--surface2);border:1.5px solid var(--border);co
         </div>
         <div id="monthlyAnalyticsList"></div>
       </div>
+      <div class="coverage-board compact-board" style="margin-top:14px;" id="ptSummaryPanel">
+        <div class="coverage-board-head">
+          <span class="section-title" style="font-size:16px;">PT Hours</span>
+          <span class="week-chip" id="ptSummaryChip"></span>
+        </div>
+        <div id="ptSummaryBody"></div>
+      </div>
     </div>
 
     <div class="view" id="view-availability">
@@ -445,6 +489,47 @@ select{width:100%;background:var(--surface2);border:1.5px solid var(--border);co
       </div>
       <div class="coaches-grid" id="coachesGrid"></div>
     </div>
+
+    <div class="view" id="view-pt">
+      <div class="section-head">
+        <span class="section-title">PT Hours</span>
+        <div class="week-chip" id="ptWeekChip"></div>
+      </div>
+      <!-- Entry form -->
+      <div class="pt-form">
+        <div class="pt-form-grid">
+          <div class="form-row" style="margin-bottom:0">
+            <label>Coach</label>
+            <input type="text" id="ptCoachName" readonly style="background:var(--surface3);cursor:default;">
+          </div>
+          <div class="form-row" style="margin-bottom:0">
+            <label>Date</label>
+            <input type="date" id="ptDate" style="width:100%;background:var(--surface2);border:1.5px solid var(--border);color:var(--text);font-family:'Figtree',sans-serif;font-size:14px;padding:10px 12px;border-radius:8px;outline:none;-webkit-appearance:none;">
+          </div>
+          <div class="form-row" style="margin-bottom:0;grid-column:1/-1">
+            <label>Member Name</label>
+            <input type="text" id="ptMember" placeholder="e.g. John Smith">
+          </div>
+        </div>
+        <label style="display:block;font-size:10px;color:var(--text2);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;font-weight:700;">Duration</label>
+        <div class="pt-dur-row">
+          <button class="pt-dur-btn selected" data-min="30" onclick="selectDur(this)">30 min</button>
+          <button class="pt-dur-btn" data-min="45" onclick="selectDur(this)">45 min</button>
+          <button class="pt-dur-btn" data-min="60" onclick="selectDur(this)">60 min</button>
+        </div>
+        <div style="display:flex;justify-content:flex-end;">
+          <button class="btn" id="ptSaveBtn" onclick="savePtSession()">+ Log Session</button>
+        </div>
+      </div>
+      <!-- This week's entries -->
+      <div class="pt-entries" id="ptEntriesPanel">
+        <div class="pt-entry-head">
+          <span class="pt-entry-head-title">This Week's Sessions</span>
+          <span class="pt-entry-head-count" id="ptEntriesCount"></span>
+        </div>
+        <div id="ptEntriesList"></div>
+      </div>
+    </div>
   </main>
 
   <nav class="bottom-tabs" id="bottomTabs"></nav>
@@ -499,6 +584,7 @@ const sb={
   get h(){return{'Content-Type':'application/json','apikey':SUPABASE_ANON_KEY,'Authorization':'Bearer '+SUPABASE_ANON_KEY,'Prefer':'return=representation'};},
   async select(t,p=''){const r=await fetch(`${SUPABASE_URL}/rest/v1/${t}?${p}`,{headers:sb.h});if(!r.ok)throw new Error(await r.text());return r.json();},
   async upsert(t,rows){const r=await fetch(`${SUPABASE_URL}/rest/v1/${t}`,{method:'POST',headers:{...sb.h,'Prefer':'resolution=merge-duplicates,return=minimal'},body:JSON.stringify(rows)});if(!r.ok)throw new Error(await r.text());},
+  async upsertReturn(t,rows){const r=await fetch(`${SUPABASE_URL}/rest/v1/${t}`,{method:'POST',headers:{...sb.h,'Prefer':'resolution=merge-duplicates,return=representation'},body:JSON.stringify(rows)});if(!r.ok)throw new Error(await r.text());return r.json();},
   async del(t,p){const r=await fetch(`${SUPABASE_URL}/rest/v1/${t}?${p}`,{method:'DELETE',headers:sb.h});if(!r.ok)throw new Error(await r.text());}
 };
 
@@ -528,9 +614,10 @@ const DEFAULT_COACHES = [
 
 const S={
   weekOffset:0,isHC:false,curCoachId:null,nextId:13,
-  coaches: JSON.parse(JSON.stringify(DEFAULT_COACHES)).map(c=>({...c,active:true})), // start with defaults, replaced on load
+  coaches: JSON.parse(JSON.stringify(DEFAULT_COACHES)).map(c=>({...c,active:true})),
   schedule:{},availability:{},notes:{},coverage:{},
-  monthlyClassCounts:{}, // { coachName: count } for current calendar month
+  monthlyClassCounts:null,
+  ptSessions:[],
 };
 
 // ─── WEEK HELPERS ────────────────────────────────────
@@ -760,14 +847,15 @@ async function enterAs(coachId,isHC){
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   g('view-schedule').classList.add('active');
   if(isHC) await seedScheduleIfEmpty();
-  await loadMonthlyClassCounts(); // load for both HC and coaches on login
+  await loadMonthlyClassCounts();
+  await loadPtSessions();
   await loadWeekFromDB();renderAll();
 }
 
 function goSplash(){g('splash').style.display='flex';g('app').style.display='none';buildSplash();}
 
 // ─── TABS ────────────────────────────────────────────
-const COACH_TABS=[{id:'schedule',label:'Schedule',icon:'📅'},{id:'availability',label:'Availability',icon:'✋'}];
+const COACH_TABS=[{id:'schedule',label:'Schedule',icon:'📅'},{id:'availability',label:'Availability',icon:'✋'},{id:'pt',label:'PT Hours',icon:'💪'}];
 const HC_TABS=[{id:'schedule',label:'Schedule',icon:'📅'},{id:'ops',label:'Ops',icon:'📌'},{id:'availability',label:'Overview',icon:'👥'},{id:'coaches',label:'Coaches',icon:'⚡'}];
 let activeTab='schedule';
 
@@ -783,6 +871,8 @@ async function switchTab(id,btn){
   document.querySelectorAll('.btab').forEach(t=>t.classList.remove('active'));
   btn.classList.add('active');
   if(id==='coaches'||id==='ops') await loadMonthlyClassCounts();
+  if(id==='pt') await loadPtSessions();
+  if(id==='ops') await loadPtSessions();
   renderAll();
 }
 
@@ -1012,12 +1102,14 @@ function renderAll(){
   if(g('view-ops') && g('view-ops').classList.contains('active') && S.isHC){
     renderCoverageBoard();
     renderMonthlyAnalytics();
+    renderPtSummary();
   }
   if(g('view-availability').classList.contains('active')){
     if(S.isHC){g('coachAvailView').style.display='none';g('hcAvailView').style.display='block';renderHcAvail();}
     else{g('coachAvailView').style.display='block';g('hcAvailView').style.display='none';renderCoachAvail();}
   }
   if(g('view-coaches').classList.contains('active'))renderCoaches();
+  if(g('view-pt')&&g('view-pt').classList.contains('active'))renderPtView();
 }
 
 // ─── MONTHLY ANALYTICS (HC only, Ops tab) ────────────
@@ -1037,8 +1129,10 @@ function renderMonthlyAnalytics(){
   const counts=S.monthlyClassCounts||{};
   const coaches=S.coaches.filter(c=>c.active!==false);
 
-  if(Object.keys(counts).length===0){
-    list.innerHTML='<div class="health-empty" style="padding:10px 0">Loading monthly data… open the Coaches tab or wait a moment.</div>';
+  // Show all coaches even if counts is empty (just means zero classes, not unloaded)
+  // Only show loading message if monthlyClassCounts is null (never fetched)
+  if(S.monthlyClassCounts===null){
+    list.innerHTML='<div class="health-empty" style="padding:10px 0">Loading monthly data…</div>';
     return;
   }
 
@@ -1069,7 +1163,192 @@ function renderMonthlyAnalytics(){
   }).join('');
 }
 
-// ─── ASSIGN MODAL ────────────────────────────────────
+// ─── PT HOURS ────────────────────────────────────────
+// State: S.ptSessions = array of rows for currently loaded range
+// We load sessions spanning: current viewed week + full month of that week.
+
+function ptWeekRange(){
+  // Returns {weekStart, weekEnd} ISO strings for the viewed week (Mon–Sun)
+  const mon=getMon(S.weekOffset);
+  const sun=new Date(mon); sun.setDate(sun.getDate()+6);
+  return{weekStart:mon.toISOString().slice(0,10), weekEnd:sun.toISOString().slice(0,10)};
+}
+function ptMonthRange(){
+  const mon=getMon(S.weekOffset);
+  const y=mon.getFullYear(),m=mon.getMonth();
+  return{monthStart:new Date(y,m,1).toISOString().slice(0,10), monthEnd:new Date(y,m+1,0).toISOString().slice(0,10)};
+}
+function fmtHrs(mins){
+  if(mins===30)return'0.5 hrs';
+  if(mins===45)return'0.75 hrs';
+  if(mins===60)return'1.0 hr';
+  return(mins/60).toFixed(2)+' hrs';
+}
+function fmtHrsNum(mins){return mins/60;}
+
+async function loadPtSessions(){
+  const {monthStart,monthEnd}=ptMonthRange();
+  try{
+    const rows=await sb.select('pt_sessions',`session_date=gte.${monthStart}&session_date=lte.${monthEnd}&select=id,coach_name,session_date,member_name,duration_minutes,created_at&order=session_date.desc`);
+    S.ptSessions=rows;
+  }catch(e){
+    console.warn('PT sessions table not set up yet:',e.message);
+    if(!S.ptSessions)S.ptSessions=[];
+  }
+}
+
+async function savePtSession(){
+  const coach=byId(S.curCoachId); if(!coach)return;
+  const date=g('ptDate').value;
+  const member=g('ptMember').value.trim();
+  const durBtn=document.querySelector('.pt-dur-btn.selected');
+  const dur=durBtn?parseInt(durBtn.dataset.min):30;
+  if(!date){showToast('Pick a date','err');return;}
+  if(!member){showToast('Enter member name','err');return;}
+  const row={coach_name:coach.name,session_date:date,member_name:member,duration_minutes:dur,created_at:new Date().toISOString()};
+  g('ptSaveBtn').disabled=true;
+  setSyncing('syncing','Saving…');
+  try{
+    const res=await sb.upsertReturn('pt_sessions',[row]);
+    const saved=res&&res[0]?res[0]:{...row,id:Date.now()};
+    if(!S.ptSessions)S.ptSessions=[];
+    S.ptSessions.unshift(saved);
+    g('ptMember').value='';
+    // reset duration to 30
+    document.querySelectorAll('.pt-dur-btn').forEach(b=>b.classList.remove('selected'));
+    document.querySelector('.pt-dur-btn[data-min="30"]').classList.add('selected');
+    setSyncing('ok','Saved');
+    showToast('Session logged ✓','ok');
+    renderPtView();
+  }catch(e){
+    console.error(e);setSyncing('err','Error');showToast('Save error: '+e.message,'err');
+  }
+  g('ptSaveBtn').disabled=false;
+}
+
+async function deletePtSession(id){
+  if(!confirm('Delete this session?'))return;
+  setSyncing('syncing','Deleting…');
+  try{
+    await sb.del('pt_sessions',`id=eq.${id}`);
+    S.ptSessions=(S.ptSessions||[]).filter(r=>r.id!==id);
+    setSyncing('ok','Saved');
+    showToast('Session removed','ok');
+    renderPtView();
+    if(g('view-ops')&&g('view-ops').classList.contains('active'))renderPtSummary();
+  }catch(e){
+    console.error(e);setSyncing('err','Error');showToast('Delete error: '+e.message,'err');
+  }
+}
+
+function selectDur(btn){
+  document.querySelectorAll('.pt-dur-btn').forEach(b=>b.classList.remove('selected'));
+  btn.classList.add('selected');
+}
+
+function renderPtView(){
+  const coach=byId(S.curCoachId); if(!coach)return;
+  const {weekStart,weekEnd}=ptWeekRange();
+  // Set date input default to today if empty
+  if(!g('ptDate').value) g('ptDate').value=new Date().toISOString().slice(0,10);
+  g('ptCoachName').value=coach.name;
+  if(g('ptWeekChip'))g('ptWeekChip').textContent='Week of '+fmtF(wDates()[0]);
+
+  const sessions=(S.ptSessions||[]).filter(r=>
+    r.coach_name===coach.name &&
+    r.session_date>=weekStart &&
+    r.session_date<=weekEnd
+  ).sort((a,b)=>b.session_date.localeCompare(a.session_date));
+
+  const totalMins=sessions.reduce((s,r)=>s+(r.duration_minutes||0),0);
+  if(g('ptEntriesCount'))g('ptEntriesCount').textContent=`${sessions.length} session${sessions.length===1?'':'s'} · ${fmtHrs(totalMins)}`;
+
+  const list=g('ptEntriesList');
+  if(!list)return;
+  if(sessions.length===0){
+    list.innerHTML='<div class="pt-empty">No sessions logged this week.</div>';
+    return;
+  }
+  list.innerHTML=sessions.map(r=>{
+    const d=new Date(r.session_date+'T12:00:00');
+    const dateStr=d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+    return`<div class="pt-entry-row">
+      <div class="pt-entry-main">
+        <div class="pt-entry-member">${r.member_name}</div>
+        <div class="pt-entry-meta">${dateStr}</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span class="pt-entry-dur">${fmtHrs(r.duration_minutes)}</span>
+        <button class="pt-del-btn" onclick="deletePtSession(${r.id})" title="Delete">✕</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderPtSummary(){
+  const body=g('ptSummaryBody'); if(!body)return;
+  const chip=g('ptSummaryChip');
+  const {weekStart,weekEnd}=ptWeekRange();
+  const {monthStart,monthEnd}=ptMonthRange();
+  const viewedMonday=getMon(S.weekOffset);
+  const monthName=viewedMonday.toLocaleString('default',{month:'long'});
+  if(chip)chip.textContent=monthName+' '+viewedMonday.getFullYear();
+
+  const all=S.ptSessions||[];
+  const weekSessions=all.filter(r=>r.session_date>=weekStart&&r.session_date<=weekEnd);
+  const monthSessions=all.filter(r=>r.session_date>=monthStart&&r.session_date<=monthEnd);
+
+  const wTotal=weekSessions.length;
+  const wHrs=weekSessions.reduce((s,r)=>s+(r.duration_minutes||0),0)/60;
+  const mTotal=monthSessions.length;
+  const mHrs=monthSessions.reduce((s,r)=>s+(r.duration_minutes||0),0)/60;
+
+  // Per-coach breakdown
+  const coaches=activeCoaches();
+  const coachStats=coaches.map(c=>{
+    const cw=weekSessions.filter(r=>r.coach_name===c.name);
+    const cm=monthSessions.filter(r=>r.coach_name===c.name);
+    return{
+      coach:c,
+      wSessions:cw.length,
+      wHrs:cw.reduce((s,r)=>s+(r.duration_minutes||0),0)/60,
+      mSessions:cm.length,
+      mHrs:cm.reduce((s,r)=>s+(r.duration_minutes||0),0)/60,
+    };
+  }).filter(s=>s.mSessions>0||s.wSessions>0).sort((a,b)=>b.mHrs-a.mHrs);
+
+  body.innerHTML=`
+    <div class="pt-summary-grid">
+      <div class="pt-sum-card"><div class="pt-sum-num">${wTotal}</div><div class="pt-sum-lbl">Sessions This Week</div></div>
+      <div class="pt-sum-card"><div class="pt-sum-num">${wHrs.toFixed(1)}</div><div class="pt-sum-lbl">Hours This Week</div></div>
+      <div class="pt-sum-card"><div class="pt-sum-num">${mTotal}</div><div class="pt-sum-lbl">Sessions This Month</div></div>
+      <div class="pt-sum-card"><div class="pt-sum-num">${mHrs.toFixed(1)}</div><div class="pt-sum-lbl">Hours This Month</div></div>
+    </div>
+    ${coachStats.length===0?'<div class="pt-empty">No PT sessions logged yet.</div>':`
+      <div class="pt-coach-header">
+        <div class="pt-coach-header-spacer"></div>
+        <div class="pt-coach-header-labels">
+          <div class="pt-coach-header-lbl">Wk Ses</div>
+          <div class="pt-coach-header-lbl">Wk Hrs</div>
+          <div class="pt-coach-header-lbl">Mo Ses</div>
+          <div class="pt-coach-header-lbl">Mo Hrs</div>
+        </div>
+      </div>
+      ${coachStats.map(s=>`
+        <div class="pt-coach-row">
+          <div class="pt-coach-name">
+            <span style="width:9px;height:9px;border-radius:50%;background:${s.coach.color};flex-shrink:0;display:inline-block;"></span>
+            <span style="font-size:13px;font-weight:700;color:var(--accent)">${s.coach.name}</span>
+          </div>
+          <div class="pt-coach-stats">
+            <div class="pt-coach-stat"><div class="pt-coach-stat-num">${s.wSessions}</div></div>
+            <div class="pt-coach-stat"><div class="pt-coach-stat-num">${s.wHrs.toFixed(1)}</div></div>
+            <div class="pt-coach-stat"><div class="pt-coach-stat-num">${s.mSessions}</div></div>
+            <div class="pt-coach-stat"><div class="pt-coach-stat-num" style="color:${s.mHrs>0?s.coach.color:'var(--text3)'}">${s.mHrs.toFixed(1)}</div></div>
+          </div>
+        </div>`).join('')}
+    `}`;
+}
 let assignTarget=null,assignSelected=null;
 function openCellModal(dIdx,tIdx){
   assignTarget={dIdx,tIdx};
@@ -1211,10 +1490,12 @@ async function changeWeek(dir){
   const prevMonth=getMon(S.weekOffset).getMonth();
   S.weekOffset+=dir;
   updateWeekLbl();
-  // If the month changed, reload monthly counts
   const newMonth=getMon(S.weekOffset).getMonth();
   if(newMonth!==prevMonth||(activeTab==='ops'||activeTab==='coaches')){
     await loadMonthlyClassCounts();
+  }
+  if(activeTab==='pt'||activeTab==='ops'){
+    await loadPtSessions();
   }
   await loadWeekFromDB();renderAll();
 }
