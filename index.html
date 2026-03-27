@@ -4,7 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>BoxSchedule — Gym</title>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Figtree:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<!-- Non-blocking font load: page renders immediately, fonts swap in when ready -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Figtree:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Figtree:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"></noscript>
 <style>
 :root {
   --bg:#f4f3ee;--surface:#ffffff;--surface2:#f0eff9;--surface3:#d9d9d9;
@@ -18,7 +22,8 @@
   --shadow-lg:0 4px 24px rgba(3,48,71,.12);
 }
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-body{font-family:'Figtree',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:15px;line-height:1.4;}
+html{overflow-x:hidden;}
+body{font-family:'Figtree',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:15px;line-height:1.4;overflow-x:hidden;max-width:100vw;}
 
 #loadingOverlay{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;}
 .spinner{width:32px;height:32px;border:3px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;}
@@ -68,7 +73,8 @@ header{background:var(--surface);border-bottom:1px solid var(--border);position:
 .btab.active{color:var(--accent);}
 .btab-icon{font-size:18px;line-height:1;}
 
-main{max-width:1200px;margin:0 auto;padding:16px 12px 80px;}
+main{max-width:1200px;margin:0 auto;padding:16px 12px 80px;width:100%;}
+@media(max-width:400px){main{padding:12px 8px 80px;}}
 .view{display:none;}.view.active{display:block;}
 .section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:8px;}
 .section-title{font-family:'Bebas Neue',cursive;font-size:18px;letter-spacing:2px;color:var(--text2);}
@@ -211,14 +217,16 @@ select{width:100%;background:var(--surface2);border:1.5px solid var(--border);co
 .assign-check{color:var(--green);font-size:14px;opacity:0;font-weight:700;}
 .assign-item.selected .assign-check{opacity:1;}
 .quick-hint{font-size:11px;color:var(--text3);margin:-6px 0 12px;}
-.mobile-schedule{display:none;padding:12px;}
-.mobile-day{border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:10px;}
+.mobile-schedule{display:none;padding:0;width:100%;}
+.mobile-day{border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:10px;width:100%;}
 .mobile-day-head{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:var(--surface2);font-family:'Bebas Neue',cursive;letter-spacing:1px;font-size:16px;color:var(--text2);}
-.mobile-day-body{padding:8px 10px;display:flex;flex-direction:column;gap:8px;}
-.mobile-slot{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);}
+.mobile-day-body{padding:6px 10px;display:flex;flex-direction:column;gap:6px;}
+.mobile-slot{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 0;border-bottom:1px solid var(--border);min-width:0;}
 .mobile-slot:last-child{border-bottom:none;}
-.mobile-time{font-family:'DM Mono',monospace;font-size:11px;color:var(--accent);min-width:74px;}
-.mobile-actions{display:flex;justify-content:flex-end;align-items:center;gap:6px;flex:1;flex-wrap:wrap;}
+.mobile-time{font-family:'DM Mono',monospace;font-size:11px;color:var(--accent);width:68px;flex-shrink:0;}
+.mobile-actions{display:flex;justify-content:flex-end;align-items:center;gap:6px;flex:1;min-width:0;overflow:hidden;}
+.mobile-actions .chip{max-width:100%;min-width:0;overflow:hidden;}
+.mobile-actions .chip span:not(.chip-dot):not(.chip-cover-badge){overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;}
 .ops-metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px;}
 .ops-metric{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:10px 12px;box-shadow:var(--shadow);}
 .ops-metric-num{font-family:'Bebas Neue',cursive;font-size:24px;line-height:1;color:var(--accent);}
@@ -644,11 +652,79 @@ function updateWeekLbl(){
   ['availWeekChip','hcAvailWeekChip','opsWeekChip','coverageWeekChip'].forEach(id=>{const el=g(id);if(el)el.textContent=chip;});
 }
 
+// ─── LOCAL CACHE (stale-while-revalidate) ────────────
+// Persist schedule, availability, coverage and notes to localStorage so the
+// app renders instantly on load using last-known data while fresh data fetches
+// in the background. Keys are namespaced by week so stale weeks don't pollute.
+const CACHE_VERSION='bsv1'; // bump this to invalidate all caches on deploy
+
+function cacheKey(type,week){return `${CACHE_VERSION}:${type}:${week}`;}
+
+function cacheWrite(type,week,data){
+  try{localStorage.setItem(cacheKey(type,week),JSON.stringify(data));}
+  catch(e){/* storage full — silently skip */}
+}
+
+function cacheRead(type,week){
+  try{
+    const raw=localStorage.getItem(cacheKey(type,week));
+    return raw?JSON.parse(raw):null;
+  }catch{return null;}
+}
+
+// Restore all cached data for a given week into S (instantaneous — no network)
+function restoreWeekFromCache(key){
+  const sched=cacheRead('schedule',key);
+  if(sched){
+    if(!S.schedule[key])S.schedule[key]={};
+    // Merge cached rows into schedule state
+    sched.forEach(r=>{
+      if(!S.schedule[key][r.d])S.schedule[key][r.d]={};
+      S.schedule[key][r.d][r.t]=r.c;
+    });
+  }
+  const avail=cacheRead('avail',key);
+  if(avail){
+    if(!S.availability[key])S.availability[key]={};
+    Object.assign(S.availability[key],avail);
+  }
+  const coverage=cacheRead('coverage',key);
+  if(coverage){
+    if(!S.coverage)S.coverage={};
+    S.coverage[key]=coverage;
+  }
+  const notes=cacheRead('notes',key);
+  if(notes){
+    if(!S.notes)S.notes={};
+    S.notes[key]=notes;
+  }
+  return !!(sched||avail); // true if we had useful cached data
+}
+
+// Persist current week data to cache after a successful DB load
+function persistWeekToCache(key){
+  // Flatten schedule into compact array format to save space
+  const weekData=S.schedule[key]||{};
+  const schedRows=[];
+  for(const d in weekData) for(const t in weekData[d]){
+    if(weekData[d][t]) schedRows.push({d:+d,t:+t,c:weekData[d][t]});
+  }
+  cacheWrite('schedule',key,schedRows);
+  if(S.availability[key]) cacheWrite('avail',key,S.availability[key]);
+  if(S.coverage[key])     cacheWrite('coverage',key,S.coverage[key]);
+  if(S.notes&&S.notes[key]) cacheWrite('notes',key,S.notes[key]);
+}
+
 // ─── DB HELPERS ──────────────────────────────────────
 
 async function loadCoachesFromDB(){
+  // Restore coaches from cache immediately so splash renders without waiting
+  const cached=cacheRead('coaches','list');
+  if(cached&&cached.length>0){
+    S.coaches=cached;
+    S.nextId=Math.max(...cached.map(c=>c.id))+1;
+  }
   try{
-    // Try with 'active' column first; fall back if column doesn't exist yet
     let rows=[];
     try{
       rows=await sb.select('coaches','select=id,name,color,role,active&order=id.asc');
@@ -658,16 +734,17 @@ async function loadCoachesFromDB(){
     if(rows&&rows.length>0){
       S.coaches=rows.map(c=>({...c,active:c.active!==false}));
       S.nextId=Math.max(...rows.map(c=>c.id))+1;
-    }else{
-      // Seed the coaches table on first run
+      cacheWrite('coaches','list',S.coaches); // persist for next visit
+    }else if(!cached){
       const seeded=DEFAULT_COACHES.map(c=>({...c,active:true}));
       try{await sb.upsert('coaches',seeded);}catch{try{await sb.upsert('coaches',DEFAULT_COACHES);}catch{}}
       S.coaches=seeded.map(c=>({...c}));
       S.nextId=13;
+      cacheWrite('coaches','list',S.coaches);
     }
   }catch(e){
     console.warn('Coaches table not ready:',e.message);
-    S.coaches=DEFAULT_COACHES.map(c=>({...c,active:true}));
+    if(!cached) S.coaches=DEFAULT_COACHES.map(c=>({...c,active:true}));
   }
 }
 
@@ -678,56 +755,60 @@ async function saveCoachToDB(coach){
     }catch{
       await sb.upsert('coaches',[{id:coach.id,name:coach.name,color:coach.color,role:coach.role}]);
     }
+    cacheWrite('coaches','list',S.coaches); // keep cache fresh
   }catch(e){
     console.warn('Could not save coach:',e.message);
     showToast('Saved locally only — coaches table not set up','err');
   }
 }
 
-// PERF: loadWeekFromDB fires schedule + availability in parallel, then notes + coverage in parallel.
-// Previously all 4 were sequential — this cuts perceived load time roughly in half.
+// PERF: all 4 fetches fire in parallel via Promise.allSettled.
+// Notes and coverage are optional — failures are swallowed gracefully.
+// After a successful load the week is persisted to localStorage cache.
 async function loadWeekFromDB(){
   const key=wKey();
   setSyncing('syncing','Loading…');
   try{
-    // Batch 1: schedule + availability in parallel
     const cn=S.isHC?null:byId(S.curCoachId)?.name;
     let availParam=`week=eq.${key}&select=coach_name,day_index,time_index,available`;
     if(cn) availParam+=`&coach_name=eq.${encodeURIComponent(cn)}`;
 
-    const [sr,ar]=await Promise.all([
+    // Fire all 4 requests simultaneously
+    const [sr,ar,noteRes,covRes]=await Promise.allSettled([
       sb.select('schedule',`week=eq.${key}&select=day_index,time_index,coach_name`),
       sb.select('availability',availParam),
-    ]);
-
-    // Populate schedule cache
-    if(!S.schedule[key])S.schedule[key]={};
-    sr.forEach(r=>{
-      if(!S.schedule[key][r.day_index])S.schedule[key][r.day_index]={};
-      S.schedule[key][r.day_index][r.time_index]=r.coach_name||null;
-    });
-
-    // Populate availability cache
-    if(!S.availability[key])S.availability[key]={};
-    ar.forEach(r=>{
-      if(!S.availability[key][r.coach_name])S.availability[key][r.coach_name]={};
-      S.availability[key][r.coach_name][`${r.day_index}_${r.time_index}`]=r.available;
-    });
-
-    // Batch 2: notes + coverage in parallel (both optional — swallow individually)
-    const [noteRows,coverageRows]=await Promise.allSettled([
       sb.select('notes',`week=eq.${key}&select=coach_name,note,created_at`),
       sb.select('coverage_requests',`week=eq.${key}&select=week,day_index,time_index,requested_by,volunteer_name,status,created_at`),
     ]);
 
+    if(sr.status==='fulfilled'){
+      if(!S.schedule[key])S.schedule[key]={};
+      sr.value.forEach(r=>{
+        if(!S.schedule[key][r.day_index])S.schedule[key][r.day_index]={};
+        S.schedule[key][r.day_index][r.time_index]=r.coach_name||null;
+      });
+    }else{
+      throw new Error(sr.reason?.message||'Schedule fetch failed');
+    }
+
+    if(ar.status==='fulfilled'){
+      if(!S.availability[key])S.availability[key]={};
+      ar.value.forEach(r=>{
+        if(!S.availability[key][r.coach_name])S.availability[key][r.coach_name]={};
+        S.availability[key][r.coach_name][`${r.day_index}_${r.time_index}`]=r.available;
+      });
+    }
+
     if(!S.notes)S.notes={};
-    S.notes[key]=noteRows.status==='fulfilled'?noteRows.value:[];
-    if(noteRows.status==='rejected') console.warn('Notes table not set up yet.');
+    S.notes[key]=noteRes.status==='fulfilled'?noteRes.value:[];
+    if(noteRes.status==='rejected') console.warn('Notes table not set up yet.');
 
     if(!S.coverage)S.coverage={};
-    S.coverage[key]=coverageRows.status==='fulfilled'?coverageRows.value:(S.coverage[key]||[]);
-    if(coverageRows.status==='rejected') console.warn('Coverage table not set up yet.');
+    S.coverage[key]=covRes.status==='fulfilled'?covRes.value:(S.coverage[key]||[]);
+    if(covRes.status==='rejected') console.warn('Coverage table not set up yet.');
 
+    // Persist fresh data to localStorage for next visit
+    persistWeekToCache(key);
     setSyncing('ok','Synced');
   }catch(err){
     console.error(err);
@@ -928,20 +1009,39 @@ async function enterAs(coachId,isHC){
   showLoader('Loading…');
   try{
     if(isHC) await seedScheduleIfEmpty();
-    // PERF: load monthly counts + PT sessions in parallel with weekly data
-    await Promise.all([
-      loadMonthlyClassCounts(),
-      loadPtSessions(),
-      loadWeekFromDB(),
-    ]);
+
+    // STALE-WHILE-REVALIDATE: restore cache instantly, render, then fetch fresh
+    const key=wKey();
+    const hadCache=restoreWeekFromCache(key);
+    if(hadCache){
+      // Render immediately with cached data — user sees content in <100ms
+      hideLoader();
+      renderAll();
+      setSyncing('syncing','Refreshing…');
+      // Fetch fresh data silently in background
+      await Promise.all([
+        loadMonthlyClassCounts(),
+        loadPtSessions(),
+        loadWeekFromDB(),
+      ]);
+      renderAll(); // re-render with fresh data
+    }else{
+      // No cache — show spinner and wait for network
+      await Promise.all([
+        loadMonthlyClassCounts(),
+        loadPtSessions(),
+        loadWeekFromDB(),
+      ]);
+      hideLoader();
+      renderAll();
+    }
   }catch(e){
     console.error('Login load error:',e);
     setSyncing('err','Error');
     showToast('Some data failed to load — check connection','err');
-  }finally{
     hideLoader();
+    renderAll();
   }
-  renderAll();
 }
 
 function goSplash(){
@@ -1666,15 +1766,23 @@ function clearMyAvail(){
 async function changeWeek(dir){
   const prevMonth=getMon(S.weekOffset).getMonth();
   S.weekOffset+=dir;
-  clearMonCache(); // invalidate memoised Monday dates
+  clearMonCache();
   updateWeekLbl();
   const newMonth=getMon(S.weekOffset).getMonth();
-  showLoader('Loading…');
+  const key=wKey();
+
+  // Restore from cache for instant render
+  const hadCache=restoreWeekFromCache(key);
+  if(hadCache){
+    renderActiveTab();
+    setSyncing('syncing','Refreshing…');
+  }else{
+    showLoader('Loading…');
+  }
+
   try{
-    const monthChanged=newMonth!==prevMonth;
-    // PERF: batch all needed fetches in parallel
     const fetches=[loadWeekFromDB()];
-    if(monthChanged||activeTab==='ops'||activeTab==='coaches') fetches.push(loadMonthlyClassCounts());
+    if(newMonth!==prevMonth||activeTab==='ops'||activeTab==='coaches') fetches.push(loadMonthlyClassCounts());
     if(activeTab==='pt'||activeTab==='pt-hc') fetches.push(loadPtSessions());
     await Promise.all(fetches);
   }catch(e){console.error(e);}
@@ -1872,16 +1980,28 @@ async function seedScheduleIfEmpty(){
 
 // ─── INIT ────────────────────────────────────────────
 (async()=>{
-  showLoader('Loading…');
-  try{
-    await loadCoachesFromDB();
-  }catch(e){
-    console.error('Init error:',e);
-  }finally{
-    hideLoader();
+  // If coaches are cached, show splash immediately — no spinner needed
+  const cachedCoaches=cacheRead('coaches','list');
+  if(cachedCoaches&&cachedCoaches.length>0){
+    S.coaches=cachedCoaches;
+    S.nextId=Math.max(...cachedCoaches.map(c=>c.id))+1;
+    g('splash').style.display='flex';
+    buildSplash();
+    // Refresh coaches from DB silently in background
+    loadCoachesFromDB().then(()=>buildSplash()).catch(()=>{});
+  }else{
+    // No cache — show spinner and wait
+    showLoader('Loading…');
+    try{
+      await loadCoachesFromDB();
+    }catch(e){
+      console.error('Init error:',e);
+    }finally{
+      hideLoader();
+    }
+    g('splash').style.display='flex';
+    buildSplash();
   }
-  g('splash').style.display='flex';
-  buildSplash();
 })();
 </script>
 </body>
