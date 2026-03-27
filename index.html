@@ -692,7 +692,6 @@ async function toggleCoachActiveInDB(coach){
 async function loadWeekFromDB(){
   const key=wKey();
   setSyncing('syncing','Loading…');
-  showLoader('Loading schedule…');
   try{
     const sr=await sb.select('schedule',`week=eq.${key}&select=day_index,time_index,coach_name`);
     if(!S.schedule[key])S.schedule[key]={};
@@ -703,7 +702,6 @@ async function loadWeekFromDB(){
     const ar=await sb.select('availability',ap);
     if(!S.availability[key])S.availability[key]={};
     ar.forEach(r=>{if(!S.availability[key][r.coach_name])S.availability[key][r.coach_name]={};S.availability[key][r.coach_name][`${r.day_index}_${r.time_index}`]=r.available;});
-    // Load notes for this week (graceful — table may not exist yet)
     try{
       const noteRows=await sb.select('notes',`week=eq.${key}&select=coach_name,note,created_at`);
       if(!S.notes)S.notes={};
@@ -711,7 +709,7 @@ async function loadWeekFromDB(){
     }catch(e){
       if(!S.notes)S.notes={};
       S.notes[key]=[];
-      console.warn('Notes table not set up yet — run SQL in Supabase to enable notes.');
+      console.warn('Notes table not set up yet.');
     }
     try{
       const coverageRows=await sb.select('coverage_requests',`week=eq.${key}&select=week,day_index,time_index,requested_by,volunteer_name,status,created_at`);
@@ -720,11 +718,14 @@ async function loadWeekFromDB(){
     }catch(e){
       if(!S.coverage)S.coverage={};
       S.coverage[key]=S.coverage[key]||[];
-      console.warn('Coverage table not set up yet — run SQL in Supabase to enable coverage requests.');
+      console.warn('Coverage table not set up yet.');
     }
     setSyncing('ok','Synced');
-  }catch(err){console.error(err);setSyncing('err','Error');showToast('Load error: '+err.message,'err');}
-  hideLoader();
+  }catch(err){
+    console.error(err);
+    setSyncing('err','Error');
+    showToast('Load error: '+err.message,'err');
+  }
 }
 
 async function saveScheduleSlot(dIdx,tIdx,coachName){
@@ -840,7 +841,7 @@ function buildSplash(){
 
 async function enterAs(coachId,isHC){
   S.isHC=isHC;S.curCoachId=coachId;
-  S.weekOffset=0; // always open on current week
+  S.weekOffset=0;
   g('splash').style.display='none';g('app').style.display='block';
   if(isHC){
     g('userDot').style.background='#1a7a4a';
@@ -855,10 +856,20 @@ async function enterAs(coachId,isHC){
   activeTab='schedule';buildTabs();updateWeekLbl();
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   g('view-schedule').classList.add('active');
-  if(isHC) await seedScheduleIfEmpty();
-  await loadMonthlyClassCounts();
-  await loadPtSessions();
-  await loadWeekFromDB();renderAll();
+  showLoader('Loading…');
+  try{
+    if(isHC) await seedScheduleIfEmpty();
+    await loadMonthlyClassCounts();
+    await loadPtSessions();
+    await loadWeekFromDB();
+  }catch(e){
+    console.error('Login load error:',e);
+    setSyncing('err','Error');
+    showToast('Some data failed to load — check connection','err');
+  }finally{
+    hideLoader();
+  }
+  renderAll();
 }
 
 function goSplash(){g('splash').style.display='flex';g('app').style.display='none';buildSplash();}
@@ -1546,13 +1557,21 @@ async function changeWeek(dir){
   S.weekOffset+=dir;
   updateWeekLbl();
   const newMonth=getMon(S.weekOffset).getMonth();
-  if(newMonth!==prevMonth||(activeTab==='ops'||activeTab==='coaches')){
-    await loadMonthlyClassCounts();
+  showLoader('Loading…');
+  try{
+    if(newMonth!==prevMonth||(activeTab==='ops'||activeTab==='coaches')){
+      await loadMonthlyClassCounts();
+    }
+    if(activeTab==='pt'||activeTab==='ops'||activeTab==='pt-hc'){
+      await loadPtSessions();
+    }
+    await loadWeekFromDB();
+  }catch(e){
+    console.error(e);
+  }finally{
+    hideLoader();
   }
-  if(activeTab==='pt'||activeTab==='ops'){
-    await loadPtSessions();
-  }
-  await loadWeekFromDB();renderAll();
+  renderAll();
 }
 
 function exportCSV(){
@@ -1817,4 +1836,29 @@ async function seedScheduleIfEmpty() {
 
       // Save all slots
       const rows = slots.map(([d,t,c]) => ({
-        week: weekKey, day_index: d, time_index: t, coa
+        week: weekKey, day_index: d, time_index: t, coach_name: c
+      }));
+      await sb.upsert('schedule', rows);
+      console.log('Seeded week', weekKey);
+    } catch(e) {
+      console.warn('Seed failed for', weekKey, e.message);
+    }
+  }
+}
+
+// ─── INIT ────────────────────────────────────────────
+(async()=>{
+  showLoader('Loading…');
+  try{
+    await loadCoachesFromDB();
+  }catch(e){
+    console.error('Init error:',e);
+  }finally{
+    hideLoader();
+  }
+  g('splash').style.display='flex';
+  buildSplash();
+})();
+</script>
+</body>
+</html>
