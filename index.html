@@ -486,7 +486,10 @@ select{width:100%;background:var(--surface2);border:1.5px solid var(--border);co
     <div class="view" id="view-pt-hc">
       <div class="section-head">
         <span class="section-title">PT Hours</span>
-        <span class="week-chip" id="ptHcWeekChip"></span>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span class="week-chip" id="ptHcWeekChip"></span>
+          <button class="btn ghost" onclick="exportPtCSV()" style="font-size:12px;padding:6px 12px;">⬇ Export</button>
+        </div>
       </div>
       <div id="ptSummaryPanel">
         <div id="ptSummaryBody"></div>
@@ -1351,6 +1354,53 @@ function renderPtSummary(){
         </div>`).join('')}
     `}`;
 }
+
+function exportPtCSV(){
+  const {monthStart,monthEnd}=ptMonthRange();
+  const viewedMonday=getMon(S.weekOffset);
+  const monthName=viewedMonday.toLocaleString('default',{month:'long'});
+  const year=viewedMonday.getFullYear();
+
+  const sessions=(S.ptSessions||[])
+    .filter(r=>r.session_date>=monthStart&&r.session_date<=monthEnd)
+    .sort((a,b)=>a.session_date.localeCompare(b.session_date)||a.coach_name.localeCompare(b.coach_name));
+
+  if(sessions.length===0){showToast('No sessions to export','err');return;}
+
+  // ── Sheet 1: All sessions ──
+  const esc=v=>`"${String(v).replace(/"/g,'""')}"`;
+  let csv='PT Sessions — '+monthName+' '+year+'\n\n';
+  csv+='Coach,Date,Member,Duration (min),Duration (hrs)\n';
+  sessions.forEach(r=>{
+    const hrs=(r.duration_minutes/60).toFixed(2);
+    csv+=`${esc(r.coach_name)},${esc(r.session_date)},${esc(r.member_name)},${r.duration_minutes},${hrs}\n`;
+  });
+
+  // ── Sheet 2 (appended as second table): Per-coach summary ──
+  csv+='\nCoach Summary — '+monthName+' '+year+'\n\n';
+  csv+='Coach,Total Sessions,Total Minutes,Total Hours\n';
+  const coaches=activeCoaches();
+  const coachTotals=coaches.map(c=>{
+    const cs=sessions.filter(r=>r.coach_name===c.name);
+    const mins=cs.reduce((s,r)=>s+(r.duration_minutes||0),0);
+    return{name:c.name,sessions:cs.length,mins,hrs:(mins/60).toFixed(2)};
+  }).filter(c=>c.sessions>0).sort((a,b)=>b.mins-a.mins);
+
+  coachTotals.forEach(c=>{
+    csv+=`${esc(c.name)},${c.sessions},${c.mins},${c.hrs}\n`;
+  });
+
+  // Download
+  const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;
+  a.download=`PT_Hours_${monthName}_${year}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('Exported ✓','ok');
+}
+
 let assignTarget=null,assignSelected=null;
 function openCellModal(dIdx,tIdx){
   assignTarget={dIdx,tIdx};
