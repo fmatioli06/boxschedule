@@ -345,7 +345,10 @@ select{width:100%;background:var(--surface2);border:1.5px solid var(--border);co
 <div id="app">
   <header>
     <div class="header-inner">
-      <div class="logo">Box<span>Schedule</span></div>
+      <div class="logo" onclick="goSplash()" style="cursor:pointer;display:flex;align-items:center;gap:7px;" title="Home">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;color:var(--accent)"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z"/><polyline points="9 21 9 12 15 12 15 21"/></svg>
+        Box<span>Schedule</span>
+      </div>
       <div class="week-nav">
         <button class="nav-btn" onclick="changeWeek(-1)">‹</button>
         <div class="week-lbl" id="weekLbl"></div>
@@ -1814,24 +1817,4 @@ async function seedScheduleIfEmpty() {
 
       // Save all slots
       const rows = slots.map(([d,t,c]) => ({
-        week: weekKey, day_index: d, time_index: t, coach_name: c
-      }));
-      await sb.upsert('schedule', rows);
-      console.log('Seeded week', weekKey);
-    } catch(e) {
-      console.warn('Seed failed for', weekKey, e.message);
-    }
-  }
-}
-
-// ─── INIT ────────────────────────────────────────────
-(async()=>{
-  showLoader('Loading coaches…');
-  await loadCoachesFromDB();
-  hideLoader();
-  g('splash').style.display='flex';
-  buildSplash();
-})();
-</script>
-</body>
-</html>
+        week: weekKey, day_index: d, time_index: t, coa
