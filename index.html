@@ -279,6 +279,27 @@ select{width:100%;background:var(--surface2);border:1.5px solid var(--border);co
   .coach-snap-item{font-size:10px;padding:4px 8px;}
 }
 
+/* ── Analytics ── */
+.analytics-period-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;}
+.period-pill{font-size:11px;font-weight:700;padding:5px 12px;border-radius:999px;border:1.5px solid var(--border);background:var(--surface);color:var(--text2);cursor:pointer;transition:all .15s;white-space:nowrap;font-family:'Figtree',sans-serif;letter-spacing:.3px;}
+.period-pill:hover{border-color:var(--accent);color:var(--accent);}
+.period-pill.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+.period-pill.divider-before{margin-left:6px;border-left:none;}
+.analytics-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px;}
+.analytics-stat{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 14px;box-shadow:var(--shadow);}
+.analytics-stat-num{font-family:'Bebas Neue',cursive;font-size:28px;line-height:1;color:var(--accent);}
+.analytics-stat-lbl{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.7px;font-weight:700;margin-top:4px;}
+.analytics-coach-row{padding:10px 0;border-bottom:1px solid var(--border);}
+.analytics-coach-row:last-child{border-bottom:none;}
+.analytics-coach-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:5px;}
+.analytics-coach-name{display:flex;align-items:center;gap:7px;font-size:13px;font-weight:700;color:var(--accent);}
+.analytics-coach-right{display:flex;align-items:baseline;gap:8px;}
+.analytics-coach-total{font-family:'DM Mono',monospace;font-size:15px;font-weight:500;color:var(--accent);}
+.analytics-coach-avg{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.4px;white-space:nowrap;}
+.analytics-bar-track{height:5px;background:var(--border);border-radius:3px;overflow:hidden;}
+.analytics-bar-fill{height:100%;border-radius:3px;transition:width .4s ease;}
+@media(max-width:500px){.analytics-stats{grid-template-columns:repeat(3,1fr);}.analytics-stat-num{font-size:22px;}}
+
 /* ── PT Hours ── */
 .pt-form{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px;box-shadow:var(--shadow);}
 .pt-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;}
@@ -412,13 +433,6 @@ select{width:100%;background:var(--surface2);border:1.5px solid var(--border);co
         </div>
         <div id="coverageBoardList"></div>
       </div>
-      <div class="coverage-board compact-board" style="margin-top:14px;" id="monthlyAnalyticsPanel">
-        <div class="coverage-board-head">
-          <span class="section-title" style="font-size:16px;" id="monthlyAnalyticsTitle">Monthly Classes</span>
-          <span class="week-chip" id="monthlyAnalyticsChip"></span>
-        </div>
-        <div id="monthlyAnalyticsList"></div>
-      </div>
     </div>
 
     <div class="view" id="view-availability">
@@ -476,6 +490,25 @@ select{width:100%;background:var(--surface2);border:1.5px solid var(--border);co
         <button class="btn" onclick="openAddCoach()">+ Add</button>
       </div>
       <div class="coaches-grid" id="coachesGrid"></div>
+    </div>
+
+    <div class="view" id="view-analytics">
+      <div class="section-head">
+        <span class="section-title">Analytics</span>
+        <span class="week-chip" id="analyticsYearChip"></span>
+      </div>
+      <!-- Period selector -->
+      <div class="analytics-period-row" id="analyticsPeriodRow"></div>
+      <!-- Summary stat cards -->
+      <div class="analytics-stats" id="analyticsStats"></div>
+      <!-- Coach breakdown -->
+      <div class="coverage-board compact-board" style="margin-top:0">
+        <div class="coverage-board-head">
+          <span class="section-title" style="font-size:16px;">Coach Breakdown</span>
+          <span style="font-size:10px;color:var(--text3);font-family:'DM Mono',monospace;" id="analyticsSubLabel"></span>
+        </div>
+        <div id="analyticsCoachList"></div>
+      </div>
     </div>
 
     <div class="view" id="view-pt-hc">
@@ -1061,6 +1094,7 @@ const HC_TABS=[
   {id:'ops',label:'Ops',icon:'📌'},
   {id:'availability',label:'Overview',icon:'👥'},
   {id:'coaches',label:'Coaches',icon:'⚡'},
+  {id:'analytics',label:'Analytics',icon:'📊'},
   {id:'pt-hc',label:'PT Hours',icon:'💪'},
 ];
 let activeTab='schedule';
@@ -1087,6 +1121,7 @@ async function switchTab(id,btn){
   try{
     if(id==='coaches'||id==='ops') await loadMonthlyClassCounts();
     if(id==='pt'||id==='pt-hc') await loadPtSessions();
+    if(id==='analytics') await loadAnalyticsData();
     renderActiveTab();
   }catch(e){console.error(e);}
 }
@@ -1100,6 +1135,7 @@ function renderActiveTab(){
     case 'ops':        renderOps(); break;
     case 'availability': renderAvailability(); break;
     case 'coaches':    renderCoaches(); break;
+    case 'analytics':  renderAnalytics(); break;
     case 'pt':         renderPtView(); break;
     case 'pt-hc':      renderPtSummary(); break;
   }
@@ -1255,7 +1291,6 @@ function renderOps(){
     <div class="ops-row"><div class="ops-meta"><strong>${total-filled} open class${total-filled===1?'':'es'}</strong><span class="ops-sub">Still unassigned on the schedule</span></div><span class="cover-chip ${total-filled?'waiting':''}">${total-filled?'Open slots':'All filled'}</span></div>`;
 
   renderCoverageBoard();
-  renderMonthlyAnalytics();
 }
 
 // ─── RENDER: AVAILABILITY ────────────────────────────
@@ -1387,40 +1422,160 @@ function renderCoverageBoard(){
   }).join('');
 }
 
-// ─── RENDER: MONTHLY ANALYTICS ───────────────────────
-function renderMonthlyAnalytics(){
-  const list=g('monthlyAnalyticsList'); if(!list) return;
-  const chip=g('monthlyAnalyticsChip');
-  const title=g('monthlyAnalyticsTitle');
-  const viewedMon=getMon(S.weekOffset);
-  const monthName=viewedMon.toLocaleString('default',{month:'long'});
-  if(chip) chip.textContent=`${monthName} ${viewedMon.getFullYear()}`;
-  if(title) title.textContent=`${monthName} Classes`;
+// ─── ANALYTICS ───────────────────────────────────────
+// Fully independent of the weekly nav. Has its own period state and data cache.
 
-  if(S.monthlyClassCounts===null){
-    list.innerHTML='<div class="health-empty" style="padding:10px 0">Loading monthly data…</div>';
+const AN={
+  period:null,      // selected period key e.g. '2026-03', 'Q1-2026', 'YTD-2026'
+  data:{},          // cache: periodKey → array of {coach_name, count}
+  loading:false,
+};
+
+// Build the list of selectable periods from Jan of this year through current month
+function analyticsGetPeriods(){
+  const now=new Date();
+  const year=now.getFullYear();
+  const curMonth=now.getMonth(); // 0-indexed
+  const months=[];
+  const MONTH_SHORT=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  for(let m=0;m<=curMonth;m++){
+    months.push({key:`${year}-${String(m+1).padStart(2,'0')}`,label:MONTH_SHORT[m],type:'month',year,month:m});
+  }
+  // Quarters that have at least one completed or current month
+  const quarters=[];
+  [[0,1,2],[3,4,5],[6,7,8],[9,10,11]].forEach(([a,b,c],qi)=>{
+    if(a<=curMonth) quarters.push({key:`Q${qi+1}-${year}`,label:`Q${qi+1}`,type:'quarter',year,months:[a,b,c].filter(m=>m<=curMonth)});
+  });
+  const ytd={key:`YTD-${year}`,label:'YTD',type:'ytd',year,months:Array.from({length:curMonth+1},(_,i)=>i)};
+  return{months,quarters,ytd,year};
+}
+
+// Given a period descriptor, return {start, end} ISO date strings
+function analyticsPeriodRange(pd){
+  const year=pd.year;
+  if(pd.type==='month'){
+    const m=pd.month;
+    return{start:new Date(year,m,1).toISOString().slice(0,10),end:new Date(year,m+1,0).toISOString().slice(0,10),months:1};
+  }
+  if(pd.type==='quarter'||pd.type==='ytd'){
+    const ms=pd.months;
+    return{start:new Date(year,ms[0],1).toISOString().slice(0,10),end:new Date(year,ms[ms.length-1]+1,0).toISOString().slice(0,10),months:ms.length};
+  }
+}
+
+async function loadAnalyticsData(){
+  if(!AN.period){
+    // Default to current month
+    const now=new Date();
+    AN.period=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+  }
+  if(AN.data[AN.period]) return; // already cached
+  const{months,quarters,ytd}=analyticsGetPeriods();
+  const all=[...months,...quarters,ytd];
+  const pd=all.find(p=>p.key===AN.period);
+  if(!pd) return;
+  const{start,end}=analyticsPeriodRange(pd);
+  AN.loading=true;
+  try{
+    // Fetch all schedule rows in range — only coach_name needed for counting
+    const rows=await sb.select('schedule',`week=gte.${start}&week=lte.${end}&select=coach_name`);
+    const counts={};
+    rows.forEach(r=>{if(r.coach_name) counts[r.coach_name]=(counts[r.coach_name]||0)+1;});
+    AN.data[AN.period]=counts;
+  }catch(e){
+    console.warn('Analytics load failed:',e.message);
+    AN.data[AN.period]={};
+  }
+  AN.loading=false;
+}
+
+function selectAnalyticsPeriod(key){
+  AN.period=key;
+  // Render immediately with loading state if not cached
+  renderAnalytics();
+  // Fetch if needed then re-render
+  if(!AN.data[key]){
+    loadAnalyticsData().then(()=>renderAnalytics()).catch(()=>{});
+  }
+}
+
+function renderAnalytics(){
+  if(!g('view-analytics')) return;
+  const{months,quarters,ytd,year}=analyticsGetPeriods();
+  const all=[...months,...quarters,ytd];
+
+  // Default period on first open
+  if(!AN.period){
+    const now=new Date();
+    AN.period=`${year}-${String(now.getMonth()+1).padStart(2,'0')}`;
+  }
+
+  // Year chip
+  if(g('analyticsYearChip')) g('analyticsYearChip').textContent=String(year);
+
+  // Period pills
+  const pillsHTML=
+    months.map(p=>`<button class="period-pill ${p.key===AN.period?'active':''}" onclick="selectAnalyticsPeriod('${p.key}')">${p.label}</button>`).join('')+
+    '<span style="display:inline-block;width:1px;height:20px;background:var(--border2);margin:0 4px;vertical-align:middle;flex-shrink:0;"></span>'+
+    quarters.map(p=>`<button class="period-pill ${p.key===AN.period?'active':''}" onclick="selectAnalyticsPeriod('${p.key}')">${p.label}</button>`).join('')+
+    `<button class="period-pill ${ytd.key===AN.period?'active':''}" onclick="selectAnalyticsPeriod('${ytd.key}')">${ytd.label}</button>`;
+  g('analyticsPeriodRow').innerHTML=pillsHTML;
+
+  // Get current period descriptor
+  const pd=all.find(p=>p.key===AN.period);
+  if(!pd) return;
+  const{months:pdMonths}=analyticsPeriodRange(pd);
+
+  // Loading state
+  if(AN.loading||!AN.data[AN.period]){
+    g('analyticsStats').innerHTML=`<div class="analytics-stat"><div class="analytics-stat-num">—</div><div class="analytics-stat-lbl">Total classes</div></div><div class="analytics-stat"><div class="analytics-stat-num">—</div><div class="analytics-stat-lbl">Avg / coach</div></div><div class="analytics-stat"><div class="analytics-stat-num">—</div><div class="analytics-stat-lbl">Active coaches</div></div>`;
+    g('analyticsCoachList').innerHTML='<div class="health-empty" style="padding:14px 0">Loading…</div>';
     return;
   }
 
-  const counts=S.monthlyClassCounts;
-  const sorted=S.coaches.filter(c=>c.active!==false).map(c=>({c,count:counts[c.name]||0})).sort((a,b)=>b.count-a.count);
-  const max=sorted[0]?.count||1;
+  const counts=AN.data[AN.period];
+  const coaches=activeCoaches();
 
-  list.innerHTML=sorted.map(({c,count})=>{
-    const pct=Math.round((count/max)*100);
-    const bar=count===0?'var(--border2)':c.color;
-    return`<div class="coverage-item" style="flex-direction:column;align-items:stretch;gap:6px;padding:10px 0;">
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
-        <div style="display:flex;align-items:center;gap:8px;">
-          <span style="width:10px;height:10px;border-radius:50%;background:${c.color};flex-shrink:0;display:inline-block;"></span>
-          <span style="font-size:13px;font-weight:700;color:var(--accent)">${c.name}</span>
-          <span style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px">${c.role||'Coach'}</span>
+  // Summary stats
+  const total=Object.values(counts).reduce((s,n)=>s+n,0);
+  const coachesWithClasses=coaches.filter(c=>counts[c.name]>0).length;
+  const avg=coachesWithClasses>0?(total/coachesWithClasses).toFixed(1):'0';
+
+  // Sub-label (how many months in the period)
+  const monthCount=pdMonths;
+  const subLabel=monthCount>1?`${monthCount} months`:'1 month';
+  if(g('analyticsSubLabel')) g('analyticsSubLabel').textContent=`sorted by total · ${subLabel}`;
+
+  g('analyticsStats').innerHTML=`
+    <div class="analytics-stat"><div class="analytics-stat-num">${total}</div><div class="analytics-stat-lbl">Total classes</div></div>
+    <div class="analytics-stat"><div class="analytics-stat-num">${avg}</div><div class="analytics-stat-lbl">Avg / coach</div></div>
+    <div class="analytics-stat"><div class="analytics-stat-num">${coachesWithClasses}</div><div class="analytics-stat-lbl">Coaches active</div></div>`;
+
+  // Coach rows sorted by total, only those with classes
+  const sorted=coaches.map(c=>({c,total:counts[c.name]||0})).filter(x=>x.total>0).sort((a,b)=>b.total-a.total);
+  const max=sorted[0]?.total||1;
+
+  if(sorted.length===0){
+    g('analyticsCoachList').innerHTML='<div class="health-empty" style="padding:14px 0">No classes found for this period.</div>';
+    return;
+  }
+
+  g('analyticsCoachList').innerHTML=sorted.map(({c,total})=>{
+    const pct=Math.round((total/max)*100);
+    const avgPerMonth=monthCount>1?(total/monthCount).toFixed(1):null;
+    const avgLabel=avgPerMonth?`<span class="analytics-coach-avg">${avgPerMonth} / mo avg</span>`:'';
+    return`<div class="analytics-coach-row">
+      <div class="analytics-coach-top">
+        <div class="analytics-coach-name">
+          <span style="width:9px;height:9px;border-radius:50%;background:${c.color};flex-shrink:0;display:inline-block;"></span>
+          ${c.name}
         </div>
-        <span style="font-family:'DM Mono',monospace;font-size:14px;font-weight:500;color:${count===0?'var(--text3)':c.color}">${count}</span>
+        <div class="analytics-coach-right">
+          ${avgLabel}
+          <span class="analytics-coach-total">${total}</span>
+        </div>
       </div>
-      <div style="height:5px;background:var(--border);border-radius:3px;overflow:hidden;">
-        <div style="height:100%;width:${pct}%;background:${bar};border-radius:3px;transition:width .3s;"></div>
-      </div>
+      <div class="analytics-bar-track"><div class="analytics-bar-fill" style="width:${pct}%;background:${c.color}"></div></div>
     </div>`;
   }).join('');
 }
