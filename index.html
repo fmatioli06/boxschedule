@@ -1110,20 +1110,19 @@ function buildTabs(){
 // then loads data in the background and re-renders only that tab.
 async function switchTab(id,btn){
   activeTab=id;
-  // Show the new tab immediately — don't wait for data
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   g('view-'+id).classList.add('active');
   document.querySelectorAll('.btab').forEach(t=>t.classList.remove('active'));
   btn.classList.add('active');
-  // Render with current data first for instant response
+  // Always hide global loader when switching tabs — it should never block tab nav
+  hideLoader();
   renderActiveTab();
-  // Then fetch any tab-specific data and re-render
   try{
     if(id==='coaches'||id==='ops') await loadMonthlyClassCounts();
     if(id==='pt'||id==='pt-hc') await loadPtSessions();
     if(id==='analytics') await loadAnalyticsData();
-    renderActiveTab();
   }catch(e){console.error(e);}
+  renderActiveTab();
 }
 
 // ─── RENDER: ACTIVE TAB ONLY ──────────────────────────
@@ -1464,29 +1463,36 @@ function analyticsPeriodRange(pd){
 }
 
 async function loadAnalyticsData(){
+  // Set default period if not yet chosen
   if(!AN.period){
-    // Default to current month
     const now=new Date();
     AN.period=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
   }
-  if(AN.data[AN.period]) return; // already cached
+  // Already cached — nothing to do
+  if(AN.data[AN.period]) return;
+
   const{months,quarters,ytd}=analyticsGetPeriods();
   const all=[...months,...quarters,ytd];
   const pd=all.find(p=>p.key===AN.period);
-  if(!pd) return;
-  const{start,end}=analyticsPeriodRange(pd);
+
+  // Unknown period — mark as empty so we don't retry forever
+  if(!pd){AN.data[AN.period]={};return;}
+
+  const range=analyticsPeriodRange(pd);
+  if(!range){AN.data[AN.period]={};return;}
+
   AN.loading=true;
   try{
-    // Fetch all schedule rows in range — only coach_name needed for counting
-    const rows=await sb.select('schedule',`week=gte.${start}&week=lte.${end}&select=coach_name`);
+    const rows=await sb.select('schedule',`week=gte.${range.start}&week=lte.${range.end}&select=coach_name`);
     const counts={};
     rows.forEach(r=>{if(r.coach_name) counts[r.coach_name]=(counts[r.coach_name]||0)+1;});
     AN.data[AN.period]=counts;
   }catch(e){
     console.warn('Analytics load failed:',e.message);
     AN.data[AN.period]={};
+  }finally{
+    AN.loading=false;
   }
-  AN.loading=false;
 }
 
 function selectAnalyticsPeriod(key){
