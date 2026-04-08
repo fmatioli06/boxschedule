@@ -3,11 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>BoxSchedule</title>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Figtree:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<title>BoxSchedule — Gym</title>
+<!-- Non-blocking font load: page renders immediately, fonts swap in when ready -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Figtree:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Figtree:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"></noscript>
 <style>
 :root {
-  /* Palette: 033047 / 304C62 / 5C677D / D9D9D9 / F4F3EE */
   --bg:#f4f3ee;--surface:#ffffff;--surface2:#f0eff9;--surface3:#d9d9d9;
   --border:#d9d9d9;--border2:#c4c4c4;
   --accent:#033047;--accent2:#304c62;
@@ -19,7 +22,8 @@
   --shadow-lg:0 4px 24px rgba(3,48,71,.12);
 }
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-body{font-family:'Figtree',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:15px;line-height:1.4;}
+html{overflow-x:hidden;}
+body{font-family:'Figtree',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:15px;line-height:1.4;overflow-x:hidden;max-width:100vw;}
 
 #loadingOverlay{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;}
 .spinner{width:32px;height:32px;border:3px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;}
@@ -62,16 +66,15 @@ header{background:var(--surface);border-bottom:1px solid var(--border);position:
 .user-pill{display:flex;align-items:center;gap:6px;background:var(--surface2);border:1.5px solid var(--border);border-radius:20px;padding:4px 10px 4px 6px;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;white-space:nowrap;}
 .user-pill:hover{border-color:var(--accent);}
 .user-dot{width:9px;height:9px;border-radius:50%;}
-
-/* hide sync label text on small screens, show dot only */
 @media(max-width:480px){.sync-label{display:none;}.sync-pill{padding:3px 6px;}}
 
 .bottom-tabs{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);display:flex;z-index:100;box-shadow:0 -2px 12px rgba(0,0,0,.06);}
-.btab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 4px 10px;gap:3px;border:none;background:transparent;cursor:pointer;color:var(--text3);font-family:'Figtree',sans-serif;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;transition:all .15s;}
+.btab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 2px 10px;gap:3px;border:none;background:transparent;cursor:pointer;color:var(--text3);font-family:'Figtree',sans-serif;font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.3px;transition:all .15s;}
 .btab.active{color:var(--accent);}
 .btab-icon{font-size:18px;line-height:1;}
 
-main{max-width:1200px;margin:0 auto;padding:16px 12px 80px;}
+main{max-width:1200px;margin:0 auto;padding:16px 12px 80px;width:100%;}
+@media(max-width:400px){main{padding:12px 8px 80px;}}
 .view{display:none;}.view.active{display:block;}
 .section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:8px;}
 .section-title{font-family:'Bebas Neue',cursive;font-size:18px;letter-spacing:2px;color:var(--text2);}
@@ -116,7 +119,6 @@ main{max-width:1200px;margin:0 auto;padding:16px 12px 80px;}
 .cover-chip{display:inline-flex;align-items:center;gap:6px;padding:4px 8px;border-radius:999px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;border:1px solid var(--border);background:var(--surface);color:var(--text2);}
 .cover-chip.waiting{color:var(--red);background:var(--red-bg);border-color:var(--red-bdr);}
 .cover-chip.ready{color:var(--green);background:var(--green-bg);border-color:var(--green-bdr);}
-.coverage-tag{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--red);}
 .chip.has-cover{gap:7px;padding-right:8px;}
 .chip-cover-badge{display:inline-flex;align-items:center;padding:2px 6px;border-radius:999px;background:var(--red-bg);border:1px solid var(--red-bdr);color:var(--red);font-size:9px;font-weight:700;line-height:1;text-transform:uppercase;letter-spacing:.35px;}
 .coverage-callout-items{display:flex;gap:6px;flex-wrap:wrap;align-items:center;}
@@ -170,7 +172,6 @@ tbody td:first-child{font-family:'DM Mono',monospace;font-size:10px;font-weight:
 .hc-slot{width:100%;min-height:46px;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:3px;padding:4px;background:var(--surface);}
 .hc-slot.bk{background:#f0efe9;}
 .coach-label{display:inline-flex;align-items:center;gap:3px;border-radius:4px;padding:2px 5px;font-family:'Figtree',sans-serif;font-size:9px;font-weight:700;white-space:nowrap;line-height:1.2;}
-
 .cl-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
 
 .coaches-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;}
@@ -216,31 +217,34 @@ select{width:100%;background:var(--surface2);border:1.5px solid var(--border);co
 .assign-check{color:var(--green);font-size:14px;opacity:0;font-weight:700;}
 .assign-item.selected .assign-check{opacity:1;}
 .quick-hint{font-size:11px;color:var(--text3);margin:-6px 0 12px;}
-.mobile-schedule{display:none;padding:12px;}
-.mobile-day{border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:10px;}
+.mobile-schedule{display:none;padding:0;width:100%;}
+.mobile-day{border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:10px;width:100%;}
 .mobile-day-head{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:var(--surface2);font-family:'Bebas Neue',cursive;letter-spacing:1px;font-size:16px;color:var(--text2);}
-.mobile-day-body{padding:8px 10px;display:flex;flex-direction:column;gap:8px;}
-.mobile-slot{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);}
+.mobile-day-body{padding:6px 10px;display:flex;flex-direction:column;gap:6px;}
+.mobile-slot{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 0;border-bottom:1px solid var(--border);min-width:0;}
 .mobile-slot:last-child{border-bottom:none;}
-.mobile-time{font-family:'DM Mono',monospace;font-size:11px;color:var(--accent);min-width:74px;}
-.mobile-actions{display:flex;justify-content:flex-end;align-items:center;gap:6px;flex:1;flex-wrap:wrap;}
-.load-status{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:4px 7px;border-radius:999px;border:1px solid var(--border);}
-.load-status.over{color:var(--red);background:var(--red-bg);border-color:var(--red-bdr);}
-.load-status.under{color:var(--green);background:var(--green-bg);border-color:var(--green-bdr);}
-.load-status.even{color:var(--accent);background:rgba(3,48,71,.06);border-color:rgba(3,48,71,.15);}
-@media(max-width:700px){.summary-bar{grid-template-columns:repeat(3,1fr);} .health-panel{grid-template-columns:1fr;} .fairness-grid{grid-template-columns:1fr 1fr;} .compact-card{padding:10px;} .tbl-wrap{display:none;} .mobile-schedule{display:block;} .section-head{align-items:flex-start;flex-direction:column;} .ops-metrics{grid-template-columns:repeat(2,1fr);} }
-@media(max-width:700px){
-  .chip{min-height:36px;padding:4px 12px 4px 8px;}
-  .mobile-actions .chip{font-size:11px;}
-}
-
-
-.avail-top{display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
-.week-chip{font-family:'DM Mono',monospace;font-size:10px;color:var(--text2);background:var(--surface);border:1.5px solid var(--border);padding:5px 10px;border-radius:6px;font-weight:500;}
-.legend{display:flex;gap:12px;margin-bottom:12px;flex-wrap:wrap;}
-.leg-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text2);font-weight:500;}
-.leg-sw{width:10px;height:10px;border-radius:2px;flex-shrink:0;}
-
+.mobile-time{font-family:'DM Mono',monospace;font-size:11px;color:var(--accent);width:68px;flex-shrink:0;}
+.mobile-actions{display:flex;justify-content:flex-end;align-items:center;gap:6px;flex:1;min-width:0;overflow:hidden;}
+.mobile-actions .chip{max-width:100%;min-width:0;overflow:hidden;}
+.mobile-actions .chip span:not(.chip-dot):not(.chip-cover-badge){overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;}
+.ops-metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px;}
+.ops-metric{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:10px 12px;box-shadow:var(--shadow);}
+.ops-metric-num{font-family:'Bebas Neue',cursive;font-size:24px;line-height:1;color:var(--accent);}
+.ops-metric-lbl{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.7px;font-weight:700;margin-top:4px;}
+.ops-metric-sub{font-size:11px;color:var(--text2);margin-top:4px;}
+.coach-snapshot{display:none;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:10px 12px;margin-bottom:12px;box-shadow:var(--shadow);}
+.coach-snapshot.show{display:block;}
+.coach-snap-hint{margin-top:8px;font-size:11px;color:var(--text3);}
+.coach-snap-hint strong{color:var(--accent);font-weight:700;}
+.coverage-callout{display:none;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:8px 10px;margin-bottom:10px;font-size:12px;color:var(--text2);box-shadow:var(--shadow);}
+.coverage-callout.show{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;}
+.coverage-callout .cover-chip{flex-shrink:0;}
+.coach-snap-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px;}
+.coach-snap-title{font-family:'Bebas Neue',cursive;font-size:16px;letter-spacing:1.5px;color:var(--text2);line-height:1;}
+.coach-snap-count{font-family:'DM Mono',monospace;font-size:11px;color:var(--text3);white-space:nowrap;}
+.coach-snap-list{display:flex;flex-wrap:wrap;gap:6px;}
+.coach-snap-item{display:inline-flex;align-items:center;gap:6px;background:var(--surface2);border:1px solid var(--border);border-radius:18px;padding:5px 9px;font-size:11px;font-weight:600;color:var(--text2);}
+.coach-snap-empty{font-size:12px;color:var(--text3);}
 .note-card{background:var(--surface);border:1.5px solid var(--border);border-radius:10px;padding:14px 16px;position:relative;}
 .note-card-name{font-family:'Bebas Neue',cursive;font-size:14px;letter-spacing:1px;margin-bottom:4px;}
 .note-card-text{font-size:13px;color:var(--text);line-height:1.5;}
@@ -248,45 +252,93 @@ select{width:100%;background:var(--surface2);border:1.5px solid var(--border);co
 .toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--text);color:#fff;border-radius:20px;padding:10px 20px;font-size:13px;font-weight:600;z-index:999;display:none;animation:fadeUp .2s ease;white-space:nowrap;box-shadow:var(--shadow-lg);}
 .toast.ok{background:var(--green);}
 .toast.err{background:var(--red);}
+.week-chip{font-family:'DM Mono',monospace;font-size:10px;color:var(--text2);background:var(--surface);border:1.5px solid var(--border);padding:5px 10px;border-radius:6px;font-weight:500;}
+.legend{display:flex;gap:12px;margin-bottom:12px;flex-wrap:wrap;}
+.leg-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text2);font-weight:500;}
+.leg-sw{width:10px;height:10px;border-radius:2px;flex-shrink:0;}
+.avail-top{display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
 
+@media(max-width:700px){
+  .summary-bar{grid-template-columns:repeat(3,1fr);}
+  .health-panel{grid-template-columns:1fr;}
+  .fairness-grid{grid-template-columns:1fr 1fr;}
+  .compact-card{padding:10px;}
+  .tbl-wrap{display:none;}
+  .mobile-schedule{display:block;}
+  .section-head{align-items:flex-start;flex-direction:column;}
+  .ops-metrics{grid-template-columns:repeat(2,1fr);}
+}
+@media(max-width:700px){
+  .chip{min-height:36px;padding:4px 12px 4px 8px;}
+  .mobile-actions .chip{font-size:11px;}
+}
+@media(max-width:600px){
+  .coach-snapshot{padding:9px 10px;margin-bottom:10px;}
+  .coach-snap-top{margin-bottom:7px;}
+  .coach-snap-list{gap:5px;}
+  .coach-snap-item{font-size:10px;padding:4px 8px;}
+}
 
-.coach-snapshot{display:none;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:10px 12px;margin-bottom:12px;box-shadow:var(--shadow);} 
-.coach-snapshot.show{display:block;}
-.coach-snap-hint{margin-top:8px;font-size:11px;color:var(--text3);}
-.coach-snap-hint strong{color:var(--accent);font-weight:700;}
-.coverage-callout{display:none;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:8px 10px;margin-bottom:10px;font-size:12px;color:var(--text2);box-shadow:var(--shadow);}
-.coverage-callout.show{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;}
-.coverage-callout .cover-chip{flex-shrink:0;}
-.ops-metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px;}
-.ops-metric{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:10px 12px;box-shadow:var(--shadow);}
-.ops-metric-num{font-family:'Bebas Neue',cursive;font-size:24px;line-height:1;color:var(--accent);}
-.ops-metric-lbl{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.7px;font-weight:700;margin-top:4px;}
-.ops-metric-sub{font-size:11px;color:var(--text2);margin-top:4px;}
-.coach-snap-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px;}
-.coach-snap-title{font-family:'Bebas Neue',cursive;font-size:16px;letter-spacing:1.5px;color:var(--text2);line-height:1;}
-.coach-snap-count{font-family:'DM Mono',monospace;font-size:11px;color:var(--text3);white-space:nowrap;}
-.coach-snap-list{display:flex;flex-wrap:wrap;gap:6px;}
-.coach-snap-item{display:inline-flex;align-items:center;gap:6px;background:var(--surface2);border:1px solid var(--border);border-radius:18px;padding:5px 9px;font-size:11px;font-weight:600;color:var(--text2);}
-.coach-snap-empty{font-size:12px;color:var(--text3);}
-@media(max-width:600px){.coach-snapshot{padding:9px 10px;margin-bottom:10px;}.coach-snap-top{margin-bottom:7px;}.coach-snap-list{gap:5px;}.coach-snap-item{font-size:10px;padding:4px 8px;}}
+/* ── Analytics ── */
+.analytics-period-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;}
+.period-pill{font-size:11px;font-weight:700;padding:5px 12px;border-radius:999px;border:1.5px solid var(--border);background:var(--surface);color:var(--text2);cursor:pointer;transition:all .15s;white-space:nowrap;font-family:'Figtree',sans-serif;letter-spacing:.3px;}
+.period-pill:hover{border-color:var(--accent);color:var(--accent);}
+.period-pill.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+.period-pill.divider-before{margin-left:6px;border-left:none;}
+.analytics-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px;}
+.analytics-stat{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 14px;box-shadow:var(--shadow);}
+.analytics-stat-num{font-family:'Bebas Neue',cursive;font-size:28px;line-height:1;color:var(--accent);}
+.analytics-stat-lbl{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.7px;font-weight:700;margin-top:4px;}
+.analytics-coach-row{padding:10px 0;border-bottom:1px solid var(--border);}
+.analytics-coach-row:last-child{border-bottom:none;}
+.analytics-coach-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:5px;}
+.analytics-coach-name{display:flex;align-items:center;gap:7px;font-size:13px;font-weight:700;color:var(--accent);}
+.analytics-coach-right{display:flex;align-items:baseline;gap:8px;}
+.analytics-coach-total{font-family:'DM Mono',monospace;font-size:15px;font-weight:500;color:var(--accent);}
+.analytics-coach-avg{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.4px;white-space:nowrap;}
+.analytics-bar-track{height:5px;background:var(--border);border-radius:3px;overflow:hidden;}
+.analytics-bar-fill{height:100%;border-radius:3px;transition:width .4s ease;}
+@media(max-width:500px){.analytics-stats{grid-template-columns:repeat(3,1fr);}.analytics-stat-num{font-size:22px;}}
+
+/* ── PT Hours ── */
+.pt-form{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px;box-shadow:var(--shadow);}
+.pt-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;}
+@media(max-width:500px){.pt-form-grid{grid-template-columns:1fr;}}
+.pt-dur-row{display:flex;gap:8px;margin-bottom:12px;}
+.pt-dur-btn{flex:1;background:var(--surface2);border:1.5px solid var(--border);color:var(--text2);font-family:'Figtree',sans-serif;font-size:13px;font-weight:600;padding:9px 6px;border-radius:8px;cursor:pointer;transition:all .15s;text-align:center;}
+.pt-dur-btn.selected{border-color:var(--accent);background:rgba(3,48,71,.07);color:var(--accent);}
+.pt-entries{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;box-shadow:var(--shadow);}
+.pt-entry-head{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--surface2);border-bottom:1px solid var(--border);}
+.pt-entry-head-title{font-family:'Bebas Neue',cursive;font-size:15px;letter-spacing:1.5px;color:var(--text2);}
+.pt-entry-head-count{font-family:'DM Mono',monospace;font-size:10px;color:var(--text3);}
+.pt-entry-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 14px;border-bottom:1px solid var(--border);}
+.pt-entry-row:last-child{border-bottom:none;}
+.pt-entry-main{display:flex;flex-direction:column;gap:2px;}
+.pt-entry-member{font-size:13px;font-weight:700;color:var(--accent);}
+.pt-entry-meta{font-size:11px;color:var(--text3);}
+.pt-entry-dur{font-family:'DM Mono',monospace;font-size:12px;font-weight:500;color:var(--text2);white-space:nowrap;}
+.pt-del-btn{background:transparent;border:none;color:var(--text3);font-size:16px;cursor:pointer;padding:4px;border-radius:4px;transition:color .12s;line-height:1;}
+.pt-del-btn:hover{color:var(--red);}
+.pt-empty{padding:14px;font-size:13px;color:var(--text3);font-style:italic;}
+.pt-summary-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px;}
+@media(max-width:600px){.pt-summary-grid{grid-template-columns:repeat(2,1fr);}}
+.pt-sum-card{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 12px;}
+.pt-sum-num{font-family:'Bebas Neue',cursive;font-size:22px;line-height:1;color:var(--accent);}
+.pt-sum-lbl{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.7px;font-weight:700;margin-top:3px;}
+.pt-coach-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);}
+.pt-coach-row:last-child{border-bottom:none;}
+.pt-coach-name{display:flex;align-items:center;gap:7px;flex:1;min-width:80px;}
+.pt-coach-stats{display:grid;grid-template-columns:repeat(4,52px);gap:4px;flex-shrink:0;}
+.pt-coach-stat{text-align:center;}
+.pt-coach-stat-num{font-family:'DM Mono',monospace;font-size:12px;font-weight:500;color:var(--text2);}
+.pt-coach-header{display:flex;align-items:center;gap:10px;padding:0 0 6px;border-bottom:1px solid var(--border);margin-bottom:2px;}
+.pt-coach-header-spacer{flex:1;min-width:80px;}
+.pt-coach-header-labels{display:grid;grid-template-columns:repeat(4,52px);gap:4px;flex-shrink:0;}
+.pt-coach-header-lbl{text-align:center;font-size:8px;color:var(--text3);text-transform:uppercase;letter-spacing:.3px;font-weight:700;}
 
 ::-webkit-scrollbar{width:4px;height:4px;}
 ::-webkit-scrollbar-track{background:transparent;}
 ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
-
-  .mobile-chip{
-    display:inline-flex;
-    align-items:center;
-    justify-content:center;
-    gap:6px;
-    max-width:100%;
-    min-height:34px;
-    height:34px;
-    line-height:1;
-    box-sizing:border-box;
-  }
-  .mobile-chip span{display:inline-flex;align-items:center;}
-
 </style>
 </head>
 <body>
@@ -308,7 +360,10 @@ select{width:100%;background:var(--surface2);border:1.5px solid var(--border);co
 <div id="app">
   <header>
     <div class="header-inner">
-      <div class="logo">Box<span>Schedule</span></div>
+      <div class="logo" onclick="goSplash()" style="cursor:pointer;display:flex;align-items:center;gap:7px;" title="Home">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;color:var(--accent)"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z"/><polyline points="9 21 9 12 15 12 15 21"/></svg>
+        Box<span>Schedule</span>
+      </div>
       <div class="week-nav">
         <button class="nav-btn" onclick="changeWeek(-1)">‹</button>
         <div class="week-lbl" id="weekLbl"></div>
@@ -341,11 +396,13 @@ select{width:100%;background:var(--surface2);border:1.5px solid var(--border);co
       <div class="coach-snapshot" id="coachSnapshot">
         <div class="coach-snap-top">
           <div class="coach-snap-title">My Week Snapshot</div>
-          <div class="coach-snap-count" id="coachSnapshotCount"></div>
+          <div style="display:flex;gap:12px;align-items:center;">
+            <div class="coach-snap-count" id="coachSnapshotCount"></div>
+            <div class="coach-snap-count" id="coachSnapshotMonth" style="color:var(--text3)"></div>
+          </div>
         </div>
         <div class="coach-snap-list" id="coachSnapshotList"></div>
         <div class="coach-snap-hint">Tap one of your classes to request coverage.</div>
-        
       </div>
       <div class="mobile-schedule" id="mobileSchedule"></div>
       <div class="tbl-wrap">
@@ -395,7 +452,6 @@ select{width:100%;background:var(--surface2);border:1.5px solid var(--border);co
           <button class="btn ghost" onclick="clearMyAvail()">Clear All</button>
           <button class="btn" id="saveAvailBtn" onclick="saveMyAvail()">💾 Save Availability</button>
         </div>
-        <!-- COACH NOTES -->
         <div style="margin-top:20px;">
           <div style="font-family:'Bebas Neue',cursive;font-size:16px;letter-spacing:2px;color:var(--text2);margin-bottom:8px;">📝 Note to Head Coach</div>
           <div style="font-size:12px;color:var(--text3);margin-bottom:8px;">Leave a note about this week — schedule requests, conflicts, anything the head coach should know.</div>
@@ -419,7 +475,6 @@ select{width:100%;background:var(--surface2);border:1.5px solid var(--border);co
           <div class="leg-item"><div class="leg-sw" style="background:var(--surface3)"></div>Empty cell = no one available</div>
         </div>
         <div class="avail-wrap"><table class="avail-tbl" id="hcAvailTbl"></table></div>
-        <!-- HC NOTES PANEL -->
         <div style="margin-top:20px;">
           <div style="font-family:'Bebas Neue',cursive;font-size:16px;letter-spacing:2px;color:var(--text2);margin-bottom:12px;">📝 Coach Notes This Week</div>
           <div id="hcNotesList" style="display:flex;flex-direction:column;gap:10px;">
@@ -436,6 +491,75 @@ select{width:100%;background:var(--surface2);border:1.5px solid var(--border);co
       </div>
       <div class="coaches-grid" id="coachesGrid"></div>
     </div>
+
+    <div class="view" id="view-analytics">
+      <div class="section-head">
+        <span class="section-title">Analytics</span>
+        <span class="week-chip" id="analyticsYearChip"></span>
+      </div>
+      <!-- Period selector -->
+      <div class="analytics-period-row" id="analyticsPeriodRow"></div>
+      <!-- Summary stat cards -->
+      <div class="analytics-stats" id="analyticsStats"></div>
+      <!-- Coach breakdown -->
+      <div class="coverage-board compact-board" style="margin-top:0">
+        <div class="coverage-board-head">
+          <span class="section-title" style="font-size:16px;">Coach Breakdown</span>
+          <span style="font-size:10px;color:var(--text3);font-family:'DM Mono',monospace;" id="analyticsSubLabel"></span>
+        </div>
+        <div id="analyticsCoachList"></div>
+      </div>
+    </div>
+
+    <div class="view" id="view-pt-hc">
+      <div class="section-head">
+        <span class="section-title">PT Hours</span>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span class="week-chip" id="ptHcWeekChip"></span>
+          <button class="btn ghost" onclick="exportPtCSV()" style="font-size:12px;padding:6px 12px;">⬇ Export</button>
+        </div>
+      </div>
+      <div id="ptSummaryPanel"><div id="ptSummaryBody"></div></div>
+    </div>
+
+    <div class="view" id="view-pt">
+      <div class="section-head">
+        <span class="section-title">PT Hours</span>
+        <div class="week-chip" id="ptWeekChip"></div>
+      </div>
+      <div class="pt-form">
+        <div class="pt-form-grid">
+          <div class="form-row" style="margin-bottom:0">
+            <label>Coach</label>
+            <input type="text" id="ptCoachName" readonly style="background:var(--surface3);cursor:default;">
+          </div>
+          <div class="form-row" style="margin-bottom:0">
+            <label>Date</label>
+            <input type="date" id="ptDate" style="width:100%;background:var(--surface2);border:1.5px solid var(--border);color:var(--text);font-family:'Figtree',sans-serif;font-size:14px;padding:10px 12px;border-radius:8px;outline:none;-webkit-appearance:none;">
+          </div>
+          <div class="form-row" style="margin-bottom:0;grid-column:1/-1">
+            <label>Member Name</label>
+            <input type="text" id="ptMember" placeholder="e.g. John Smith">
+          </div>
+        </div>
+        <label style="display:block;font-size:10px;color:var(--text2);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;font-weight:700;">Duration</label>
+        <div class="pt-dur-row">
+          <button class="pt-dur-btn selected" data-min="30" onclick="selectDur(this)">30 min</button>
+          <button class="pt-dur-btn" data-min="45" onclick="selectDur(this)">45 min</button>
+          <button class="pt-dur-btn" data-min="60" onclick="selectDur(this)">60 min</button>
+        </div>
+        <div style="display:flex;justify-content:flex-end;">
+          <button class="btn" id="ptSaveBtn" onclick="savePtSession()">+ Log Session</button>
+        </div>
+      </div>
+      <div class="pt-entries" id="ptEntriesPanel">
+        <div class="pt-entry-head">
+          <span class="pt-entry-head-title">This Week's Sessions</span>
+          <span class="pt-entry-head-count" id="ptEntriesCount"></span>
+        </div>
+        <div id="ptEntriesList"></div>
+      </div>
+    </div>
   </main>
 
   <nav class="bottom-tabs" id="bottomTabs"></nav>
@@ -445,7 +569,7 @@ select{width:100%;background:var(--surface2);border:1.5px solid var(--border);co
   <div class="modal">
     <span class="modal-handle"></span>
     <div class="modal-title" id="assignTitle">Assign Coach</div>
-    <div class="quick-hint">Available coaches are sorted to the top. Lighter schedules are shown first to help you choose faster.</div>
+    <div class="quick-hint">Available coaches are sorted to the top. Lighter schedules are shown first.</div>
     <div class="assign-list" id="assignList"></div>
     <div class="modal-actions">
       <button class="btn ghost" onclick="closeOverlay('assignOverlay')">Cancel</button>
@@ -482,154 +606,270 @@ select{width:100%;background:var(--surface2);border:1.5px solid var(--border);co
 <div class="toast" id="toast"></div>
 
 <script>
-// ─── SUPABASE CONFIG ─────────────────────────────────
+// ─── SUPABASE ─────────────────────────────────────────
 const SUPABASE_URL      = 'https://ahaqybgwhvfgqpcpomtw.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFoYXF5Ymd3aHZmZ3FwY3BvbXR3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4NDMxNTEsImV4cCI6MjA4OTQxOTE1MX0.Zghu5uEbORud9T6S7toDeWxZhKytfx6Y_ks_-iuDOSo';
 
 const sb={
   get h(){return{'Content-Type':'application/json','apikey':SUPABASE_ANON_KEY,'Authorization':'Bearer '+SUPABASE_ANON_KEY,'Prefer':'return=representation'};},
-  async select(t,p=''){const r=await fetch(`${SUPABASE_URL}/rest/v1/${t}?${p}`,{headers:sb.h});if(!r.ok)throw new Error(await r.text());return r.json();},
-  async upsert(t,rows){const r=await fetch(`${SUPABASE_URL}/rest/v1/${t}`,{method:'POST',headers:{...sb.h,'Prefer':'resolution=merge-duplicates,return=minimal'},body:JSON.stringify(rows)});if(!r.ok)throw new Error(await r.text());},
-  async del(t,p){const r=await fetch(`${SUPABASE_URL}/rest/v1/${t}?${p}`,{method:'DELETE',headers:sb.h});if(!r.ok)throw new Error(await r.text());}
+  // Wraps fetch with a 8-second timeout so a hanging network never freezes the app
+  async _fetch(url,opts){
+    const ctrl=new AbortController();
+    const timer=setTimeout(()=>ctrl.abort(),8000);
+    try{
+      const r=await fetch(url,{...opts,signal:ctrl.signal});
+      clearTimeout(timer);
+      return r;
+    }catch(e){
+      clearTimeout(timer);
+      throw e.name==='AbortError'?new Error('Request timed out — check your connection'):e;
+    }
+  },
+  async select(t,p=''){const r=await sb._fetch(`${SUPABASE_URL}/rest/v1/${t}?${p}`,{headers:sb.h});if(!r.ok)throw new Error(await r.text());return r.json();},
+  async upsert(t,rows){const r=await sb._fetch(`${SUPABASE_URL}/rest/v1/${t}`,{method:'POST',headers:{...sb.h,'Prefer':'resolution=merge-duplicates,return=minimal'},body:JSON.stringify(rows)});if(!r.ok)throw new Error(await r.text());},
+  async upsertReturn(t,rows){const r=await sb._fetch(`${SUPABASE_URL}/rest/v1/${t}`,{method:'POST',headers:{...sb.h,'Prefer':'resolution=merge-duplicates,return=representation'},body:JSON.stringify(rows)});if(!r.ok)throw new Error(await r.text());return r.json();},
+  async del(t,p){const r=await sb._fetch(`${SUPABASE_URL}/rest/v1/${t}?${p}`,{method:'DELETE',headers:sb.h});if(!r.ok)throw new Error(await r.text());}
 };
 
 // ─── CONSTANTS ───────────────────────────────────────
 const CLASS_TIMES=['5:30 AM','6:30 AM','8:15 AM','9:30 AM','12:15 PM','4:45 PM','6:15 PM'];
 const DAYS=['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
 const DAY_SHORT=['MON','TUE','WED','THU','FRI','SAT'];
+// Pre-computed blackout set: Saturday slots that don't run
 const SAT_BK=new Set(['5:30 AM','6:30 AM','12:15 PM','4:45 PM','6:15 PM']);
 function isBk(d,t){return d===5&&SAT_BK.has(CLASS_TIMES[t]);}
 
 // ─── STATE ───────────────────────────────────────────
-// Default coaches — used as seed if Supabase coaches table is empty
-const DEFAULT_COACHES = [
-  {id:1, name:'Tyler',    color:'#033047',role:'Head Coach'},
-  {id:2, name:'Hannah',   color:'#2e8b57',role:'Coach'},
-  {id:3, name:'Laura',    color:'#c0392b',role:'Coach'},
-  {id:4, name:'Nick',     color:'#2980b9',role:'Coach'},
-  {id:5, name:'Felipe',   color:'#8e44ad',role:'Coach'},
-  {id:6, name:'Josh',     color:'#d35400',role:'Coach'},
-  {id:7, name:'Marissa',  color:'#b03060',role:'Coach'},
-  {id:8, name:'Brennan',  color:'#16a085',role:'Coach'},
-  {id:9, name:'Emily',    color:'#b7950b',role:'Coach'},
-  {id:10,name:'Steven',   color:'#27ae60',role:'Coach'},
+const DEFAULT_COACHES=[
+  {id:1,name:'Tyler',    color:'#033047',role:'Head Coach'},
+  {id:2,name:'Hannah',   color:'#2e8b57',role:'Coach'},
+  {id:3,name:'Laura',    color:'#c0392b',role:'Coach'},
+  {id:4,name:'Nick',     color:'#2980b9',role:'Coach'},
+  {id:5,name:'Felipe',   color:'#8e44ad',role:'Coach'},
+  {id:6,name:'Josh',     color:'#d35400',role:'Coach'},
+  {id:7,name:'Marissa',  color:'#b03060',role:'Coach'},
+  {id:8,name:'Brennan',  color:'#16a085',role:'Coach'},
+  {id:9,name:'Emily',    color:'#b7950b',role:'Coach'},
+  {id:10,name:'Steven',  color:'#27ae60',role:'Coach'},
   {id:11,name:'Sara Beth',color:'#e74c8b',role:'Coach'},
-  {id:12,name:'KJ',       color:'#5b7fdb',role:'Coach'},
+  {id:12,name:'KJ',      color:'#5b7fdb',role:'Coach'},
 ];
 
 const S={
-  weekOffset:0,isHC:false,curCoachId:null,nextId:13,
-  coaches: JSON.parse(JSON.stringify(DEFAULT_COACHES)).map(c=>({...c,active:true})), // start with defaults, replaced on load
-  schedule:{},availability:{},notes:{},coverage:{},
+  weekOffset:0, isHC:false, curCoachId:null, nextId:13,
+  coaches: DEFAULT_COACHES.map(c=>({...c,active:true})),
+  schedule:{}, availability:{}, notes:{}, coverage:{},
+  monthlyClassCounts:null,
+  ptSessions:[],
 };
 
-// ─── WEEK HELPERS ────────────────────────────────────
-function getMon(off){const d=new Date(),day=d.getDay();const m=new Date(d.setDate(d.getDate()-day+(day===0?-6:1)+off*7));m.setHours(0,0,0,0);return m;}
+// ─── WEEK HELPERS ─────────────────────────────────────
+// getMon: returns Monday Date for a given week offset.
+// Memoised per offset so repeated calls within the same render don't re-compute.
+const _monCache={};
+function getMon(off){
+  if(_monCache[off])return new Date(_monCache[off].getTime());
+  const d=new Date(),day=d.getDay();
+  const m=new Date(d);
+  m.setDate(d.getDate()-day+(day===0?-6:1)+off*7);
+  m.setHours(0,0,0,0);
+  _monCache[off]=new Date(m.getTime());
+  return m;
+}
+// Invalidate memo when week changes so stale dates don't persist
+function clearMonCache(){Object.keys(_monCache).forEach(k=>delete _monCache[k]);}
+
 function wKey(off=S.weekOffset){return getMon(off).toISOString().slice(0,10);}
-function wDates(off=S.weekOffset){const m=getMon(off);return Array.from({length:6},(_,i)=>{const d=new Date(m);d.setDate(d.getDate()+i);return d;});}
+
+// wDates: returns 6 Date objects Mon–Sat for the given offset.
+// Called once per render and passed around rather than re-called.
+function wDates(off=S.weekOffset){
+  const m=getMon(off);
+  return Array.from({length:6},(_,i)=>{const d=new Date(m);d.setDate(d.getDate()+i);return d;});
+}
+
 function fmt(d){return(d.getMonth()+1)+'/'+d.getDate();}
 function fmtF(d){return(d.getMonth()+1)+'/'+d.getDate()+'/'+d.getFullYear();}
+
 function updateWeekLbl(){
   const ds=wDates();
   g('weekLbl').textContent=fmt(ds[0])+' – '+fmt(ds[5]);
-  ['availWeekChip','hcAvailWeekChip','opsWeekChip','coverageWeekChip'].forEach(id=>{if(g(id))g(id).textContent='Week of '+fmtF(ds[0]);});
+  const chip='Week of '+fmtF(ds[0]);
+  ['availWeekChip','hcAvailWeekChip','opsWeekChip','coverageWeekChip'].forEach(id=>{const el=g(id);if(el)el.textContent=chip;});
 }
 
-// ─── DB ──────────────────────────────────────────────
+// ─── LOCAL CACHE (stale-while-revalidate) ────────────
+// Persist schedule, availability, coverage and notes to localStorage so the
+// app renders instantly on load using last-known data while fresh data fetches
+// in the background. Keys are namespaced by week so stale weeks don't pollute.
+const CACHE_VERSION='bsv1'; // bump this to invalidate all caches on deploy
+
+function cacheKey(type,week){return `${CACHE_VERSION}:${type}:${week}`;}
+
+function cacheWrite(type,week,data){
+  try{localStorage.setItem(cacheKey(type,week),JSON.stringify(data));}
+  catch(e){/* storage full — silently skip */}
+}
+
+function cacheRead(type,week){
+  try{
+    const raw=localStorage.getItem(cacheKey(type,week));
+    return raw?JSON.parse(raw):null;
+  }catch{return null;}
+}
+
+// Restore all cached data for a given week into S (instantaneous — no network)
+function restoreWeekFromCache(key){
+  const sched=cacheRead('schedule',key);
+  if(sched){
+    if(!S.schedule[key])S.schedule[key]={};
+    // Merge cached rows into schedule state
+    sched.forEach(r=>{
+      if(!S.schedule[key][r.d])S.schedule[key][r.d]={};
+      S.schedule[key][r.d][r.t]=r.c;
+    });
+  }
+  const avail=cacheRead('avail',key);
+  if(avail){
+    if(!S.availability[key])S.availability[key]={};
+    Object.assign(S.availability[key],avail);
+  }
+  const coverage=cacheRead('coverage',key);
+  if(coverage){
+    if(!S.coverage)S.coverage={};
+    S.coverage[key]=coverage;
+  }
+  const notes=cacheRead('notes',key);
+  if(notes){
+    if(!S.notes)S.notes={};
+    S.notes[key]=notes;
+  }
+  return !!(sched||avail); // true if we had useful cached data
+}
+
+// Persist current week data to cache after a successful DB load
+function persistWeekToCache(key){
+  // Flatten schedule into compact array format to save space
+  const weekData=S.schedule[key]||{};
+  const schedRows=[];
+  for(const d in weekData) for(const t in weekData[d]){
+    if(weekData[d][t]) schedRows.push({d:+d,t:+t,c:weekData[d][t]});
+  }
+  cacheWrite('schedule',key,schedRows);
+  if(S.availability[key]) cacheWrite('avail',key,S.availability[key]);
+  if(S.coverage[key])     cacheWrite('coverage',key,S.coverage[key]);
+  if(S.notes&&S.notes[key]) cacheWrite('notes',key,S.notes[key]);
+}
+
+// ─── DB HELPERS ──────────────────────────────────────
 
 // withTimeout: wraps any promise so it rejects after ms milliseconds.
 // Prevents any single fetch from hanging the init sequence forever.
-function withTimeout(promise, ms=6000){
+function withTimeout(promise,ms=6000){
   return Promise.race([
     promise,
     new Promise((_,reject)=>setTimeout(()=>reject(new Error('Request timed out')),ms))
   ]);
 }
 
-// Load coaches from Supabase — called once on app start.
-// Always resolves: falls back to DEFAULT_COACHES on any error or timeout.
 async function loadCoachesFromDB(){
+  // Restore coaches from cache immediately so splash renders without waiting
+  const cached=cacheRead('coaches','list');
+  if(cached&&cached.length>0){
+    S.coaches=cached;
+    S.nextId=Math.max(...cached.map(c=>c.id))+1;
+  }
   try{
     let rows=[];
     try{
-      rows = await withTimeout(sb.select('coaches','select=id,name,color,role,active&order=id.asc'));
-    }catch(err){
-      // Retry without active column in case it doesn't exist yet
-      rows = await withTimeout(sb.select('coaches','select=id,name,color,role&order=id.asc'));
+      rows=await withTimeout(sb.select('coaches','select=id,name,color,role,active&order=id.asc'));
+    }catch{
+      rows=await withTimeout(sb.select('coaches','select=id,name,color,role&order=id.asc'));
     }
-    if(rows && rows.length > 0){
-      S.coaches = rows.map(c=>({...c, active:c.active !== false}));
-      S.nextId = Math.max(...rows.map(c=>c.id)) + 1;
-    } else {
-      const seeded = DEFAULT_COACHES.map(c=>({...c,active:true}));
-      try{ await sb.upsert('coaches', seeded); } catch(e){ try{ await sb.upsert('coaches', DEFAULT_COACHES); }catch(_){ } }
-      S.coaches = JSON.parse(JSON.stringify(seeded));
-      S.nextId = 13;
+    if(rows&&rows.length>0){
+      S.coaches=rows.map(c=>({...c,active:c.active!==false}));
+      S.nextId=Math.max(...rows.map(c=>c.id))+1;
+      cacheWrite('coaches','list',S.coaches); // persist for next visit
+    }else if(!cached){
+      const seeded=DEFAULT_COACHES.map(c=>({...c,active:true}));
+      try{await sb.upsert('coaches',seeded);}catch{try{await sb.upsert('coaches',DEFAULT_COACHES);}catch{}}
+      S.coaches=seeded.map(c=>({...c}));
+      S.nextId=13;
+      cacheWrite('coaches','list',S.coaches);
     }
   }catch(e){
-    console.warn('Coaches load failed or timed out:', e.message);
-    S.coaches = JSON.parse(JSON.stringify(DEFAULT_COACHES)).map(c=>({...c,active:true}));
+    console.warn('Coaches table not ready:',e.message);
+    if(!cached) S.coaches=DEFAULT_COACHES.map(c=>({...c,active:true}));
   }
 }
 
 async function saveCoachToDB(coach){
   try{
     try{
-      await sb.upsert('coaches',[{id:coach.id,name:coach.name,color:coach.color,role:coach.role,active:coach.active !== false}]);
-    }catch(err){
+      await sb.upsert('coaches',[{id:coach.id,name:coach.name,color:coach.color,role:coach.role,active:coach.active!==false}]);
+    }catch{
       await sb.upsert('coaches',[{id:coach.id,name:coach.name,color:coach.color,role:coach.role}]);
     }
+    cacheWrite('coaches','list',S.coaches); // keep cache fresh
   }catch(e){
-    console.warn('Could not save coach to DB:', e.message);
-    showToast('Coach saved locally only — coaches table not set up','err');
+    console.warn('Could not save coach:',e.message);
+    showToast('Saved locally only — coaches table not set up','err');
   }
 }
 
-async function toggleCoachActiveInDB(coach){
-  try{
-    await sb.upsert('coaches',[{id:coach.id,name:coach.name,color:coach.color,role:coach.role,active:coach.active !== false}]);
-  }catch(e){
-    console.warn('Could not save coach active state:', e.message);
-    showToast('Status changed locally only — add active column in Supabase to persist','err');
-  }
-}
-
+// PERF: all 4 fetches fire in parallel via Promise.allSettled.
+// Notes and coverage are optional — failures are swallowed gracefully.
+// After a successful load the week is persisted to localStorage cache.
 async function loadWeekFromDB(){
   const key=wKey();
   setSyncing('syncing','Loading…');
-  showLoader('Loading schedule…');
   try{
-    const sr=await sb.select('schedule',`week=eq.${key}&select=day_index,time_index,coach_name`);
-    if(!S.schedule[key])S.schedule[key]={};
-    sr.forEach(r=>{if(!S.schedule[key][r.day_index])S.schedule[key][r.day_index]={};S.schedule[key][r.day_index][r.time_index]=r.coach_name||null;});
     const cn=S.isHC?null:byId(S.curCoachId)?.name;
-    let ap=`week=eq.${key}&select=coach_name,day_index,time_index,available`;
-    if(cn)ap+=`&coach_name=eq.${encodeURIComponent(cn)}`;
-    const ar=await sb.select('availability',ap);
-    if(!S.availability[key])S.availability[key]={};
-    ar.forEach(r=>{if(!S.availability[key][r.coach_name])S.availability[key][r.coach_name]={};S.availability[key][r.coach_name][`${r.day_index}_${r.time_index}`]=r.available;});
-    // Load notes for this week (graceful — table may not exist yet)
-    try{
-      const noteRows=await sb.select('notes',`week=eq.${key}&select=coach_name,note,created_at`);
-      if(!S.notes)S.notes={};
-      S.notes[key]=noteRows;
-    }catch(e){
-      if(!S.notes)S.notes={};
-      S.notes[key]=[];
-      console.warn('Notes table not set up yet — run SQL in Supabase to enable notes.');
+    let availParam=`week=eq.${key}&select=coach_name,day_index,time_index,available`;
+    if(cn) availParam+=`&coach_name=eq.${encodeURIComponent(cn)}`;
+
+    // Fire all 4 requests simultaneously
+    const [sr,ar,noteRes,covRes]=await Promise.allSettled([
+      sb.select('schedule',`week=eq.${key}&select=day_index,time_index,coach_name`),
+      sb.select('availability',availParam),
+      sb.select('notes',`week=eq.${key}&select=coach_name,note,created_at`),
+      sb.select('coverage_requests',`week=eq.${key}&select=week,day_index,time_index,requested_by,volunteer_name,status,created_at`),
+    ]);
+
+    if(sr.status==='fulfilled'){
+      if(!S.schedule[key])S.schedule[key]={};
+      sr.value.forEach(r=>{
+        if(!S.schedule[key][r.day_index])S.schedule[key][r.day_index]={};
+        S.schedule[key][r.day_index][r.time_index]=r.coach_name||null;
+      });
+    }else{
+      throw new Error(sr.reason?.message||'Schedule fetch failed');
     }
-    try{
-      const coverageRows=await sb.select('coverage_requests',`week=eq.${key}&select=week,day_index,time_index,requested_by,volunteer_name,status,created_at`);
-      if(!S.coverage)S.coverage={};
-      S.coverage[key]=coverageRows;
-    }catch(e){
-      if(!S.coverage)S.coverage={};
-      S.coverage[key]=S.coverage[key]||[];
-      console.warn('Coverage table not set up yet — run SQL in Supabase to enable coverage requests.');
+
+    if(ar.status==='fulfilled'){
+      if(!S.availability[key])S.availability[key]={};
+      ar.value.forEach(r=>{
+        if(!S.availability[key][r.coach_name])S.availability[key][r.coach_name]={};
+        S.availability[key][r.coach_name][`${r.day_index}_${r.time_index}`]=r.available;
+      });
     }
+
+    if(!S.notes)S.notes={};
+    S.notes[key]=noteRes.status==='fulfilled'?noteRes.value:[];
+    if(noteRes.status==='rejected') console.warn('Notes table not set up yet.');
+
+    if(!S.coverage)S.coverage={};
+    S.coverage[key]=covRes.status==='fulfilled'?covRes.value:(S.coverage[key]||[]);
+    if(covRes.status==='rejected') console.warn('Coverage table not set up yet.');
+
+    // Persist fresh data to localStorage for next visit
+    persistWeekToCache(key);
     setSyncing('ok','Synced');
-  }catch(err){console.error(err);setSyncing('err','Error');showToast('Load error: '+err.message,'err');}
-  hideLoader();
+  }catch(err){
+    console.error(err);
+    setSyncing('err','Error');
+    showToast('Load error: '+err.message,'err');
+  }
 }
 
 async function saveScheduleSlot(dIdx,tIdx,coachName){
@@ -639,7 +879,7 @@ async function saveScheduleSlot(dIdx,tIdx,coachName){
   S.schedule[key][dIdx][tIdx]=coachName||null;
   setSyncing('syncing','Saving…');
   try{
-    if(coachName)await sb.upsert('schedule',[{week:key,day_index:dIdx,time_index:tIdx,coach_name:coachName}]);
+    if(coachName) await sb.upsert('schedule',[{week:key,day_index:dIdx,time_index:tIdx,coach_name:coachName}]);
     else await sb.del('schedule',`week=eq.${key}&day_index=eq.${dIdx}&time_index=eq.${tIdx}`);
     setSyncing('ok','Saved');
   }catch(err){console.error(err);setSyncing('err','Error');showToast('Save error: '+err.message,'err');}
@@ -652,7 +892,9 @@ async function saveMyAvail(){
   setSyncing('syncing','Saving…');showLoader('Saving availability…');
   try{
     const rows=[];
-    CLASS_TIMES.forEach((_,t)=>DAYS.forEach((_,d)=>{if(!isBk(d,t))rows.push({week:key,coach_name:coach.name,day_index:d,time_index:t,available:isAvail(coach.name,d,t)});}));
+    CLASS_TIMES.forEach((_,t)=>DAYS.forEach((_,d)=>{
+      if(!isBk(d,t)) rows.push({week:key,coach_name:coach.name,day_index:d,time_index:t,available:isAvail(coach.name,d,t)});
+    }));
     await sb.del('availability',`week=eq.${key}&coach_name=eq.${encodeURIComponent(coach.name)}`);
     await sb.upsert('availability',rows);
     setSyncing('ok','Saved');showToast('Availability saved ✓','ok');
@@ -660,258 +902,437 @@ async function saveMyAvail(){
   g('saveAvailBtn').disabled=false;hideLoader();
 }
 
-// ─── LOCAL DATA ──────────────────────────────────────
+// PERF: loadMonthlyClassCounts derives month from the viewed week (not today),
+// so the Ops tab always shows the correct month as you navigate.
+async function loadMonthlyClassCounts(){
+  const mon=getMon(S.weekOffset);
+  const y=mon.getFullYear(),m=mon.getMonth();
+  const monthStart=new Date(y,m,1).toISOString().slice(0,10);
+  const monthEnd=new Date(y,m+1,0).toISOString().slice(0,10);
+  try{
+    const rows=await sb.select('schedule',`week=gte.${monthStart}&week=lte.${monthEnd}&select=coach_name`);
+    const counts={};
+    rows.forEach(r=>{if(r.coach_name) counts[r.coach_name]=(counts[r.coach_name]||0)+1;});
+    S.monthlyClassCounts=counts;
+  }catch(e){
+    console.warn('Monthly counts failed:',e.message);
+    S.monthlyClassCounts={};
+  }
+}
+
+// ─── LOCAL DATA HELPERS ───────────────────────────────
 function getSlot(d,t){return S.schedule[wKey()]?.[d]?.[t]??null;}
 function byId(id){return S.coaches.find(c=>c.id===id);}
 function byName(n){return S.coaches.find(c=>c.name===n);}
-function isCoachActive(coach){return coach && coach.active !== false;}
-function activeCoaches(){return S.coaches.filter(isCoachActive);}
-function getCoverageRequests(key=wKey()){if(!S.coverage[key])S.coverage[key]=[];return S.coverage[key];}
-function getCoverageRequest(d,t,key=wKey()){return getCoverageRequests(key).find(r=>r.day_index===d&&r.time_index===t&&r.status!=='approved')||null;}
-function getAnyCoverageRecord(d,t,key=wKey()){return getCoverageRequests(key).find(r=>r.day_index===d&&r.time_index===t)||null;}
-function coverageStatusLabel(req){if(!req)return ''; return req.volunteer_name ? 'Volunteer ready' : 'Waiting for cover';}
+function activeCoaches(){return S.coaches.filter(c=>c.active!==false);}
+
+function getCoverageRequests(key=wKey()){
+  if(!S.coverage[key])S.coverage[key]=[];
+  return S.coverage[key];
+}
+function getAnyCoverageRecord(d,t,key=wKey()){
+  return getCoverageRequests(key).find(r=>r.day_index===d&&r.time_index===t)||null;
+}
+function coverageStatusLabel(req){
+  if(!req)return '';
+  return req.volunteer_name?'Volunteer ready':'Waiting for cover';
+}
+
 async function saveCoverageRow(row){
   const key=row.week||wKey();
   row.week=key;
   setSyncing('syncing','Saving…');
   try{
     await sb.upsert('coverage_requests',[row]);
-    const list=getCoverageRequests(key);
-    const idx=list.findIndex(r=>r.day_index===row.day_index&&r.time_index===row.time_index);
-    if(idx>=0)list[idx]={...list[idx],...row}; else list.push({...row});
-    setSyncing('ok','Saved');
-    return true;
   }catch(err){
-    console.warn('Coverage save issue:', err.message);
-    const list=getCoverageRequests(key);
-    const idx=list.findIndex(r=>r.day_index===row.day_index&&r.time_index===row.time_index);
-    if(idx>=0)list[idx]={...list[idx],...row}; else list.push({...row});
-    setSyncing('ok','Saved');
+    console.warn('Coverage save issue:',err.message);
     showToast('Coverage saved locally only — add coverage_requests table to persist','err');
-    return false;
   }
-}
-async function deleteCoverageRow(d,t,key=wKey()){
-  setSyncing('syncing','Saving…');
-  try{
-    await sb.del('coverage_requests',`week=eq.${key}&day_index=eq.${d}&time_index=eq.${t}`);
-  }catch(err){
-    console.warn('Coverage delete issue:', err.message);
-  }
-  if(S.coverage[key])S.coverage[key]=S.coverage[key].filter(r=>!(r.day_index===d&&r.time_index===t));
+  // Always update local cache regardless of DB success
+  const list=getCoverageRequests(key);
+  const idx=list.findIndex(r=>r.day_index===row.day_index&&r.time_index===row.time_index);
+  if(idx>=0) list[idx]={...list[idx],...row}; else list.push({...row});
   setSyncing('ok','Saved');
 }
-function coachClassCount(name,key=wKey()){let count=0;CLASS_TIMES.forEach((_,t)=>DAYS.forEach((_,d)=>{if(!isBk(d,t)&&S.schedule[key]?.[d]?.[t]===name)count++;}));return count;}
-function getLoadStatus(count,avg){if(count>avg+1)return 'over'; if(count<avg-1)return 'under'; return 'even';}
+
+async function deleteCoverageRow(d,t,key=wKey()){
+  setSyncing('syncing','Saving…');
+  try{await sb.del('coverage_requests',`week=eq.${key}&day_index=eq.${d}&time_index=eq.${t}`);}
+  catch(err){console.warn('Coverage delete issue:',err.message);}
+  if(S.coverage[key]) S.coverage[key]=S.coverage[key].filter(r=>!(r.day_index===d&&r.time_index===t));
+  setSyncing('ok','Saved');
+}
+
+// PERF: coachClassCount now accepts a pre-built schedule week object to avoid
+// repeated wKey() calls and object lookups in tight loops.
+function coachClassCount(name,weekData){
+  if(!weekData) weekData=S.schedule[wKey()]||{};
+  let count=0;
+  for(let t=0;t<CLASS_TIMES.length;t++){
+    for(let d=0;d<DAYS.length;d++){
+      if(!isBk(d,t)&&weekData[d]?.[t]===name) count++;
+    }
+  }
+  return count;
+}
+
 function ensureAvail(name){
   const k=wKey();
   if(!S.availability[k])S.availability[k]={};
-  if(!S.availability[k][name]){S.availability[k][name]={};CLASS_TIMES.forEach((_,t)=>DAYS.forEach((_,d)=>{if(!isBk(d,t))S.availability[k][name][`${d}_${t}`]=true;}));}
+  if(!S.availability[k][name]){
+    S.availability[k][name]={};
+    CLASS_TIMES.forEach((_,t)=>DAYS.forEach((_,d)=>{
+      if(!isBk(d,t)) S.availability[k][name][`${d}_${t}`]=true;
+    }));
+  }
   return S.availability[k][name];
 }
 function isAvail(name,d,t){return ensureAvail(name)[`${d}_${t}`]!==false;}
 function toggleSlot(name,d,t){const av=ensureAvail(name);av[`${d}_${t}`]=!av[`${d}_${t}`];}
-function isDayOff(name,dIdx){return CLASS_TIMES.map((_,t)=>t).filter(t=>!isBk(dIdx,t)).every(t=>ensureAvail(name)[`${dIdx}_${t}`]===false);}
+function isDayOff(name,dIdx){
+  return CLASS_TIMES.map((_,t)=>t).filter(t=>!isBk(dIdx,t)).every(t=>ensureAvail(name)[`${dIdx}_${t}`]===false);
+}
 function toggleDayOff(name,dIdx){
   const av=ensureAvail(name);
   const slots=CLASS_TIMES.map((_,t)=>t).filter(t=>!isBk(dIdx,t));
   const allOff=slots.every(t=>av[`${dIdx}_${t}`]===false);
-  slots.forEach(t=>{av[`${dIdx}_${t}`]=allOff;});renderCoachAvail();
+  slots.forEach(t=>{av[`${dIdx}_${t}`]=allOff;});
+  renderCoachAvail();
+}
+
+// ─── SCHEDULE STATS HELPER ───────────────────────────
+// PERF: computeScheduleStats() runs once per renderSchedule call and returns
+// everything needed by the stats bar, health list, ops panel, and snapshot —
+// instead of re-iterating the schedule multiple times in separate places.
+function computeScheduleStats(){
+  const key=wKey();
+  const weekData=S.schedule[key]||{};
+  const active=activeCoaches();
+  let filled=0,total=0;
+  const cnt={};         // coach name → class count
+  const openSlots=[];
+  const problemSlots=[];
+
+  for(let t=0;t<CLASS_TIMES.length;t++){
+    for(let d=0;d<DAYS.length;d++){
+      if(isBk(d,t)) continue;
+      total++;
+      const n=weekData[d]?.[t];
+      if(n){
+        filled++;
+        cnt[n]=(cnt[n]||0)+1;
+      }else{
+        openSlots.push({d,t});
+        const avCount=active.filter(c=>isAvail(c.name,d,t)).length;
+        if(avCount===0) problemSlots.push({d,t,label:'No one available'});
+        else if(avCount===1) problemSlots.push({d,t,label:'Only 1 coach free'});
+      }
+    }
+  }
+
+  const openCoverage=getCoverageRequests().filter(r=>r.status!=='approved');
+  const readyCoverage=openCoverage.filter(r=>r.volunteer_name);
+  const topEntry=Object.entries(cnt).sort((a,b)=>b[1]-a[1])[0];
+
+  return{filled,total,cnt,openSlots,problemSlots,openCoverage,readyCoverage,topEntry,weekData};
 }
 
 // ─── SPLASH ──────────────────────────────────────────
 function buildSplash(){
-  g('splashCoaches').innerHTML=activeCoaches().map(c=>`<button class="coach-pick-btn" onclick="enterAs(${c.id},false)"><span class="coach-pick-dot" style="background:${c.color}"></span>${c.name}</button>`).join('');
+  g('splashCoaches').innerHTML=activeCoaches().map(c=>
+    `<button class="coach-pick-btn" onclick="enterAs(${c.id},false)"><span class="coach-pick-dot" style="background:${c.color}"></span>${c.name}</button>`
+  ).join('');
 }
 
 async function enterAs(coachId,isHC){
-  S.isHC=isHC;S.curCoachId=coachId;
-  g('splash').style.display='none';g('app').style.display='block';
+  S.isHC=isHC; S.curCoachId=coachId; S.weekOffset=0;
+  clearMonCache(); // reset date memo for fresh week
+  g('splash').style.display='none'; g('app').style.display='block';
   if(isHC){
     g('userDot').style.background='#1a7a4a';
     g('userName').textContent='Head Coach';
-    g('copySchedBtn').style.display='inline-flex'; // HC only
-  } else {
+    g('copySchedBtn').style.display='inline-flex';
+  }else{
     const c=byId(coachId);
     g('userDot').style.background=c.color;
     g('userName').textContent=c.name;
-    g('copySchedBtn').style.display='none'; // coaches cannot copy schedule
+    g('copySchedBtn').style.display='none';
   }
-  activeTab='schedule';buildTabs();updateWeekLbl();
+  activeTab='schedule'; buildTabs(); updateWeekLbl();
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   g('view-schedule').classList.add('active');
-  // Seed historical schedule data on first HC login
-  if(isHC) await seedScheduleIfEmpty();
-  await loadWeekFromDB();renderAll();
+  showLoader('Loading…');
+  try{
+    if(isHC) await seedScheduleIfEmpty();
+
+    // STALE-WHILE-REVALIDATE: restore cache instantly, render, then fetch fresh
+    const key=wKey();
+    const hadCache=restoreWeekFromCache(key);
+    if(hadCache){
+      // Render immediately with cached data — user sees content in <100ms
+      hideLoader();
+      renderAll();
+      setSyncing('syncing','Refreshing…');
+      // Fetch fresh data silently in background
+      await Promise.all([
+        loadMonthlyClassCounts(),
+        loadPtSessions(),
+        loadWeekFromDB(),
+      ]);
+      renderAll(); // re-render with fresh data
+    }else{
+      // No cache — show spinner and wait for network
+      await Promise.all([
+        loadMonthlyClassCounts(),
+        loadPtSessions(),
+        loadWeekFromDB(),
+      ]);
+      hideLoader();
+      renderAll();
+    }
+  }catch(e){
+    console.error('Login load error:',e);
+    setSyncing('err','Error');
+    showToast('Some data failed to load — check connection','err');
+    hideLoader();
+    renderAll();
+  }
 }
 
-function goSplash(){g('splash').style.display='flex';g('app').style.display='none';buildSplash();}
+function goSplash(){
+  g('splash').style.display='flex';
+  g('app').style.display='none';
+  buildSplash();
+}
 
 // ─── TABS ────────────────────────────────────────────
-const COACH_TABS=[{id:'schedule',label:'Schedule',icon:'📅'},{id:'availability',label:'Availability',icon:'✋'}];
-const HC_TABS=[{id:'schedule',label:'Schedule',icon:'📅'},{id:'ops',label:'Ops',icon:'📌'},{id:'availability',label:'Overview',icon:'👥'},{id:'coaches',label:'Coaches',icon:'⚡'}];
+const COACH_TABS=[
+  {id:'schedule',label:'Schedule',icon:'📅'},
+  {id:'availability',label:'Availability',icon:'✋'},
+  {id:'pt',label:'PT Hours',icon:'💪'},
+];
+const HC_TABS=[
+  {id:'schedule',label:'Schedule',icon:'📅'},
+  {id:'ops',label:'Ops',icon:'📌'},
+  {id:'availability',label:'Overview',icon:'👥'},
+  {id:'coaches',label:'Coaches',icon:'⚡'},
+  {id:'analytics',label:'Stats',icon:'📊'},
+  {id:'pt-hc',label:'PT',icon:'💪'},
+];
 let activeTab='schedule';
 
 function buildTabs(){
   const tabs=S.isHC?HC_TABS:COACH_TABS;
-  g('bottomTabs').innerHTML=tabs.map(t=>`<button class="btab ${t.id===activeTab?'active':''}" onclick="switchTab('${t.id}',this)"><span class="btab-icon">${t.icon}</span>${t.label}</button>`).join('');
+  g('bottomTabs').innerHTML=tabs.map(t=>
+    `<button class="btab ${t.id===activeTab?'active':''}" onclick="switchTab('${t.id}',this)"><span class="btab-icon">${t.icon}</span>${t.label}</button>`
+  ).join('');
 }
 
+// PERF: switchTab shows the new view immediately (instant feedback on mobile),
+// then loads data in the background and re-renders only that tab.
 async function switchTab(id,btn){
   activeTab=id;
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   g('view-'+id).classList.add('active');
   document.querySelectorAll('.btab').forEach(t=>t.classList.remove('active'));
-  btn.classList.add('active');renderAll();
+  btn.classList.add('active');
+  // Always hide global loader when switching tabs — it should never block tab nav
+  hideLoader();
+  renderActiveTab();
+  try{
+    if(id==='coaches'||id==='ops') await loadMonthlyClassCounts();
+    if(id==='pt'||id==='pt-hc') await loadPtSessions();
+    if(id==='analytics') await loadAnalyticsData();
+  }catch(e){console.error(e);}
+  renderActiveTab();
 }
+
+// ─── RENDER: ACTIVE TAB ONLY ──────────────────────────
+// PERF: renderActiveTab() replaces the old renderAll() which re-rendered
+// every section on every action. Now each action only renders what changed.
+function renderActiveTab(){
+  switch(activeTab){
+    case 'schedule':   renderSchedule(); break;
+    case 'ops':        renderOps(); break;
+    case 'availability': renderAvailability(); break;
+    case 'coaches':    renderCoaches(); break;
+    case 'analytics':  renderAnalytics(); break;
+    case 'pt':         renderPtView(); break;
+    case 'pt-hc':      renderPtSummary(); break;
+  }
+}
+
+// renderAll is kept for cases where we need to refresh everything
+// (e.g. after a week change where any tab might be active)
+function renderAll(){renderActiveTab();}
 
 // ─── RENDER: SCHEDULE ────────────────────────────────
 function renderSchedule(){
-  const dates=wDates(),today=new Date();today.setHours(0,0,0,0);
-  const active=activeCoaches();
+  const dates=wDates();
+  const today=new Date(); today.setHours(0,0,0,0);
+  const stats=computeScheduleStats(); // single pass over all schedule data
+  const me=S.isHC?null:byId(S.curCoachId);
+
+  // Week chip
   g('coverageWeekChip').textContent='Week of '+fmtF(dates[0]);
-  g('schedHead').innerHTML='<tr><th>TIME</th>'+dates.map((d,i)=>`<th style="${d.getTime()===today.getTime()?'color:var(--accent)':''}">${DAY_SHORT[i]}<br><span style="font-size:8px;font-weight:400">${fmt(d)}</span></th>`).join('')+'</tr>';
-  g('schedBody').innerHTML=CLASS_TIMES.map((_,tIdx)=>`<tr><td>${CLASS_TIMES[tIdx]}</td>`+DAYS.map((_,dIdx)=>{
-    if(isBk(dIdx,tIdx))return'<td class="blackout-cell"></td>';
-    const cName=getSlot(dIdx,tIdx),c=cName?byName(cName):null;
-    const coverage=getAnyCoverageRecord(dIdx,tIdx);
-    if(c){
-      const coverageMark=coverage?`<span class="chip-cover-badge">cover</span>`:'';
-      if(S.isHC){
-        return`<td><span class="chip ${coverage?'has-cover':''}" style="border-color:${c.color}40;background:${c.color}12" onclick="openCellModal(${dIdx},${tIdx})"><span class="chip-dot" style="background:${c.color}"></span>${c.name}${coverageMark}</span></td>`;
+
+  // Desktop table header
+  g('schedHead').innerHTML='<tr><th>TIME</th>'+
+    dates.map((d,i)=>`<th style="${d.getTime()===today.getTime()?'color:var(--accent)':''}">${DAY_SHORT[i]}<br><span style="font-size:8px;font-weight:400">${fmt(d)}</span></th>`).join('')+
+    '</tr>';
+
+  // Desktop table body — build chip HTML per cell
+  g('schedBody').innerHTML=CLASS_TIMES.map((_,tIdx)=>
+    '<tr><td>'+CLASS_TIMES[tIdx]+'</td>'+
+    DAYS.map((_,dIdx)=>{
+      if(isBk(dIdx,tIdx)) return '<td class="blackout-cell"></td>';
+      const cName=stats.weekData[dIdx]?.[tIdx]||null;
+      const c=cName?byName(cName):null;
+      const cov=getAnyCoverageRecord(dIdx,tIdx);
+      const badge=cov?'<span class="chip-cover-badge">cover</span>':'';
+      if(c){
+        const cls=`chip${cov?' has-cover':''}`;
+        const style=`border-color:${c.color}40;background:${c.color}12`;
+        if(S.isHC) return`<td><span class="${cls}" style="${style}" onclick="openCellModal(${dIdx},${tIdx})"><span class="chip-dot" style="background:${c.color}"></span>${c.name}${badge}</span></td>`;
+        if(me&&c.name===me.name) return`<td><span class="${cls}" style="${style}" onclick="openCoverageModal(${dIdx},${tIdx})"><span class="chip-dot" style="background:${c.color}"></span>${c.name}${badge}</span></td>`;
+        return`<td><span class="${cls}" style="${style}"><span class="chip-dot" style="background:${c.color}"></span>${c.name}${badge}</span></td>`;
       }
-      const me=byId(S.curCoachId);
-      const mine=me&&c.name===me.name;
-      if(mine){
-        return`<td><span class="chip ${coverage?'has-cover':''}" style="border-color:${c.color}40;background:${c.color}12" onclick="openCoverageModal(${dIdx},${tIdx})"><span class="chip-dot" style="background:${c.color}"></span>${c.name}${coverageMark}</span></td>`;
-      }
-      return`<td><span class="chip ${coverage?'has-cover':''}" style="border-color:${c.color}40;background:${c.color}12"><span class="chip-dot" style="background:${c.color}"></span>${c.name}${coverageMark}</span></td>`;
-    }
-    if(S.isHC)return`<td><button class="add-slot-btn" onclick="openCellModal(${dIdx},${tIdx})" title="Choose coach">+</button></td>`;
-    return'<td><span style="color:var(--text3);font-size:13px">—</span></td>';
-  }).join('')+'</tr>').join('');
+      if(S.isHC) return`<td><button class="add-slot-btn" onclick="openCellModal(${dIdx},${tIdx})" title="Choose coach">+</button></td>`;
+      return'<td><span style="color:var(--text3);font-size:13px">—</span></td>';
+    }).join('')+'</tr>'
+  ).join('');
 
-  let filled=0,total=0;const cnt={};const openSlots=[];const problemSlots=[];
-  CLASS_TIMES.forEach((_,t)=>DAYS.forEach((_,d)=>{
-    if(isBk(d,t))return;
-    total++;
-    const n=getSlot(d,t);
-    if(n){filled++;cnt[n]=(cnt[n]||0)+1;}
-    else{
-      openSlots.push({d,t});
-      const available=active.filter(c=>isAvail(c.name,d,t));
-      if(available.length===0)problemSlots.push({d,t,label:'No one available'});
-      else if(available.length===1)problemSlots.push({d,t,label:'Only 1 coach free'});
-    }
-  }));
-  const top=Object.entries(cnt).sort((a,b)=>b[1]-a[1])[0];
-  const openCoverage=getCoverageRequests().filter(r=>r.status!=='approved');
-  const readyCoverage=openCoverage.filter(r=>r.volunteer_name);
-  if(g('summaryBar')) g('summaryBar').innerHTML=`
-    <div class="sum-stat"><div class="sum-num">${filled}</div><div class="sum-lbl">Filled</div></div>
-    <div class="sum-stat"><div class="sum-num" style="color:var(--red)">${total-filled}</div><div class="sum-lbl">Open</div></div>
-    <div class="sum-stat"><div class="sum-num">${problemSlots.length}</div><div class="sum-lbl">Hot Spots</div></div>
-    <div class="sum-stat"><div class="sum-num">${openCoverage.length}</div><div class="sum-lbl">Coverage</div></div>
-    <div class="sum-stat"><div class="sum-num" style="font-size:16px;padding-top:3px">${top?top[0]:'—'}</div><div class="sum-lbl">Most</div></div>`;
-
-  const health=problemSlots.concat(openSlots.filter(os=>!problemSlots.find(ps=>ps.d===os.d&&ps.t===os.t)).slice(0,Math.max(0,3-problemSlots.length)).map(os=>({...os,label:'Open slot'}))).slice(0,3);
-  if(g('healthList')) g('healthList').innerHTML = health.length ? health.map(item=>`<div class="health-row"><div><strong>${DAY_SHORT[item.d]} ${CLASS_TIMES[item.t]}</strong><div style="font-size:11px;color:var(--text3)">${item.label}</div></div><span class="health-badge">Needs eyes</span></div>`).join('') : '<div class="health-empty">Everything looks solid this week.</div>';
-
-  if(S.isHC && g('opsPanel')){
-    const activeCoaches=S.coaches.filter(c=>c.active!==false);
-    const noteCount=((S.notes&&S.notes[wKey()])||[]).length;
-    const coachesWithoutClasses=activeCoaches.filter(c=>!cnt[c.name]).length;
-    if(g('opsMetrics')) g('opsMetrics').innerHTML=`
-      <div class="ops-metric"><div class="ops-metric-num">${filled}/${total}</div><div class="ops-metric-lbl">Scheduled</div><div class="ops-metric-sub">${total-filled===0?'Full week covered':'Classes assigned so far'}</div></div>
-      <div class="ops-metric"><div class="ops-metric-num">${total-filled}</div><div class="ops-metric-lbl">Open Slots</div><div class="ops-metric-sub">${problemSlots.length ? problemSlots.length+' need attention' : 'All open classes this week'}</div></div>
-      <div class="ops-metric"><div class="ops-metric-num">${openCoverage.length}</div><div class="ops-metric-lbl">Coverage Requests</div><div class="ops-metric-sub">${readyCoverage.length?readyCoverage.length+' ready to approve':'Nothing waiting right now'}</div></div>
-      <div class="ops-metric"><div class="ops-metric-num">${noteCount}</div><div class="ops-metric-lbl">Coach Notes</div><div class="ops-metric-sub">${coachesWithoutClasses} active coach${coachesWithoutClasses===1?'':'es'} without classes</div></div>`;
-    g('opsTitle').textContent='Coverage Snapshot';
-    g('opsPanel').innerHTML=`
-      <div class="ops-row"><div class="ops-meta"><strong>${openCoverage.length} request${openCoverage.length===1?'':'s'} open</strong><span class="ops-sub">Coaches asking for coverage this week</span></div><span class="cover-chip ${openCoverage.length?'waiting':''}">${openCoverage.length?'Active':'Quiet'}</span></div>
-      <div class="ops-row"><div class="ops-meta"><strong>${readyCoverage.length} ready for approval</strong><span class="ops-sub">A volunteer is waiting on head coach signoff</span></div><span class="cover-chip ${readyCoverage.length?'ready':''}">${readyCoverage.length?'Needs approval':'None ready'}</span></div>
-      <div class="ops-row"><div class="ops-meta"><strong>${total-filled} open class${total-filled===1?'':'es'}</strong><span class="ops-sub">Still unassigned on the schedule</span></div><span class="cover-chip ${total-filled?'waiting':''}">${total-filled?'Open slots':'All filled'}</span></div>`;
-  } else if(g('opsMetrics')) {
-    g('opsMetrics').innerHTML='';
-  }
-
-  const callout=g('coverageCallout');
-  if(callout){
-    if(S.isHC){
-      callout.className='coverage-callout';
-      callout.innerHTML='';
-    }else{
-      const me=byId(S.curCoachId);
-      const openCoverage=getCoverageRequests().filter(r=>r.status!=='approved');
-      const myOpenCoverage=openCoverage.filter(r=>r.requested_by===me?.name).length;
-      const visibleCoverage=openCoverage.filter(r=>r.requested_by!==me?.name).sort((a,b)=>a.day_index-b.day_index||a.time_index-b.time_index);
-      if(visibleCoverage.length){
-        const preview=visibleCoverage.slice(0,2).map(r=>`<span class="coverage-mini-item"><strong>${r.requested_by}</strong> ${DAY_SHORT[r.day_index]} ${CLASS_TIMES[r.time_index]}</span>`).join('');
-        callout.className='coverage-callout show';
-        callout.innerHTML=`<span class="coverage-callout-text">Coverage needed</span><div class="coverage-callout-items">${preview}</div><span class="cover-chip waiting">${visibleCoverage.length} open</span>`;
-      }else if(myOpenCoverage){
-        callout.className='coverage-callout show';
-        callout.innerHTML=`<span class="coverage-callout-text">Your coverage requests</span><span class="cover-chip waiting">${myOpenCoverage} open</span>`;
-      }else{
-        callout.className='coverage-callout';
-        callout.innerHTML='';
-      }
-    }
-  }
-
-  const snap = g('coachSnapshot');
-  if(snap){
-    if(S.isHC){
-      snap.classList.remove('show');
-    }else{
-      const me=byId(S.curCoachId);
-      const mySlots=[];
-      DAYS.forEach((day,dIdx)=>CLASS_TIMES.forEach((time,tIdx)=>{
-        if(isBk(dIdx,tIdx))return;
-        if(getSlot(dIdx,tIdx)===me?.name){
-          const req=getAnyCoverageRecord(dIdx,tIdx);
-          mySlots.push({label:`${DAY_SHORT[dIdx]} ${time}`, coverage:!!req});
-        }
-      }));
-      g('coachSnapshotCount').textContent=`${mySlots.length} class${mySlots.length===1?'':'es'} this week`;
-      g('coachSnapshotList').innerHTML = mySlots.length
-        ? mySlots.map(item=>`<span class="coach-snap-item">${item.label}${item.coverage?'<span class="chip-cover-badge" style="margin-left:4px;">cover</span>':''}</span>`).join('')
-        : '<div class="coach-snap-empty">No classes assigned this week yet.</div>';
-      snap.classList.add('show');
-    }
-  }
-
-  const mobileHtml = DAYS.map((day,dIdx)=>{
+  // Mobile layout
+  g('mobileSchedule').innerHTML=DAYS.map((day,dIdx)=>{
     const slots=CLASS_TIMES.map((time,tIdx)=>{
       if(isBk(dIdx,tIdx)) return '';
-      const cName=getSlot(dIdx,tIdx), c=cName?byName(cName):null, coverage=getAnyCoverageRecord(dIdx,tIdx);
+      const cName=stats.weekData[dIdx]?.[tIdx]||null;
+      const c=cName?byName(cName):null;
+      const cov=getAnyCoverageRecord(dIdx,tIdx);
+      const badge=cov?'<span class="chip-cover-badge">cover</span>':'';
       let action='';
       if(c){
-        if(S.isHC){
-          action=`<span class="chip ${coverage?'has-cover':''}" style="border-color:${c.color}40;background:${c.color}12" onclick="openCellModal(${dIdx},${tIdx})"><span class="chip-dot" style="background:${c.color}"></span>${c.name}</span>${coverage?'<span class="chip-cover-badge">cover</span>':''}`;
-        }else{
-          const me=byId(S.curCoachId);
-          const mine=me&&c.name===me.name;
-          action=`<span class="chip ${coverage?'has-cover':''}" style="border-color:${c.color}40;background:${c.color}12" ${mine?`onclick="openCoverageModal(${dIdx},${tIdx})"`:''}><span class="chip-dot" style="background:${c.color}"></span>${c.name}${coverage?'<span class="chip-cover-badge">cover</span>':''}</span>`;
-        }
+        const cls=`chip${cov?' has-cover':''}`;
+        const style=`border-color:${c.color}40;background:${c.color}12`;
+        if(S.isHC) action=`<span class="${cls}" style="${style}" onclick="openCellModal(${dIdx},${tIdx})"><span class="chip-dot" style="background:${c.color}"></span>${c.name}</span>${badge}`;
+        else action=`<span class="${cls}" style="${style}"${me&&c.name===me.name?` onclick="openCoverageModal(${dIdx},${tIdx})"`:''} ><span class="chip-dot" style="background:${c.color}"></span>${c.name}${badge}</span>`;
       }else if(S.isHC){
         action=`<button class="btn ghost" style="padding:6px 10px;font-size:11px;" onclick="openCellModal(${dIdx},${tIdx})">Choose Coach</button>`;
       }else{
         action='<span style="color:var(--text3);font-size:13px">—</span>';
       }
-      return `<div class="mobile-slot"><div class="mobile-time">${time}</div><div class="mobile-actions">${action}</div></div>`;
+      return`<div class="mobile-slot"><div class="mobile-time">${time}</div><div class="mobile-actions">${action}</div></div>`;
     }).join('');
-    return `<div class="mobile-day"><div class="mobile-day-head"><span>${day}</span><span style="font-size:11px;font-family:'DM Mono',monospace;letter-spacing:0;">${fmt(dates[dIdx])}</span></div><div class="mobile-day-body">${slots}</div></div>`;
+    return`<div class="mobile-day"><div class="mobile-day-head"><span>${day}</span><span style="font-size:11px;font-family:'DM Mono',monospace;letter-spacing:0;">${fmt(dates[dIdx])}</span></div><div class="mobile-day-body">${slots}</div></div>`;
   }).join('');
-  g('mobileSchedule').innerHTML=mobileHtml;
+
+  // Coverage callout (coach view only)
+  const callout=g('coverageCallout');
+  if(callout){
+    if(S.isHC){
+      callout.className='coverage-callout'; callout.innerHTML='';
+    }else{
+      const myReqs=stats.openCoverage.filter(r=>r.requested_by===me?.name).length;
+      const others=stats.openCoverage.filter(r=>r.requested_by!==me?.name).sort((a,b)=>a.day_index-b.day_index||a.time_index-b.time_index);
+      if(others.length){
+        const preview=others.slice(0,2).map(r=>`<span class="coverage-mini-item"><strong>${r.requested_by}</strong> ${DAY_SHORT[r.day_index]} ${CLASS_TIMES[r.time_index]}</span>`).join('');
+        callout.className='coverage-callout show';
+        callout.innerHTML=`<span class="coverage-callout-text">Coverage needed</span><div class="coverage-callout-items">${preview}</div><span class="cover-chip waiting">${others.length} open</span>`;
+      }else if(myReqs){
+        callout.className='coverage-callout show';
+        callout.innerHTML=`<span class="coverage-callout-text">Your coverage requests</span><span class="cover-chip waiting">${myReqs} open</span>`;
+      }else{
+        callout.className='coverage-callout'; callout.innerHTML='';
+      }
+    }
+  }
+
+  // Coach snapshot (coach view only)
+  const snap=g('coachSnapshot');
+  if(snap){
+    if(S.isHC){
+      snap.classList.remove('show');
+    }else{
+      const mySlots=[];
+      DAYS.forEach((_,dIdx)=>CLASS_TIMES.forEach((time,tIdx)=>{
+        if(isBk(dIdx,tIdx)) return;
+        if(stats.weekData[dIdx]?.[tIdx]===me?.name){
+          mySlots.push({label:`${DAY_SHORT[dIdx]} ${time}`,coverage:!!getAnyCoverageRecord(dIdx,tIdx)});
+        }
+      }));
+      const monthName=new Date().toLocaleString('default',{month:'long'});
+      const myMonthCount=S.monthlyClassCounts?S.monthlyClassCounts[me?.name]||0:0;
+      g('coachSnapshotCount').textContent=`${mySlots.length} class${mySlots.length===1?'':'es'} this week`;
+      g('coachSnapshotMonth').textContent=`${myMonthCount} in ${monthName}`;
+      g('coachSnapshotList').innerHTML=mySlots.length
+        ?mySlots.map(item=>`<span class="coach-snap-item">${item.label}${item.coverage?'<span class="chip-cover-badge" style="margin-left:4px;">cover</span>':''}</span>`).join('')
+        :'<div class="coach-snap-empty">No classes assigned this week yet.</div>';
+      snap.classList.add('show');
+    }
+  }
+
   renderCoverageBoard();
 }
 
-// ─── RENDER: COACH AVAIL ─────────────────────────────
-function renderCoachAvail(){
-  const coach=byId(S.curCoachId);if(!coach)return;
+// ─── RENDER: OPS TAB ─────────────────────────────────
+// PERF: ops rendering is now its own function — only runs when ops tab is active.
+function renderOps(){
+  if(!S.isHC) return;
+  const stats=computeScheduleStats(); // shared helper, single pass
+  const {filled,total,cnt,problemSlots,openCoverage,readyCoverage}=stats;
   const dates=wDates();
-  const hdr=DAY_SHORT.map((d,i)=>`<th><div class="day-col-head"><span>${d}<br><span style="font-weight:400;font-size:8px">${fmt(dates[i])}</span></span><button class="day-off-btn ${isDayOff(coach.name,i)?'active':''}" onclick="toggleDayOff('${coach.name}',${i})">✕ Off</button></div></th>`).join('');
+
+  // Week chips
+  const weekChip='Week of '+fmtF(dates[0]);
+  const el=g('opsWeekChip'); if(el) el.textContent=weekChip;
+
+  // 4 metric cards
+  const activeList=activeCoaches();
+  const noteCount=((S.notes&&S.notes[wKey()])||[]).length;
+  const coachesWithoutClasses=activeList.filter(c=>!cnt[c.name]).length;
+  if(g('opsMetrics')) g('opsMetrics').innerHTML=`
+    <div class="ops-metric"><div class="ops-metric-num">${filled}/${total}</div><div class="ops-metric-lbl">Scheduled</div><div class="ops-metric-sub">${total-filled===0?'Full week covered':'Classes assigned so far'}</div></div>
+    <div class="ops-metric"><div class="ops-metric-num">${total-filled}</div><div class="ops-metric-lbl">Open Slots</div><div class="ops-metric-sub">${problemSlots.length?problemSlots.length+' need attention':'All open classes this week'}</div></div>
+    <div class="ops-metric"><div class="ops-metric-num">${openCoverage.length}</div><div class="ops-metric-lbl">Coverage Requests</div><div class="ops-metric-sub">${readyCoverage.length?readyCoverage.length+' ready to approve':'Nothing waiting right now'}</div></div>
+    <div class="ops-metric"><div class="ops-metric-num">${noteCount}</div><div class="ops-metric-lbl">Coach Notes</div><div class="ops-metric-sub">${coachesWithoutClasses} active coach${coachesWithoutClasses===1?'':'es'} without classes</div></div>`;
+
+  // Schedule health
+  const health=problemSlots
+    .concat(stats.openSlots.filter(os=>!problemSlots.find(ps=>ps.d===os.d&&ps.t===os.t)).slice(0,Math.max(0,3-problemSlots.length)).map(os=>({...os,label:'Open slot'})))
+    .slice(0,3);
+  if(g('healthList')) g('healthList').innerHTML=health.length
+    ?health.map(item=>`<div class="health-row"><div><strong>${DAY_SHORT[item.d]} ${CLASS_TIMES[item.t]}</strong><div style="font-size:11px;color:var(--text3)">${item.label}</div></div><span class="health-badge">Needs eyes</span></div>`).join('')
+    :'<div class="health-empty">Everything looks solid this week.</div>';
+
+  // Coverage snapshot panel
+  if(g('opsTitle')) g('opsTitle').textContent='Coverage Snapshot';
+  if(g('opsPanel')) g('opsPanel').innerHTML=`
+    <div class="ops-row"><div class="ops-meta"><strong>${openCoverage.length} request${openCoverage.length===1?'':'s'} open</strong><span class="ops-sub">Coaches asking for coverage this week</span></div><span class="cover-chip ${openCoverage.length?'waiting':''}">${openCoverage.length?'Active':'Quiet'}</span></div>
+    <div class="ops-row"><div class="ops-meta"><strong>${readyCoverage.length} ready for approval</strong><span class="ops-sub">A volunteer is waiting on head coach signoff</span></div><span class="cover-chip ${readyCoverage.length?'ready':''}">${readyCoverage.length?'Needs approval':'None ready'}</span></div>
+    <div class="ops-row"><div class="ops-meta"><strong>${total-filled} open class${total-filled===1?'':'es'}</strong><span class="ops-sub">Still unassigned on the schedule</span></div><span class="cover-chip ${total-filled?'waiting':''}">${total-filled?'Open slots':'All filled'}</span></div>`;
+
+  renderCoverageBoard();
+}
+
+// ─── RENDER: AVAILABILITY ────────────────────────────
+function renderAvailability(){
+  if(S.isHC){
+    g('coachAvailView').style.display='none';
+    g('hcAvailView').style.display='block';
+    renderHcAvail();
+  }else{
+    g('coachAvailView').style.display='block';
+    g('hcAvailView').style.display='none';
+    renderCoachAvail();
+  }
+}
+
+function renderCoachAvail(){
+  const coach=byId(S.curCoachId); if(!coach) return;
+  const dates=wDates();
+  const hdr=DAY_SHORT.map((d,i)=>
+    `<th><div class="day-col-head"><span>${d}<br><span style="font-weight:400;font-size:8px">${fmt(dates[i])}</span></span><button class="day-off-btn ${isDayOff(coach.name,i)?'active':''}" onclick="toggleDayOff('${coach.name}',${i})">✕ Off</button></div></th>`
+  ).join('');
   let html=`<thead><tr><th>TIME</th>${hdr}</tr></thead><tbody>`;
   CLASS_TIMES.forEach((_,tIdx)=>{
     html+=`<tr><td style="padding:0 10px 0 0;height:46px">${CLASS_TIMES[tIdx]}</td>`;
@@ -923,96 +1344,523 @@ function renderCoachAvail(){
     html+='</tr>';
   });
   g('coachAvailTbl').innerHTML=html+'</tbody>';
-  if(g('availWeekChip'))g('availWeekChip').textContent='Week of '+fmtF(wDates()[0]);
+  if(g('availWeekChip')) g('availWeekChip').textContent='Week of '+fmtF(wDates()[0]);
   loadCoachNoteInput();
 }
 
-// ─── RENDER: HC OVERVIEW ─────────────────────────────
 function renderHcAvail(){
-  const dates=wDates(),fv=g('hcFilter').value;
-  const vis=fv==='all'?S.coaches:S.coaches.filter(c=>c.id==fv);
-  g('hcFilter').innerHTML='<option value="all">All Coaches</option>'+S.coaches.map(c=>`<option value="${c.id}" ${c.id==fv?'selected':''}>${c.name}</option>`).join('');
-  let html='<thead><tr><th>TIME</th>'+DAY_SHORT.map((d,i)=>`<th>${d}<br><span style="font-weight:400;font-size:8px">${fmt(dates[i])}</span></th>`).join('')+'</tr></thead><tbody>';
+  const dates=wDates();
+  const filterEl=g('hcFilter');
+  const fv=filterEl.value;
+  // Only rebuild dropdown if needed (first render or coach list changed)
+  if(!filterEl.dataset.built){
+    filterEl.innerHTML='<option value="all">All Coaches</option>'+
+      S.coaches.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
+    filterEl.dataset.built='1';
+  }
+  if(fv) filterEl.value=fv; // restore selection after rebuild
+  const vis=fv==='all'||!fv?S.coaches:S.coaches.filter(c=>c.id==fv);
+
+  let html='<thead><tr><th>TIME</th>'+
+    DAY_SHORT.map((d,i)=>`<th>${d}<br><span style="font-weight:400;font-size:8px">${fmt(dates[i])}</span></th>`).join('')+
+    '</tr></thead><tbody>';
   CLASS_TIMES.forEach((_,tIdx)=>{
     html+=`<tr><td style="padding:0 10px 0 0;height:46px">${CLASS_TIMES[tIdx]}</td>`;
     DAYS.forEach((_,dIdx)=>{
       if(isBk(dIdx,tIdx)){html+='<td><div class="hc-slot bk"></div></td>';return;}
-      // Only show coaches who ARE available — hide unavailable ones entirely
       const availCoaches=vis.filter(c=>isAvail(c.name,dIdx,tIdx));
       const labels=availCoaches.map(c=>{
         const hex=c.color.replace('#','');
         const r=parseInt(hex.slice(0,2),16),gr=parseInt(hex.slice(2,4),16),b=parseInt(hex.slice(4,6),16);
-        return`<span class="coach-label" style="background:rgba(${r},${gr},${b},0.12);color:${c.color}" title="${c.name}: Available"><span class="cl-dot" style="background:${c.color}"></span>${c.name}</span>`;
+        return`<span class="coach-label" style="background:rgba(${r},${gr},${b},0.12);color:${c.color}"><span class="cl-dot" style="background:${c.color}"></span>${c.name}</span>`;
       }).join('');
-      const emptyMsg=availCoaches.length===0?'<span style="font-size:9px;color:var(--text3)">—</span>':'';
-      html+=`<td><div class="hc-slot">${labels||emptyMsg}</div></td>`;
+      html+=`<td><div class="hc-slot">${labels||'<span style="font-size:9px;color:var(--text3)">—</span>'}</div></td>`;
     });
     html+='</tr>';
   });
   g('hcAvailTbl').innerHTML=html+'</tbody>';
-  if(g('hcAvailWeekChip'))g('hcAvailWeekChip').textContent='Week of '+fmtF(dates[0]);
+  if(g('hcAvailWeekChip')) g('hcAvailWeekChip').textContent='Week of '+fmtF(dates[0]);
   renderHcNotes();
 }
 
 // ─── RENDER: COACHES ─────────────────────────────────
 function renderCoaches(){
+  const monthName=new Date().toLocaleString('default',{month:'short'}).toUpperCase();
+  const weekData=S.schedule[wKey()]||{};
   g('coachesGrid').innerHTML=S.coaches.map(c=>{
-    let classes=coachClassCount(c.name);
+    // PERF: pass weekData to avoid repeated wKey() lookups inside coachClassCount
+    const weekClasses=coachClassCount(c.name,weekData);
+    const monthClasses=S.monthlyClassCounts?S.monthlyClassCounts[c.name]||0:0;
     const ac=Object.values(ensureAvail(c.name)).filter(Boolean).length;
-    const inactive = c.active===false;
-    return`<div class="coach-card" style="${inactive?'opacity:.72;':''}"><div class="coach-card-bar" style="background:${c.color}"></div><div class="coach-card-name" style="color:${c.color}">${c.name}</div>${inactive?'<div class="inactive-pill">Inactive</div>':''}<div class="coach-card-role">${c.role||'Coach'}</div><div class="coach-mini-stats"><div class="cm-stat"><div class="cm-num" style="color:${c.color}">${classes}</div><div class="cm-lbl">Classes</div></div><div class="cm-stat"><div class="cm-num">${ac}</div><div class="cm-lbl">Avail</div></div></div><div class="card-actions" style="margin-top:12px"><button class="mini-btn" onclick="openEditCoach(${c.id})">Edit</button><button class="mini-btn ${inactive?'':'del'}" onclick="toggleCoachActive(${c.id})">${inactive?'Reactivate':'Deactivate'}</button></div></div>`;
+    const inactive=c.active===false;
+    const mColor=monthClasses===0?'var(--text3)':(monthClasses>=10?c.color:'var(--text2)');
+    return`<div class="coach-card" style="${inactive?'opacity:.72;':''}">
+      <div class="coach-card-bar" style="background:${c.color}"></div>
+      <div class="coach-card-name" style="color:${c.color}">${c.name}</div>
+      ${inactive?'<div class="inactive-pill">Inactive</div>':''}
+      <div class="coach-card-role">${c.role||'Coach'}</div>
+      <div class="coach-mini-stats">
+        <div class="cm-stat"><div class="cm-num" style="color:${c.color}">${weekClasses}</div><div class="cm-lbl">This Week</div></div>
+        <div class="cm-stat"><div class="cm-num" style="color:${mColor}">${monthClasses}</div><div class="cm-lbl">${monthName} Total</div></div>
+        <div class="cm-stat"><div class="cm-num">${ac}</div><div class="cm-lbl">Avail Slots</div></div>
+      </div>
+      <div class="card-actions" style="margin-top:12px">
+        <button class="mini-btn" onclick="openEditCoach(${c.id})">Edit</button>
+        <button class="mini-btn ${inactive?'':'del'}" onclick="toggleCoachActive(${c.id})">${inactive?'Reactivate':'Deactivate'}</button>
+      </div>
+    </div>`;
   }).join('');
 }
 
-function renderAll(){
-  renderSchedule();
-  if(g('view-ops') && g('view-ops').classList.contains('active') && S.isHC){
-    renderCoverageBoard();
+// ─── RENDER: COVERAGE BOARD ──────────────────────────
+function renderCoverageBoard(){
+  const list=g('coverageBoardList'); if(!list) return;
+  const items=getCoverageRequests().filter(r=>r.status!=='approved').sort((a,b)=>a.day_index-b.day_index||a.time_index-b.time_index);
+
+  if(S.isHC){
+    g('coverageBoardTitle').textContent='Coverage Board';
+    if(items.length===0){list.innerHTML='<div class="health-empty">No coverage requests this week.</div>';return;}
+    list.innerHTML=items.map(req=>
+      `<div class="coverage-item"><div class="coverage-main"><div class="coverage-title">${DAY_SHORT[req.day_index]} ${CLASS_TIMES[req.time_index]}</div><div class="coverage-sub">${req.requested_by} needs coverage${req.volunteer_name?` • ${req.volunteer_name} volunteered`:''}</div></div><div class="coverage-actions">${req.volunteer_name?`<button class="btn" style="padding:6px 10px;font-size:11px;" onclick="approveCoverage(${req.day_index},${req.time_index})">Approve</button>`:'<span class="cover-chip waiting">Waiting</span>'}</div></div>`
+    ).join('');
+    return;
   }
-  if(g('view-availability').classList.contains('active')){
-    if(S.isHC){g('coachAvailView').style.display='none';g('hcAvailView').style.display='block';renderHcAvail();}
-    else{g('coachAvailView').style.display='block';g('hcAvailView').style.display='none';renderCoachAvail();}
+
+  const me=byId(S.curCoachId);
+  g('coverageBoardTitle').textContent='Coverage Board';
+  const visible=items.filter(req=>req.requested_by!==me?.name);
+  if(visible.length===0){list.innerHTML='<div class="health-empty">No open coverage requests from other coaches right now.</div>';return;}
+  list.innerHTML=visible.map(req=>{
+    const canCover=isAvail(me.name,req.day_index,req.time_index);
+    const already=req.volunteer_name===me.name;
+    const someoneElse=req.volunteer_name&&req.volunteer_name!==me.name;
+    let action='';
+    if(already) action=`<button class="btn ghost" style="padding:6px 10px;font-size:11px;" onclick="removeVolunteer(${req.day_index},${req.time_index})">Undo Cover</button>`;
+    else if(someoneElse) action=`<span class="cover-chip ready">${req.volunteer_name} offered</span>`;
+    else if(canCover) action=`<button class="btn" style="padding:6px 10px;font-size:11px;" onclick="volunteerForCoverage(${req.day_index},${req.time_index})">I Can Cover</button>`;
+    else action='<span class="cover-chip waiting">Unavailable</span>';
+    return`<div class="coverage-item"><div class="coverage-main"><div class="coverage-title">${DAY_SHORT[req.day_index]} ${CLASS_TIMES[req.time_index]}</div><div class="coverage-sub">${req.requested_by} needs coverage</div></div><div class="coverage-actions">${action}</div></div>`;
+  }).join('');
+}
+
+// ─── ANALYTICS ───────────────────────────────────────
+// Fully independent of the weekly nav. Has its own period state and data cache.
+
+const AN={
+  period:null,      // selected period key e.g. '2026-03', 'Q1-2026', 'YTD-2026'
+  data:{},          // cache: periodKey → array of {coach_name, count}
+  loading:false,
+};
+
+// Build the list of selectable periods from Jan of this year through current month
+function analyticsGetPeriods(){
+  const now=new Date();
+  const year=now.getFullYear();
+  const curMonth=now.getMonth(); // 0-indexed
+  const months=[];
+  const MONTH_SHORT=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  for(let m=0;m<=curMonth;m++){
+    months.push({key:`${year}-${String(m+1).padStart(2,'0')}`,label:MONTH_SHORT[m],type:'month',year,month:m});
   }
-  if(g('view-coaches').classList.contains('active'))renderCoaches();
+  // Quarters that have at least one completed or current month
+  const quarters=[];
+  [[0,1,2],[3,4,5],[6,7,8],[9,10,11]].forEach(([a,b,c],qi)=>{
+    if(a<=curMonth) quarters.push({key:`Q${qi+1}-${year}`,label:`Q${qi+1}`,type:'quarter',year,months:[a,b,c].filter(m=>m<=curMonth)});
+  });
+  const ytd={key:`YTD-${year}`,label:'YTD',type:'ytd',year,months:Array.from({length:curMonth+1},(_,i)=>i)};
+  return{months,quarters,ytd,year};
+}
+
+// Given a period descriptor, return {start, end} ISO date strings
+function analyticsPeriodRange(pd){
+  const year=pd.year;
+  if(pd.type==='month'){
+    const m=pd.month;
+    return{start:new Date(year,m,1).toISOString().slice(0,10),end:new Date(year,m+1,0).toISOString().slice(0,10),months:1};
+  }
+  if(pd.type==='quarter'||pd.type==='ytd'){
+    const ms=pd.months;
+    return{start:new Date(year,ms[0],1).toISOString().slice(0,10),end:new Date(year,ms[ms.length-1]+1,0).toISOString().slice(0,10),months:ms.length};
+  }
+}
+
+async function loadAnalyticsData(){
+  // Set default period if not yet chosen
+  if(!AN.period){
+    const now=new Date();
+    AN.period=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+  }
+  // Already cached — nothing to do
+  if(AN.data[AN.period]) return;
+
+  const{months,quarters,ytd}=analyticsGetPeriods();
+  const all=[...months,...quarters,ytd];
+  const pd=all.find(p=>p.key===AN.period);
+
+  // Unknown period — mark as empty so we don't retry forever
+  if(!pd){AN.data[AN.period]={};return;}
+
+  const range=analyticsPeriodRange(pd);
+  if(!range){AN.data[AN.period]={};return;}
+
+  AN.loading=true;
+  try{
+    const rows=await sb.select('schedule',`week=gte.${range.start}&week=lte.${range.end}&select=coach_name`);
+    const counts={};
+    rows.forEach(r=>{if(r.coach_name) counts[r.coach_name]=(counts[r.coach_name]||0)+1;});
+    AN.data[AN.period]=counts;
+  }catch(e){
+    console.warn('Analytics load failed:',e.message);
+    AN.data[AN.period]={};
+  }finally{
+    AN.loading=false;
+  }
+}
+
+function selectAnalyticsPeriod(key){
+  AN.period=key;
+  // Render immediately with loading state if not cached
+  renderAnalytics();
+  // Fetch if needed then re-render
+  if(!AN.data[key]){
+    loadAnalyticsData().then(()=>renderAnalytics()).catch(()=>{});
+  }
+}
+
+function renderAnalytics(){
+  if(!g('view-analytics')) return;
+  const{months,quarters,ytd,year}=analyticsGetPeriods();
+  const all=[...months,...quarters,ytd];
+
+  // Default period on first open
+  if(!AN.period){
+    const now=new Date();
+    AN.period=`${year}-${String(now.getMonth()+1).padStart(2,'0')}`;
+  }
+
+  // Year chip
+  if(g('analyticsYearChip')) g('analyticsYearChip').textContent=String(year);
+
+  // Period pills
+  const pillsHTML=
+    months.map(p=>`<button class="period-pill ${p.key===AN.period?'active':''}" onclick="selectAnalyticsPeriod('${p.key}')">${p.label}</button>`).join('')+
+    '<span style="display:inline-block;width:1px;height:20px;background:var(--border2);margin:0 4px;vertical-align:middle;flex-shrink:0;"></span>'+
+    quarters.map(p=>`<button class="period-pill ${p.key===AN.period?'active':''}" onclick="selectAnalyticsPeriod('${p.key}')">${p.label}</button>`).join('')+
+    `<button class="period-pill ${ytd.key===AN.period?'active':''}" onclick="selectAnalyticsPeriod('${ytd.key}')">${ytd.label}</button>`;
+  g('analyticsPeriodRow').innerHTML=pillsHTML;
+
+  // Get current period descriptor
+  const pd=all.find(p=>p.key===AN.period);
+  if(!pd){
+    g('analyticsCoachList').innerHTML='<div class="health-empty" style="padding:14px 0">Select a period above.</div>';
+    return;
+  }
+  const rangeResult=analyticsPeriodRange(pd);
+  if(!rangeResult) return;
+  const monthCount=rangeResult.months;
+
+  // Loading state
+  if(AN.loading||!AN.data[AN.period]){
+    g('analyticsStats').innerHTML=`<div class="analytics-stat"><div class="analytics-stat-num">—</div><div class="analytics-stat-lbl">Total classes</div></div><div class="analytics-stat"><div class="analytics-stat-num">—</div><div class="analytics-stat-lbl">Avg / coach</div></div><div class="analytics-stat"><div class="analytics-stat-num">—</div><div class="analytics-stat-lbl">Active coaches</div></div>`;
+    g('analyticsCoachList').innerHTML='<div class="health-empty" style="padding:14px 0">Loading…</div>';
+    return;
+  }
+
+  const counts=AN.data[AN.period];
+  const coaches=activeCoaches();
+
+  // Summary stats
+  const total=Object.values(counts).reduce((s,n)=>s+n,0);
+  const coachesWithClasses=coaches.filter(c=>counts[c.name]>0).length;
+  const avg=coachesWithClasses>0?(total/coachesWithClasses).toFixed(1):'0';
+
+  // Sub-label (how many months in the period)
+  const subLabel=monthCount>1?`${monthCount} months`:'1 month';
+  if(g('analyticsSubLabel')) g('analyticsSubLabel').textContent=`sorted by total · ${subLabel}`;
+
+  g('analyticsStats').innerHTML=`
+    <div class="analytics-stat"><div class="analytics-stat-num">${total}</div><div class="analytics-stat-lbl">Total classes</div></div>
+    <div class="analytics-stat"><div class="analytics-stat-num">${avg}</div><div class="analytics-stat-lbl">Avg / coach</div></div>
+    <div class="analytics-stat"><div class="analytics-stat-num">${coachesWithClasses}</div><div class="analytics-stat-lbl">Coaches active</div></div>`;
+
+  // Coach rows sorted by total, only those with classes
+  const sorted=coaches.map(c=>({c,total:counts[c.name]||0})).filter(x=>x.total>0).sort((a,b)=>b.total-a.total);
+  const max=sorted[0]?.total||1;
+
+  if(sorted.length===0){
+    g('analyticsCoachList').innerHTML='<div class="health-empty" style="padding:14px 0">No classes found for this period.</div>';
+    return;
+  }
+
+  g('analyticsCoachList').innerHTML=sorted.map(({c,total})=>{
+    const pct=Math.round((total/max)*100);
+    const avgPerMonth=monthCount>1?(total/monthCount).toFixed(1):null;
+    const avgLabel=avgPerMonth?`<span class="analytics-coach-avg">${avgPerMonth} / mo avg</span>`:'';
+    return`<div class="analytics-coach-row">
+      <div class="analytics-coach-top">
+        <div class="analytics-coach-name">
+          <span style="width:9px;height:9px;border-radius:50%;background:${c.color};flex-shrink:0;display:inline-block;"></span>
+          ${c.name}
+        </div>
+        <div class="analytics-coach-right">
+          ${avgLabel}
+          <span class="analytics-coach-total">${total}</span>
+        </div>
+      </div>
+      <div class="analytics-bar-track"><div class="analytics-bar-fill" style="width:${pct}%;background:${c.color}"></div></div>
+    </div>`;
+  }).join('');
+}
+
+// ─── PT HOURS ─────────────────────────────────────────
+function ptWeekRange(){
+  const mon=getMon(S.weekOffset);
+  const sun=new Date(mon); sun.setDate(sun.getDate()+6);
+  return{weekStart:mon.toISOString().slice(0,10),weekEnd:sun.toISOString().slice(0,10)};
+}
+function ptMonthRange(){
+  const mon=getMon(S.weekOffset);
+  const y=mon.getFullYear(),m=mon.getMonth();
+  return{monthStart:new Date(y,m,1).toISOString().slice(0,10),monthEnd:new Date(y,m+1,0).toISOString().slice(0,10)};
+}
+function fmtHrs(mins){
+  if(mins===30) return'0.5 hrs';
+  if(mins===45) return'0.75 hrs';
+  if(mins===60) return'1.0 hr';
+  return(mins/60).toFixed(2)+' hrs';
+}
+
+async function loadPtSessions(){
+  const{monthStart,monthEnd}=ptMonthRange();
+  try{
+    const rows=await sb.select('pt_sessions',`session_date=gte.${monthStart}&session_date=lte.${monthEnd}&select=id,coach_name,session_date,member_name,duration_minutes,created_at&order=session_date.desc`);
+    S.ptSessions=rows;
+  }catch(e){
+    console.warn('PT sessions table not set up yet:',e.message);
+    if(!S.ptSessions) S.ptSessions=[];
+  }
+}
+
+async function savePtSession(){
+  const coach=byId(S.curCoachId); if(!coach) return;
+  const date=g('ptDate').value;
+  const member=g('ptMember').value.trim();
+  const durBtn=document.querySelector('.pt-dur-btn.selected');
+  const dur=durBtn?parseInt(durBtn.dataset.min):30;
+  if(!date){showToast('Pick a date','err');return;}
+  if(!member){showToast('Enter member name','err');return;}
+  const row={coach_name:coach.name,session_date:date,member_name:member,duration_minutes:dur,created_at:new Date().toISOString()};
+  g('ptSaveBtn').disabled=true;
+  setSyncing('syncing','Saving…');
+  try{
+    const res=await sb.upsertReturn('pt_sessions',[row]);
+    const saved=res&&res[0]?res[0]:{...row,id:Date.now()};
+    S.ptSessions.unshift(saved);
+    g('ptMember').value='';
+    document.querySelectorAll('.pt-dur-btn').forEach(b=>b.classList.remove('selected'));
+    document.querySelector('.pt-dur-btn[data-min="30"]').classList.add('selected');
+    setSyncing('ok','Saved');
+    showToast('Session logged ✓','ok');
+    renderPtView();
+  }catch(e){
+    console.error(e); setSyncing('err','Error'); showToast('Save error: '+e.message,'err');
+  }
+  g('ptSaveBtn').disabled=false;
+}
+
+async function deletePtSession(id){
+  if(!confirm('Delete this session?')) return;
+  setSyncing('syncing','Deleting…');
+  try{
+    await sb.del('pt_sessions',`id=eq.${id}`);
+    S.ptSessions=S.ptSessions.filter(r=>r.id!==id);
+    setSyncing('ok','Saved');
+    showToast('Session removed','ok');
+    renderPtView();
+  }catch(e){
+    console.error(e); setSyncing('err','Error'); showToast('Delete error: '+e.message,'err');
+  }
+}
+
+function selectDur(btn){
+  document.querySelectorAll('.pt-dur-btn').forEach(b=>b.classList.remove('selected'));
+  btn.classList.add('selected');
+}
+
+function renderPtView(){
+  const coach=byId(S.curCoachId); if(!coach) return;
+  const{weekStart,weekEnd}=ptWeekRange();
+  if(!g('ptDate').value) g('ptDate').value=new Date().toISOString().slice(0,10);
+  g('ptCoachName').value=coach.name;
+  if(g('ptWeekChip')) g('ptWeekChip').textContent='Week of '+fmtF(wDates()[0]);
+
+  const sessions=(S.ptSessions||[]).filter(r=>
+    r.coach_name===coach.name&&r.session_date>=weekStart&&r.session_date<=weekEnd
+  ).sort((a,b)=>b.session_date.localeCompare(a.session_date));
+
+  const totalMins=sessions.reduce((s,r)=>s+(r.duration_minutes||0),0);
+  if(g('ptEntriesCount')) g('ptEntriesCount').textContent=`${sessions.length} session${sessions.length===1?'':'s'} · ${fmtHrs(totalMins)}`;
+
+  const list=g('ptEntriesList'); if(!list) return;
+  if(sessions.length===0){list.innerHTML='<div class="pt-empty">No sessions logged this week.</div>';return;}
+  list.innerHTML=sessions.map(r=>{
+    const d=new Date(r.session_date+'T12:00:00');
+    const dateStr=d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+    return`<div class="pt-entry-row">
+      <div class="pt-entry-main">
+        <div class="pt-entry-member">${r.member_name}</div>
+        <div class="pt-entry-meta">${dateStr}</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span class="pt-entry-dur">${fmtHrs(r.duration_minutes)}</span>
+        <button class="pt-del-btn" onclick="deletePtSession(${r.id})" title="Delete">✕</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderPtSummary(){
+  const body=g('ptSummaryBody'); if(!body) return;
+  const chip=g('ptHcWeekChip');
+  const{weekStart,weekEnd}=ptWeekRange();
+  const{monthStart,monthEnd}=ptMonthRange();
+  const viewedMon=getMon(S.weekOffset);
+  const monthName=viewedMon.toLocaleString('default',{month:'long'});
+  if(chip) chip.textContent=monthName+' '+viewedMon.getFullYear();
+
+  const all=S.ptSessions||[];
+  const weekSessions=all.filter(r=>r.session_date>=weekStart&&r.session_date<=weekEnd);
+  const monthSessions=all.filter(r=>r.session_date>=monthStart&&r.session_date<=monthEnd);
+  const wHrs=weekSessions.reduce((s,r)=>s+(r.duration_minutes||0),0)/60;
+  const mHrs=monthSessions.reduce((s,r)=>s+(r.duration_minutes||0),0)/60;
+
+  const coachStats=activeCoaches().map(c=>{
+    const cw=weekSessions.filter(r=>r.coach_name===c.name);
+    const cm=monthSessions.filter(r=>r.coach_name===c.name);
+    return{
+      c,
+      wS:cw.length, wH:cw.reduce((s,r)=>s+(r.duration_minutes||0),0)/60,
+      mS:cm.length, mH:cm.reduce((s,r)=>s+(r.duration_minutes||0),0)/60,
+    };
+  }).filter(s=>s.mS>0||s.wS>0).sort((a,b)=>b.mH-a.mH);
+
+  body.innerHTML=`
+    <div class="pt-summary-grid">
+      <div class="pt-sum-card"><div class="pt-sum-num">${weekSessions.length}</div><div class="pt-sum-lbl">Sessions This Week</div></div>
+      <div class="pt-sum-card"><div class="pt-sum-num">${wHrs.toFixed(1)}</div><div class="pt-sum-lbl">Hours This Week</div></div>
+      <div class="pt-sum-card"><div class="pt-sum-num">${monthSessions.length}</div><div class="pt-sum-lbl">Sessions This Month</div></div>
+      <div class="pt-sum-card"><div class="pt-sum-num">${mHrs.toFixed(1)}</div><div class="pt-sum-lbl">Hours This Month</div></div>
+    </div>
+    ${coachStats.length===0?'<div class="pt-empty">No PT sessions logged yet.</div>':`
+      <div class="pt-coach-header">
+        <div class="pt-coach-header-spacer"></div>
+        <div class="pt-coach-header-labels">
+          <div class="pt-coach-header-lbl">Wk Ses</div>
+          <div class="pt-coach-header-lbl">Wk Hrs</div>
+          <div class="pt-coach-header-lbl">Mo Ses</div>
+          <div class="pt-coach-header-lbl">Mo Hrs</div>
+        </div>
+      </div>
+      ${coachStats.map(({c,wS,wH,mS,mH})=>`
+        <div class="pt-coach-row">
+          <div class="pt-coach-name">
+            <span style="width:9px;height:9px;border-radius:50%;background:${c.color};flex-shrink:0;display:inline-block;"></span>
+            <span style="font-size:13px;font-weight:700;color:var(--accent)">${c.name}</span>
+          </div>
+          <div class="pt-coach-stats">
+            <div class="pt-coach-stat"><div class="pt-coach-stat-num">${wS}</div></div>
+            <div class="pt-coach-stat"><div class="pt-coach-stat-num">${wH.toFixed(1)}</div></div>
+            <div class="pt-coach-stat"><div class="pt-coach-stat-num">${mS}</div></div>
+            <div class="pt-coach-stat"><div class="pt-coach-stat-num" style="color:${mH>0?c.color:'var(--text3)'}">${mH.toFixed(1)}</div></div>
+          </div>
+        </div>`).join('')}
+    `}`;
+}
+
+function exportPtCSV(){
+  const{monthStart,monthEnd}=ptMonthRange();
+  const viewedMon=getMon(S.weekOffset);
+  const monthName=viewedMon.toLocaleString('default',{month:'long'});
+  const year=viewedMon.getFullYear();
+  const sessions=(S.ptSessions||[])
+    .filter(r=>r.session_date>=monthStart&&r.session_date<=monthEnd)
+    .sort((a,b)=>a.session_date.localeCompare(b.session_date)||a.coach_name.localeCompare(b.coach_name));
+  if(sessions.length===0){showToast('No sessions to export','err');return;}
+  const esc=v=>`"${String(v).replace(/"/g,'""')}"`;
+  let csv=`PT Sessions — ${monthName} ${year}\n\nCoach,Date,Member,Duration (min),Duration (hrs)\n`;
+  sessions.forEach(r=>{ csv+=`${esc(r.coach_name)},${esc(r.session_date)},${esc(r.member_name)},${r.duration_minutes},${(r.duration_minutes/60).toFixed(2)}\n`; });
+  csv+=`\nCoach Summary — ${monthName} ${year}\n\nCoach,Total Sessions,Total Minutes,Total Hours\n`;
+  activeCoaches().map(c=>{
+    const cs=sessions.filter(r=>r.coach_name===c.name);
+    const mins=cs.reduce((s,r)=>s+(r.duration_minutes||0),0);
+    return{name:c.name,s:cs.length,mins,hrs:(mins/60).toFixed(2)};
+  }).filter(c=>c.s>0).sort((a,b)=>b.mins-a.mins)
+    .forEach(c=>{csv+=`${esc(c.name)},${c.s},${c.mins},${c.hrs}\n`;});
+  const a=Object.assign(document.createElement('a'),{href:URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8;'})),download:`PT_Hours_${monthName}_${year}.csv`});
+  a.click(); URL.revokeObjectURL(a.href);
+  showToast('Exported ✓','ok');
 }
 
 // ─── ASSIGN MODAL ────────────────────────────────────
-let assignTarget=null,assignSelected=null;
+let assignTarget=null, assignSelected=null;
 function openCellModal(dIdx,tIdx){
   assignTarget={dIdx,tIdx};
   g('assignTitle').textContent=DAYS[dIdx]+' · '+CLASS_TIMES[tIdx];
-  const current=getSlot(dIdx,tIdx);assignSelected=current;
+  const current=getSlot(dIdx,tIdx); assignSelected=current;
+  const weekData=S.schedule[wKey()]||{};
   const ranked=activeCoaches().map(c=>({
-    coach:c,
-    available:isAvail(c.name,dIdx,tIdx),
-    load:coachClassCount(c.name)
+    c, available:isAvail(c.name,dIdx,tIdx), load:coachClassCount(c.name,weekData)
   })).sort((a,b)=>{
-    if(a.available!==b.available)return a.available?-1:1;
-    if(a.load!==b.load)return a.load-b.load;
-    return a.coach.name.localeCompare(b.coach.name);
+    if(a.available!==b.available) return a.available?-1:1;
+    if(a.load!==b.load) return a.load-b.load;
+    return a.c.name.localeCompare(b.c.name);
   });
-  const recommended=ranked.find(r=>r.available);
-  g('assignList').innerHTML=ranked.map((item,idx)=>{
-    const c=item.coach,av=item.available,sel=c.name===current;
-    return`<div class="assign-item ${sel?'selected':''} ${recommended&&recommended.coach.name===c.name?'recommended':''}" onclick="selAssign('${c.name}',this)"><span class="assign-rank">${idx+1}</span><span class="chip-dot" style="background:${c.color};width:12px;height:12px;border-radius:50%;flex-shrink:0"></span><span class="assign-name">${c.name}</span><div class="assign-meta"><span class="assign-avail" style="color:${av?'var(--green)':'var(--text3)'}">${av?'✓ available':'Unavailable'}</span><span class="assign-load">${item.load} classes this week</span></div><span class="assign-check">✓</span></div>`;
+  const rec=ranked.find(r=>r.available);
+  g('assignList').innerHTML=ranked.map(({c,available,load},idx)=>{
+    const sel=c.name===current;
+    return`<div class="assign-item ${sel?'selected':''} ${rec&&rec.c.name===c.name?'recommended':''}" onclick="selAssign('${c.name}',this)">
+      <span class="assign-rank">${idx+1}</span>
+      <span class="chip-dot" style="background:${c.color};width:12px;height:12px;border-radius:50%;flex-shrink:0"></span>
+      <span class="assign-name">${c.name}</span>
+      <div class="assign-meta">
+        <span class="assign-avail" style="color:${available?'var(--green)':'var(--text3)'}">${available?'✓ available':'Unavailable'}</span>
+        <span class="assign-load">${load} classes this week</span>
+      </div>
+      <span class="assign-check">✓</span>
+    </div>`;
   }).join('');
   openOverlay('assignOverlay');
 }
-function selAssign(name,el){document.querySelectorAll('.assign-item').forEach(e=>e.classList.remove('selected'));el.classList.add('selected');assignSelected=name;}
-async function doAssign(){if(!assignTarget||assignSelected===null)return;closeOverlay('assignOverlay');await saveScheduleSlot(assignTarget.dIdx,assignTarget.tIdx,assignSelected);renderSchedule();showToast('Assigned ✓','ok');}
-async function doRemove(){if(!assignTarget)return;closeOverlay('assignOverlay');await saveScheduleSlot(assignTarget.dIdx,assignTarget.tIdx,'');renderSchedule();showToast('Removed','ok');}
+function selAssign(name,el){
+  document.querySelectorAll('.assign-item').forEach(e=>e.classList.remove('selected'));
+  el.classList.add('selected'); assignSelected=name;
+}
+async function doAssign(){
+  if(!assignTarget||assignSelected===null) return;
+  closeOverlay('assignOverlay');
+  await saveScheduleSlot(assignTarget.dIdx,assignTarget.tIdx,assignSelected);
+  renderSchedule();
+  showToast('Assigned ✓','ok');
+}
+async function doRemove(){
+  if(!assignTarget) return;
+  closeOverlay('assignOverlay');
+  await saveScheduleSlot(assignTarget.dIdx,assignTarget.tIdx,'');
+  renderSchedule();
+  showToast('Removed','ok');
+}
 
 // ─── COACH CRUD ──────────────────────────────────────
 let editCoachId=null;
 function openAddCoach(){editCoachId=null;g('coachModalTitle').textContent='Add Coach';g('coachSaveBtn').textContent='Add';g('cName').value='';g('cRole').value='Coach';g('cColor').value='#d94f2b';openOverlay('coachOverlay');}
 function openEditCoach(id){editCoachId=id;const c=byId(id);g('coachModalTitle').textContent='Edit Coach';g('coachSaveBtn').textContent='Save';g('cName').value=c.name;g('cRole').value=c.role;g('cColor').value=c.color;openOverlay('coachOverlay');}
+
 async function saveCoach(){
-  const name=g('cName').value.trim();if(!name){showToast('Enter a name','err');return;}
+  const name=g('cName').value.trim(); if(!name){showToast('Enter a name','err');return;}
   let coach;
   if(editCoachId){
-    const c=byId(editCoachId);
-    c.name=name;c.role=g('cRole').value.trim()||'Coach';c.color=g('cColor').value;
-    coach=c;
+    coach=byId(editCoachId);
+    coach.name=name; coach.role=g('cRole').value.trim()||'Coach'; coach.color=g('cColor').value;
     showToast('Updated ✓','ok');
   }else{
     coach={id:S.nextId++,name,role:g('cRole').value.trim()||'Coach',color:g('cColor').value,active:true};
@@ -1020,106 +1868,126 @@ async function saveCoach(){
     showToast(name+' added ✓','ok');
   }
   await saveCoachToDB(coach);
-  closeOverlay('coachOverlay');buildSplash();renderCoaches();renderSchedule();
-}
-async function toggleCoachActive(id){
-  const coach=byId(id);
-  if(!coach)return;
-  const turningOff=coach.active !== false;
-  const msg=turningOff ? `Deactivate ${coach.name}? They will stay in old schedules but disappear from the splash screen and future assignment lists.` : `Reactivate ${coach.name}?`;
-  if(!confirm(msg))return;
-  coach.active = !turningOff;
-  await toggleCoachActiveInDB(coach);
-  showToast(turningOff ? 'Coach deactivated' : 'Coach reactivated','ok');
-  renderCoaches();renderSchedule();buildSplash();
+  closeOverlay('coachOverlay');
+  // Invalidate hcFilter dropdown cache so it rebuilds with new coach
+  const f=g('hcFilter'); if(f) delete f.dataset.built;
+  buildSplash(); renderCoaches(); renderSchedule();
 }
 
+async function toggleCoachActive(id){
+  const coach=byId(id); if(!coach) return;
+  const turningOff=coach.active!==false;
+  const msg=turningOff?`Deactivate ${coach.name}? They will stay in old schedules but disappear from the splash screen and future assignment lists.`:`Reactivate ${coach.name}?`;
+  if(!confirm(msg)) return;
+  coach.active=!turningOff;
+  try{await sb.upsert('coaches',[{id:coach.id,name:coach.name,color:coach.color,role:coach.role,active:coach.active!==false}]);}
+  catch(e){console.warn('Could not save active state:',e.message);showToast('Status changed locally only','err');}
+  showToast(turningOff?'Coach deactivated':'Coach reactivated','ok');
+  const f=g('hcFilter'); if(f) delete f.dataset.built;
+  renderCoaches(); renderSchedule(); buildSplash();
+}
+
+// ─── COVERAGE ACTIONS ────────────────────────────────
 let coverageTarget=null;
 function openCoverageModal(dIdx,tIdx){
-  const me=byId(S.curCoachId);
-  if(!me)return;
-  const assigned=getSlot(dIdx,tIdx);
-  if(assigned!==me.name)return;
+  const me=byId(S.curCoachId); if(!me) return;
+  if(getSlot(dIdx,tIdx)!==me.name) return;
   coverageTarget={dIdx,tIdx};
   const req=getAnyCoverageRecord(dIdx,tIdx);
   g('coverageModalTitle').textContent=`${DAYS[dIdx]} · ${CLASS_TIMES[tIdx]}`;
-  g('coverageModalHint').textContent=req ? 'You can leave this request open or cancel it.' : 'Put this class up for coverage if you need someone to take it.';
+  g('coverageModalHint').textContent=req?'You can leave this request open or cancel it.':'Put this class up for coverage if you need someone to take it.';
   g('coverageModalBody').innerHTML=`<div class="ops-row"><div class="ops-meta"><strong>${me.name}</strong><span class="ops-sub">Assigned coach for this class</span></div><span class="cover-chip ${req&&req.volunteer_name?'ready':(req?'waiting':'')}">${req?coverageStatusLabel(req):'No request yet'}</span></div>${req&&req.volunteer_name?`<div class="ops-row"><div class="ops-meta"><strong>${req.volunteer_name}</strong><span class="ops-sub">Volunteer waiting on head coach approval</span></div><span class="cover-chip ready">Volunteer ready</span></div>`:''}`;
-  g('coverageModalActions').innerHTML=req ? `<button class="btn ghost" onclick="closeOverlay('coverageOverlay')">Close</button><button class="btn red-btn" onclick="cancelCoverageRequest()">Cancel Request</button>` : `<button class="btn ghost" onclick="closeOverlay('coverageOverlay')">Close</button><button class="btn" onclick="createCoverageRequest()">Request Coverage</button>`;
+  g('coverageModalActions').innerHTML=req
+    ?`<button class="btn ghost" onclick="closeOverlay('coverageOverlay')">Close</button><button class="btn red-btn" onclick="cancelCoverageRequest()">Cancel Request</button>`
+    :`<button class="btn ghost" onclick="closeOverlay('coverageOverlay')">Close</button><button class="btn" onclick="createCoverageRequest()">Request Coverage</button>`;
   openOverlay('coverageOverlay');
 }
 async function createCoverageRequest(){
-  const me=byId(S.curCoachId); if(!me||!coverageTarget)return;
-  const row={week:wKey(),day_index:coverageTarget.dIdx,time_index:coverageTarget.tIdx,requested_by:me.name,volunteer_name:null,status:'open',created_at:new Date().toISOString()};
-  await saveCoverageRow(row);
+  const me=byId(S.curCoachId); if(!me||!coverageTarget) return;
+  await saveCoverageRow({week:wKey(),day_index:coverageTarget.dIdx,time_index:coverageTarget.tIdx,requested_by:me.name,volunteer_name:null,status:'open',created_at:new Date().toISOString()});
   closeOverlay('coverageOverlay');
-  renderAll();
+  renderSchedule(); // only the schedule needs to update
   showToast('Coverage requested','ok');
 }
 async function cancelCoverageRequest(){
-  if(!coverageTarget)return;
+  if(!coverageTarget) return;
   await deleteCoverageRow(coverageTarget.dIdx,coverageTarget.tIdx);
   closeOverlay('coverageOverlay');
-  renderAll();
+  renderSchedule();
   showToast('Coverage request removed','ok');
 }
 async function volunteerForCoverage(dIdx,tIdx){
-  const me=byId(S.curCoachId); if(!me)return;
+  const me=byId(S.curCoachId); if(!me) return;
   const req=getAnyCoverageRecord(dIdx,tIdx);
-  if(!req || req.requested_by===me.name)return;
-  await saveCoverageRow({...req, volunteer_name:me.name, status:'open'});
-  renderAll();
+  if(!req||req.requested_by===me.name) return;
+  await saveCoverageRow({...req,volunteer_name:me.name,status:'open'});
+  renderSchedule();
   showToast('You offered to cover','ok');
 }
 async function removeVolunteer(dIdx,tIdx){
-  const me=byId(S.curCoachId); if(!me)return;
+  const me=byId(S.curCoachId); if(!me) return;
   const req=getAnyCoverageRecord(dIdx,tIdx);
-  if(!req || req.volunteer_name!==me.name)return;
-  await saveCoverageRow({...req, volunteer_name:null, status:'open'});
-  renderAll();
+  if(!req||req.volunteer_name!==me.name) return;
+  await saveCoverageRow({...req,volunteer_name:null,status:'open'});
+  renderSchedule();
   showToast('You are no longer covering','ok');
 }
 async function approveCoverage(dIdx,tIdx){
   const req=getAnyCoverageRecord(dIdx,tIdx);
-  if(!req || !req.volunteer_name)return;
+  if(!req||!req.volunteer_name) return;
   await saveScheduleSlot(dIdx,tIdx,req.volunteer_name);
   await deleteCoverageRow(dIdx,tIdx);
-  renderAll();
+  renderSchedule();
   showToast('Coverage approved','ok');
 }
-function renderCoverageBoard(){
-  const list=g('coverageBoardList'); if(!list)return;
-  const items=getCoverageRequests().filter(r=>r.status!=='approved').sort((a,b)=>a.day_index-b.day_index||a.time_index-b.time_index);
-  if(S.isHC){
-    g('coverageBoardTitle').textContent='Coverage Board';
-    if(items.length===0){ list.innerHTML='<div class="health-empty">No coverage requests this week.</div>'; return; }
-    list.innerHTML=items.map(req=>`<div class="coverage-item"><div class="coverage-main"><div class="coverage-title">${DAY_SHORT[req.day_index]} ${CLASS_TIMES[req.time_index]}</div><div class="coverage-sub">${req.requested_by} needs coverage${req.volunteer_name?` • ${req.volunteer_name} volunteered`:''}</div></div><div class="coverage-actions">${req.volunteer_name?`<button class="btn" style="padding:6px 10px;font-size:11px;" onclick="approveCoverage(${req.day_index},${req.time_index})">Approve</button>`:'<span class="cover-chip waiting">Waiting</span>'}</div></div>`).join('');
-    return;
-  }
-  const me=byId(S.curCoachId);
-  g('coverageBoardTitle').textContent='Coverage Board';
-  const visible=items.filter(req=>req.requested_by!==me?.name);
-  if(visible.length===0){ list.innerHTML='<div class="health-empty">No open coverage requests from other coaches right now.</div>'; return; }
-  list.innerHTML=visible.map(req=>{
-    const canCover=isAvail(me.name,req.day_index,req.time_index);
-    const already=req.volunteer_name===me.name;
-    const someoneElse=req.volunteer_name && req.volunteer_name!==me.name;
-    let action='';
-    if(already) action=`<button class="btn ghost" style="padding:6px 10px;font-size:11px;" onclick="removeVolunteer(${req.day_index},${req.time_index})">Undo Cover</button>`;
-    else if(someoneElse) action=`<span class="cover-chip ready">${req.volunteer_name} offered</span>`;
-    else if(canCover) action=`<button class="btn" style="padding:6px 10px;font-size:11px;" onclick="volunteerForCoverage(${req.day_index},${req.time_index})">I Can Cover</button>`;
-    else action='<span class="cover-chip waiting">Unavailable</span>';
-    return `<div class="coverage-item"><div class="coverage-main"><div class="coverage-title">${DAY_SHORT[req.day_index]} ${CLASS_TIMES[req.time_index]}</div><div class="coverage-sub">${req.requested_by} needs coverage</div></div><div class="coverage-actions">${action}</div></div>`;
-  }).join('');
+
+// ─── AVAILABILITY ────────────────────────────────────
+function clearMyAvail(){
+  const c=byId(S.curCoachId); if(!c) return;
+  const av=ensureAvail(c.name);
+  CLASS_TIMES.forEach((_,t)=>DAYS.forEach((_,d)=>{if(!isBk(d,t)) av[`${d}_${t}`]=false;}));
+  renderCoachAvail();
 }
 
-function clearMyAvail(){const c=byId(S.curCoachId);if(!c)return;const av=ensureAvail(c.name);CLASS_TIMES.forEach((_,t)=>DAYS.forEach((_,d)=>{if(!isBk(d,t))av[`${d}_${t}`]=false;}));renderCoachAvail();}
-async function changeWeek(dir){S.weekOffset+=dir;updateWeekLbl();await loadWeekFromDB();renderAll();}
+// ─── WEEK NAVIGATION ─────────────────────────────────
+async function changeWeek(dir){
+  const prevMonth=getMon(S.weekOffset).getMonth();
+  S.weekOffset+=dir;
+  clearMonCache();
+  updateWeekLbl();
+  const newMonth=getMon(S.weekOffset).getMonth();
+  const key=wKey();
 
+  // Restore from cache for instant render
+  const hadCache=restoreWeekFromCache(key);
+  if(hadCache){
+    renderActiveTab();
+    setSyncing('syncing','Refreshing…');
+  }else{
+    showLoader('Loading…');
+  }
+
+  try{
+    const fetches=[loadWeekFromDB()];
+    if(newMonth!==prevMonth||activeTab==='ops'||activeTab==='coaches') fetches.push(loadMonthlyClassCounts());
+    if(activeTab==='pt'||activeTab==='pt-hc') fetches.push(loadPtSessions());
+    await Promise.all(fetches);
+  }catch(e){console.error(e);}
+  finally{hideLoader();}
+  renderActiveTab();
+}
+
+// ─── CSV EXPORT ──────────────────────────────────────
 function exportCSV(){
-  const dates=wDates();let csv='Time,'+dates.map((d,i)=>DAYS[i]+' '+fmt(d)).join(',')+'\n';
-  CLASS_TIMES.forEach((_,t)=>{csv+=CLASS_TIMES[t];DAYS.forEach((_,d)=>{csv+=isBk(d,t)?',':(','+(getSlot(d,t)||''));});csv+='\n';});
-  Object.assign(document.createElement('a'),{href:URL.createObjectURL(new Blob([csv],{type:'text/csv'})),download:'schedule_'+wKey()+'.csv'}).click();
+  const dates=wDates();
+  let csv='Time,'+dates.map((d,i)=>DAYS[i]+' '+fmt(d)).join(',')+'\n';
+  CLASS_TIMES.forEach((_,t)=>{
+    csv+=CLASS_TIMES[t];
+    DAYS.forEach((_,d)=>{csv+=isBk(d,t)?',':(','+(getSlot(d,t)||''));});
+    csv+='\n';
+  });
+  const a=Object.assign(document.createElement('a'),{href:URL.createObjectURL(new Blob([csv],{type:'text/csv'})),download:'schedule_'+wKey()+'.csv'});
+  a.click(); URL.revokeObjectURL(a.href);
   showToast('Exported','ok');
 }
 
@@ -1127,8 +1995,15 @@ function exportCSV(){
 function g(id){return document.getElementById(id);}
 function openOverlay(id){g(id).classList.add('open');}
 function closeOverlay(id){g(id).classList.remove('open');}
-document.querySelectorAll('.overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)closeOverlay(o.id);}));
-function showToast(msg,type='ok'){const t=g('toast');t.textContent=msg;t.className='toast '+(type||'ok');t.style.display='block';clearTimeout(t._t);t._t=setTimeout(()=>t.style.display='none',2600);}
+// Single delegated event listener for all overlays instead of one per overlay
+document.addEventListener('click',e=>{
+  if(e.target.classList.contains('overlay')) closeOverlay(e.target.id);
+});
+function showToast(msg,type='ok'){
+  const t=g('toast');
+  t.textContent=msg; t.className='toast '+(type||'ok'); t.style.display='block';
+  clearTimeout(t._t); t._t=setTimeout(()=>t.style.display='none',2600);
+}
 function showLoader(msg){g('loadingMsg').textContent=msg;g('loadingOverlay').style.display='flex';}
 function hideLoader(){g('loadingOverlay').style.display='none';}
 function setSyncing(state,label){
@@ -1136,178 +2011,110 @@ function setSyncing(state,label){
   g('syncLabel').textContent=label;
 }
 
-// ─── COPY PREV WEEK SCHEDULE (Head Coach) ────────────
-async function copyPrevWeekSchedule() {
-  const prevKey = wKey(S.weekOffset - 1);
-  const curKey  = wKey(S.weekOffset);
-
-  const btn = g('copySchedBtn');
-  btn.disabled = true;
-  setSyncing('syncing', 'Copying…');
-  showLoader('Loading prev week schedule…');
-
-  try {
-    // Load previous week schedule from Supabase
-    const prevRows = await sb.select('schedule', `week=eq.${prevKey}&select=day_index,time_index,coach_name`);
-
-    if (prevRows.length === 0) {
-      showToast('No schedule found for last week', 'err');
-      btn.disabled = false; hideLoader(); setSyncing('ok', 'Ready');
-      return;
-    }
-
-    // Load current week availability for ALL coaches from Supabase
-    const availRows = await sb.select('availability', `week=eq.${curKey}&select=coach_name,day_index,time_index,available`);
-    // Build a quick lookup: availMap[coachName][d_t] = bool
-    const availMap = {};
-    availRows.forEach(r => {
-      if (!availMap[r.coach_name]) availMap[r.coach_name] = {};
-      availMap[r.coach_name][`${r.day_index}_${r.time_index}`] = r.available;
+// ─── COPY PREV WEEK SCHEDULE ──────────────────────────
+async function copyPrevWeekSchedule(){
+  const prevKey=wKey(S.weekOffset-1);
+  const curKey=wKey(S.weekOffset);
+  const btn=g('copySchedBtn');
+  btn.disabled=true; setSyncing('syncing','Copying…'); showLoader('Loading prev week schedule…');
+  try{
+    const [prevRows,availRows]=await Promise.all([
+      sb.select('schedule',`week=eq.${prevKey}&select=day_index,time_index,coach_name`),
+      sb.select('availability',`week=eq.${curKey}&select=coach_name,day_index,time_index,available`),
+    ]);
+    if(prevRows.length===0){showToast('No schedule found for last week','err');return;}
+    const availMap={};
+    availRows.forEach(r=>{
+      if(!availMap[r.coach_name]) availMap[r.coach_name]={};
+      availMap[r.coach_name][`${r.day_index}_${r.time_index}`]=r.available;
     });
-
-    // Ensure current week local cache exists
-    if (!S.schedule[curKey]) S.schedule[curKey] = {};
-
-    let copied = 0, skipped = 0;
-    const rowsToSave = [];
-
-    prevRows.forEach(({ day_index: d, time_index: t, coach_name: coach }) => {
-      if (!coach || isBk(d, t)) return;
-
-      // Check if coach is available this week
-      // If no availability record exists for this coach, default to available
-      const coachAvail = availMap[coach] || null;
-      let available = true;
-      if (coachAvail) {
-        const val = coachAvail[`${d}_${t}`];
-        available = val !== false; // undefined = default available, false = unavailable
-      }
-
-      if (available) {
-        // Copy the assignment
-        if (!S.schedule[curKey][d]) S.schedule[curKey][d] = {};
-        S.schedule[curKey][d][t] = coach;
-        rowsToSave.push({ week: curKey, day_index: d, time_index: t, coach_name: coach });
+    if(!S.schedule[curKey]) S.schedule[curKey]={};
+    let copied=0,skipped=0;
+    const rowsToSave=[];
+    prevRows.forEach(({day_index:d,time_index:t,coach_name:coach})=>{
+      if(!coach||isBk(d,t)) return;
+      const coachAvail=availMap[coach];
+      const available=!coachAvail||coachAvail[`${d}_${t}`]!==false;
+      if(available){
+        if(!S.schedule[curKey][d]) S.schedule[curKey][d]={};
+        S.schedule[curKey][d][t]=coach;
+        rowsToSave.push({week:curKey,day_index:d,time_index:t,coach_name:coach});
         copied++;
-      } else {
-        skipped++;
-      }
+      }else skipped++;
     });
-
-    // Save copied slots to Supabase
-    if (rowsToSave.length > 0) {
-      await sb.upsert('schedule', rowsToSave);
-    }
-
-    setSyncing('ok', 'Saved');
+    if(rowsToSave.length>0) await sb.upsert('schedule',rowsToSave);
+    setSyncing('ok','Saved');
     renderSchedule();
-
-    // Show result banner
-    const banner = g('copyResultBanner');
-    banner.textContent = `✓ Copied ${copied} slot${copied !== 1 ? 's' : ''} from last week. ${skipped > 0 ? `${skipped} slot${skipped !== 1 ? 's' : ''} left blank (coach unavailable this week).` : 'All coaches are available!'}`;
-    banner.style.display = 'block';
-    setTimeout(() => banner.style.display = 'none', 6000);
-
-  } catch(err) {
-    console.error(err);
-    setSyncing('err', 'Error');
-    showToast('Copy failed: ' + err.message, 'err');
+    const banner=g('copyResultBanner');
+    banner.textContent=`✓ Copied ${copied} slot${copied!==1?'s':''} from last week. ${skipped>0?`${skipped} slot${skipped!==1?'s':''} left blank (coach unavailable this week).`:'All coaches are available!'}`;
+    banner.style.display='block';
+    setTimeout(()=>banner.style.display='none',6000);
+  }catch(err){
+    console.error(err); setSyncing('err','Error'); showToast('Copy failed: '+err.message,'err');
   }
-
-  btn.disabled = false;
-  hideLoader();
+  btn.disabled=false; hideLoader();
 }
 
-// ─── COPY PREV WEEK AVAILABILITY (Coach) ─────────────
-async function copyPrevWeekAvail() {
-  const coach = byId(S.curCoachId); if (!coach) return;
-  const prevKey = wKey(S.weekOffset - 1);
-  const curKey  = wKey(S.weekOffset);
-
-  const btn = g('copyAvailBtn');
-  btn.disabled = true;
-  setSyncing('syncing', 'Loading…');
-  showLoader('Loading prev week availability…');
-
-  try {
-    // Load previous week availability for this coach
-    const prevRows = await sb.select('availability',
-      `week=eq.${prevKey}&coach_name=eq.${encodeURIComponent(coach.name)}&select=day_index,time_index,available`
-    );
-
-    if (prevRows.length === 0) {
-      showToast('No availability found for last week', 'err');
-      btn.disabled = false; hideLoader(); setSyncing('ok', 'Ready');
-      return;
-    }
-
-    // Apply to local state for current week
-    if (!S.availability[curKey]) S.availability[curKey] = {};
-    if (!S.availability[curKey][coach.name]) S.availability[curKey][coach.name] = {};
-
-    // First default all to true (available)
-    CLASS_TIMES.forEach((_, t) => DAYS.forEach((_, d) => {
-      if (!isBk(d, t)) S.availability[curKey][coach.name][`${d}_${t}`] = true;
+// ─── COPY PREV WEEK AVAILABILITY ─────────────────────
+async function copyPrevWeekAvail(){
+  const coach=byId(S.curCoachId); if(!coach) return;
+  const prevKey=wKey(S.weekOffset-1);
+  const curKey=wKey(S.weekOffset);
+  const btn=g('copyAvailBtn');
+  btn.disabled=true; setSyncing('syncing','Loading…'); showLoader('Loading prev week availability…');
+  try{
+    const prevRows=await sb.select('availability',`week=eq.${prevKey}&coach_name=eq.${encodeURIComponent(coach.name)}&select=day_index,time_index,available`);
+    if(prevRows.length===0){showToast('No availability found for last week','err');return;}
+    if(!S.availability[curKey]) S.availability[curKey]={};
+    if(!S.availability[curKey][coach.name]) S.availability[curKey][coach.name]={};
+    CLASS_TIMES.forEach((_,t)=>DAYS.forEach((_,d)=>{
+      if(!isBk(d,t)) S.availability[curKey][coach.name][`${d}_${t}`]=true;
     }));
-
-    // Then apply prev week values
-    prevRows.forEach(r => {
-      S.availability[curKey][coach.name][`${r.day_index}_${r.time_index}`] = r.available;
-    });
-
+    prevRows.forEach(r=>{S.availability[curKey][coach.name][`${r.day_index}_${r.time_index}`]=r.available;});
     renderCoachAvail();
-    showToast('Last week copied — review and hit Save ✓', 'ok');
-
-  } catch(err) {
-    console.error(err);
-    setSyncing('err', 'Error');
-    showToast('Copy failed: ' + err.message, 'err');
+    showToast('Last week copied — review and hit Save ✓','ok');
+  }catch(err){
+    console.error(err); setSyncing('err','Error'); showToast('Copy failed: '+err.message,'err');
   }
-
-  btn.disabled = false;
-  hideLoader();
+  btn.disabled=false; hideLoader();
 }
 
 // ─── COACH NOTES ─────────────────────────────────────
 async function saveCoachNote(){
-  const coach=byId(S.curCoachId);if(!coach)return;
+  const coach=byId(S.curCoachId); if(!coach) return;
   const note=g('coachNoteInput').value.trim();
   if(!note){showToast('Write something first','err');return;}
   const key=wKey();
-  g('saveNoteBtn').disabled=true;
-  setSyncing('syncing','Saving…');
+  g('saveNoteBtn').disabled=true; setSyncing('syncing','Saving…');
   try{
     await sb.upsert('notes',[{week:key,coach_name:coach.name,note,created_at:new Date().toISOString()}]);
-    // Update local cache
-    if(!S.notes)S.notes={};
-    if(!S.notes[key])S.notes[key]=[];
-    // Replace or add
+    if(!S.notes) S.notes={};
+    if(!S.notes[key]) S.notes[key]=[];
     const idx=S.notes[key].findIndex(n=>n.coach_name===coach.name);
-    if(idx>=0)S.notes[key][idx]={week:key,coach_name:coach.name,note};
+    if(idx>=0) S.notes[key][idx]={week:key,coach_name:coach.name,note};
     else S.notes[key].push({week:key,coach_name:coach.name,note});
     setSyncing('ok','Saved');
     g('noteConfirm').style.display='block';
-    setTimeout(()=>{if(g('noteConfirm'))g('noteConfirm').style.display='none';},3000);
+    setTimeout(()=>{const el=g('noteConfirm');if(el)el.style.display='none';},3000);
     showToast('Note sent ✓','ok');
   }catch(err){
-    console.error(err);setSyncing('err','Error');
-    const msg = err.message.includes('notes') ? 'Notes table not set up yet — run SQL in Supabase first' : 'Save error: '+err.message;
-    showToast(msg,'err');
+    console.error(err); setSyncing('err','Error');
+    showToast(err.message.includes('notes')?'Notes table not set up yet — run SQL in Supabase first':'Save error: '+err.message,'err');
   }
   g('saveNoteBtn').disabled=false;
 }
 
 function loadCoachNoteInput(){
-  const coach=byId(S.curCoachId);if(!coach)return;
+  const coach=byId(S.curCoachId); if(!coach) return;
   const key=wKey();
   const existing=(S.notes&&S.notes[key]||[]).find(n=>n.coach_name===coach.name);
-  if(g('coachNoteInput'))g('coachNoteInput').value=existing?existing.note:'';
+  const el=g('coachNoteInput'); if(el) el.value=existing?existing.note:'';
 }
 
 function renderHcNotes(){
   const key=wKey();
   const notes=(S.notes&&S.notes[key])||[];
-  const list=g('hcNotesList');if(!list)return;
+  const list=g('hcNotesList'); if(!list) return;
   if(notes.length===0){
     list.innerHTML='<div style="font-size:13px;color:var(--text3);font-style:italic">No notes from coaches this week.</div>';
     return;
@@ -1323,89 +2130,69 @@ function renderHcNotes(){
   }).join('');
 }
 
-// ─── SEED: pre-load schedule from screenshots ────────
-// Runs once when head coach logs in if those weeks are empty.
-const SEED_DATA = {
-  // Week of 3/16/2026 — read column by column (each column = one day)
-  // Days: Mon=0, Tue=1, Wed=2, Thu=3, Fri=4, Sat=5
-  // Times: 5:30AM=0, 6:30AM=1, 8:15AM=2, 9:30AM=3, 12:15PM=4, 4:45PM=5, 6:15PM=6
-  '2026-03-16': [
-    // 5:30 AM
+// ─── SEED DATA ───────────────────────────────────────
+const SEED_DATA={
+  '2026-03-16':[
     [0,0,'Tyler'],[1,0,'Hannah'],[2,0,'Tyler'],[3,0,'Tyler'],[4,0,'Nick'],
-    // 6:30 AM
     [0,1,'Tyler'],[1,1,'Felipe'],[2,1,'Tyler'],[3,1,'Felipe'],[4,1,'Laura'],
-    // 8:15 AM
     [0,2,'Tyler'],[1,2,'Josh'],[2,2,'Tyler'],[3,2,'Josh'],[4,2,'Tyler'],[5,2,'Steven'],
-    // 9:30 AM
     [0,3,'Tyler'],[1,3,'Josh'],[2,3,'Tyler'],[3,3,'Josh'],[4,3,'Tyler'],[5,3,'Marissa'],
-    // 12:15 PM
     [0,4,'Tyler'],[1,4,'Tyler'],[2,4,'Tyler'],[3,4,'Tyler'],[4,4,'Tyler'],
-    // 4:45 PM
     [0,5,'Tyler'],[1,5,'Brennan'],[2,5,'Tyler'],[3,5,'Tyler'],[4,5,'Marissa'],
-    // 6:15 PM
     [0,6,'Sara Beth'],[1,6,'Brennan'],[2,6,'Steven'],[3,6,'Marissa'],[4,6,'Tyler'],
   ],
-  // Week of 3/23/2026 — read column by column
-  '2026-03-23': [
-    // 5:30 AM
+  '2026-03-23':[
     [0,0,'Hannah'],[1,0,'Hannah'],[2,0,'Tyler'],[3,0,'Nick'],[4,0,'Tyler'],
-    // 6:30 AM
     [0,1,'Tyler'],[1,1,'Felipe'],[2,1,'Tyler'],[3,1,'Felipe'],[4,1,'Laura'],
-    // 8:15 AM
     [0,2,'Tyler'],[1,2,'Josh'],[2,2,'Tyler'],[3,2,'Josh'],[4,2,'Emily'],[5,2,'Tyler'],
-    // 9:30 AM
     [0,3,'Tyler'],[1,3,'Josh'],[2,3,'Tyler'],[3,3,'Josh'],[4,3,'Emily'],[5,3,'Emily'],
-    // 12:15 PM
     [0,4,'Tyler'],[1,4,'Tyler'],[2,4,'Tyler'],[3,4,'Tyler'],[4,4,'Tyler'],
-    // 4:45 PM
     [0,5,'Marissa'],[1,5,'Brennan'],[2,5,'Laura'],[3,5,'Laura'],[4,5,'Tyler'],
-    // 6:15 PM
     [0,6,'Marissa'],[1,6,'Brennan'],[2,6,'Steven'],[3,6,'Laura'],[4,6,'Tyler'],
   ]
 };
 
-async function seedScheduleIfEmpty() {
-  // Ensure notes table exists by trying to select from it
-  // (table created via Supabase SQL — see setup guide)
-  // Coaches table check
-  try { await sb.select('coaches','limit=1'); } catch(e) { console.warn('Coaches table not set up. Run SQL in Supabase.'); }
-  try { await sb.select('notes','limit=1'); } catch(e) { console.warn('Notes table may not exist yet. Run: CREATE TABLE notes (week TEXT NOT NULL, coach_name TEXT NOT NULL, note TEXT, created_at TEXT, PRIMARY KEY (week, coach_name)); GRANT ALL ON TABLE notes TO anon, authenticated; ALTER TABLE notes ENABLE ROW LEVEL SECURITY; CREATE POLICY public_notes ON notes FOR ALL TO anon, authenticated USING (true) WITH CHECK (true);'); }
-  for (const [weekKey, slots] of Object.entries(SEED_DATA)) {
-    try {
-      // Check if any rows already exist for this week
-      const existing = await sb.select('schedule', `week=eq.${weekKey}&select=week&limit=1`);
-      if (existing.length > 0) continue; // already seeded, skip
-
-      // Save all slots
-      const rows = slots.map(([d,t,c]) => ({
-        week: weekKey, day_index: d, time_index: t, coach_name: c
-      }));
-      await sb.upsert('schedule', rows);
-      console.log('Seeded week', weekKey);
-    } catch(e) {
-      console.warn('Seed failed for', weekKey, e.message);
-    }
+async function seedScheduleIfEmpty(){
+  try{await sb.select('coaches','limit=1');}catch(e){console.warn('Coaches table not set up:',e.message);}
+  try{await sb.select('notes','limit=1');}catch(e){console.warn('Notes table not set up. Run SQL to create it.');}
+  for(const [weekKey,slots] of Object.entries(SEED_DATA)){
+    try{
+      const existing=await sb.select('schedule',`week=eq.${weekKey}&select=week&limit=1`);
+      if(existing.length>0) continue;
+      await sb.upsert('schedule',slots.map(([d,t,c])=>({week:weekKey,day_index:d,time_index:t,coach_name:c})));
+      console.log('Seeded week',weekKey);
+    }catch(e){console.warn('Seed failed for',weekKey,e.message);}
   }
 }
 
 // ─── INIT ────────────────────────────────────────────
 (async()=>{
-  // Safety timer: no matter what happens, splash appears within 5 seconds.
-  // This is the last line of defense against a hung network request.
-  const safetyTimer = setTimeout(()=>{
-    hideLoader();
+  // If coaches are cached, show splash immediately — no spinner needed
+  const cachedCoaches=cacheRead('coaches','list');
+  if(cachedCoaches&&cachedCoaches.length>0){
+    S.coaches=cachedCoaches;
+    S.nextId=Math.max(...cachedCoaches.map(c=>c.id))+1;
     g('splash').style.display='flex';
     buildSplash();
-  }, 5000);
-
-  showLoader('Loading\u2026');
-  try{
-    await loadCoachesFromDB();
-  }catch(e){
-    console.warn('Init load error:', e.message);
-  }finally{
-    clearTimeout(safetyTimer);
-    hideLoader();
+    // Refresh coaches from DB silently in background
+    loadCoachesFromDB().then(()=>buildSplash()).catch(()=>{});
+  }else{
+    // No cache — show spinner, but ALWAYS show splash after 9s max
+    showLoader('Loading…');
+    const safetyTimer=setTimeout(()=>{
+      hideLoader();
+      g('splash').style.display='flex';
+      buildSplash();
+      showToast('Using offline data — check your connection','err');
+    },9000);
+    try{
+      await loadCoachesFromDB();
+    }catch(e){
+      console.error('Init error:',e);
+    }finally{
+      clearTimeout(safetyTimer);
+      hideLoader();
+    }
     g('splash').style.display='flex';
     buildSplash();
   }
