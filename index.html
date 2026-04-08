@@ -2167,24 +2167,28 @@ async function seedScheduleIfEmpty(){
 
 // ─── INIT ────────────────────────────────────────────
 (async()=>{
-  // If coaches are cached, show splash immediately — no spinner needed
+  // Safety timer: fires after 5s no matter what path we take.
+  // Guarantees the loading overlay is always dismissed.
+  const safetyTimer=setTimeout(()=>{
+    hideLoader();
+    g('splash').style.display='flex';
+    buildSplash();
+  },5000);
+
   const cachedCoaches=cacheRead('coaches','list');
   if(cachedCoaches&&cachedCoaches.length>0){
+    // Cache hit — show splash immediately, no spinner needed
     S.coaches=cachedCoaches;
     S.nextId=Math.max(...cachedCoaches.map(c=>c.id))+1;
+    clearTimeout(safetyTimer);
+    hideLoader();
     g('splash').style.display='flex';
     buildSplash();
     // Refresh coaches from DB silently in background
     loadCoachesFromDB().then(()=>buildSplash()).catch(()=>{});
   }else{
-    // No cache — show spinner, but ALWAYS show splash after 9s max
+    // No cache — show spinner and wait, safety timer is the backstop
     showLoader('Loading…');
-    const safetyTimer=setTimeout(()=>{
-      hideLoader();
-      g('splash').style.display='flex';
-      buildSplash();
-      showToast('Using offline data — check your connection','err');
-    },9000);
     try{
       await loadCoachesFromDB();
     }catch(e){
@@ -2192,9 +2196,9 @@ async function seedScheduleIfEmpty(){
     }finally{
       clearTimeout(safetyTimer);
       hideLoader();
+      g('splash').style.display='flex';
+      buildSplash();
     }
-    g('splash').style.display='flex';
-    buildSplash();
   }
 })();
 </script>
