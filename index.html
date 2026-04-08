@@ -689,7 +689,7 @@ function updateWeekLbl(){
 // Persist schedule, availability, coverage and notes to localStorage so the
 // app renders instantly on load using last-known data while fresh data fetches
 // in the background. Keys are namespaced by week so stale weeks don't pollute.
-const CACHE_VERSION='bsv1'; // bump this to invalidate all caches on deploy
+const CACHE_VERSION='bsv2'; // bump this to invalidate all caches on deploy
 
 function cacheKey(type,week){return `${CACHE_VERSION}:${type}:${week}`;}
 
