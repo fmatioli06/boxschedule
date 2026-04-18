@@ -813,7 +813,7 @@ async function saveCoachToDB(coach){
     cacheWrite('coaches','list',S.coaches); // keep cache fresh
   }catch(e){
     console.warn('Could not save coach:',e.message);
-    showToast('Saved locally only — coaches table not set up','err');
+    showToast('Saved locally only','err');
   }
 }
 
@@ -944,15 +944,16 @@ async function saveCoverageRow(row){
   setSyncing('syncing','Saving…');
   try{
     await sb.upsert('coverage_requests',[row]);
+    setSyncing('ok','Saved');
   }catch(err){
     console.warn('Coverage save issue:',err.message);
-    showToast('Coverage saved locally only — add coverage_requests table to persist','err');
+    showToast('Coverage saved locally — changes may not persist','err');
+    setSyncing('err','Error');
   }
   // Always update local cache regardless of DB success
   const list=getCoverageRequests(key);
   const idx=list.findIndex(r=>r.day_index===row.day_index&&r.time_index===row.time_index);
   if(idx>=0) list[idx]={...list[idx],...row}; else list.push({...row});
-  setSyncing('ok','Saved');
 }
 
 async function deleteCoverageRow(d,t,key=wKey()){
@@ -1040,7 +1041,7 @@ function computeScheduleStats(){
 // ─── SPLASH ──────────────────────────────────────────
 function buildSplash(){
   g('splashCoaches').innerHTML=activeCoaches().map(c=>
-    `<button class="coach-pick-btn" onclick="enterAs(${c.id},false)"><span class="coach-pick-dot" style="background:${c.color}"></span>${c.name}</button>`
+    `<button class="coach-pick-btn" onclick="enterAs(${c.id},false)"><span class="coach-pick-dot" style="background:${c.color}"></span>${esc(c.name)}</button>`
   ).join('');
 }
 
@@ -1071,7 +1072,7 @@ async function enterAs(coachId,isHC){
     if(hadCache){
       // Render immediately with cached data — user sees content in <100ms
       hideLoader();
-      renderAll();
+      renderActiveTab();
       setSyncing('syncing','Refreshing…');
       // Fetch fresh data silently in background
       await Promise.all([
@@ -1079,7 +1080,7 @@ async function enterAs(coachId,isHC){
         loadPtSessions(),
         loadWeekFromDB(),
       ]);
-      renderAll(); // re-render with fresh data
+      renderActiveTab(); // re-render with fresh data
     }else{
       // No cache — show spinner and wait for network
       await Promise.all([
@@ -1088,14 +1089,14 @@ async function enterAs(coachId,isHC){
         loadWeekFromDB(),
       ]);
       hideLoader();
-      renderAll();
+      renderActiveTab();
     }
   }catch(e){
     console.error('Login load error:',e);
     setSyncing('err','Error');
     showToast('Some data failed to load — check connection','err');
     hideLoader();
-    renderAll();
+    renderActiveTab();
   }
 }
 
@@ -1161,10 +1162,6 @@ function renderActiveTab(){
     case 'pt-hc':      renderPtSummary(); break;
   }
 }
-
-// renderAll is kept for cases where we need to refresh everything
-// (e.g. after a week change where any tab might be active)
-function renderAll(){renderActiveTab();}
 
 // ─── RENDER: SCHEDULE ────────────────────────────────
 function renderSchedule(){
@@ -1235,7 +1232,7 @@ function renderSchedule(){
       const myReqs=stats.openCoverage.filter(r=>r.requested_by===me?.name).length;
       const others=stats.openCoverage.filter(r=>r.requested_by!==me?.name).sort((a,b)=>a.day_index-b.day_index||a.time_index-b.time_index);
       if(others.length){
-        const preview=others.slice(0,2).map(r=>`<span class="coverage-mini-item"><strong>${r.requested_by}</strong> ${DAY_SHORT[r.day_index]} ${CLASS_TIMES[r.time_index]}</span>`).join('');
+        const preview=others.slice(0,2).map(r=>`<span class="coverage-mini-item"><strong>${esc(r.requested_by)}</strong> ${DAY_SHORT[r.day_index]} ${CLASS_TIMES[r.time_index]}</span>`).join('');
         callout.className='coverage-callout show';
         callout.innerHTML=`<span class="coverage-callout-text">Coverage needed</span><div class="coverage-callout-items">${preview}</div><span class="cover-chip waiting">${others.length} open</span>`;
       }else if(myReqs){
@@ -1331,7 +1328,7 @@ function renderCoachAvail(){
   const coach=byId(S.curCoachId); if(!coach) return;
   const dates=wDates();
   const hdr=DAY_SHORT.map((d,i)=>
-    `<th><div class="day-col-head"><span>${d}<br><span style="font-weight:400;font-size:8px">${fmt(dates[i])}</span></span><button class="day-off-btn ${isDayOff(coach.name,i)?'active':''}" onclick="toggleDayOff('${coach.name}',${i})">✕ Off</button></div></th>`
+    `<th><div class="day-col-head"><span>${d}<br><span style="font-weight:400;font-size:8px">${fmt(dates[i])}</span></span><button class="day-off-btn ${isDayOff(coach.name,i)?'active':''}" onclick="toggleDayOff(${esc(JSON.stringify(coach.name))},${i})">✕ Off</button></div></th>`
   ).join('');
   let html=`<thead><tr><th>TIME</th>${hdr}</tr></thead><tbody>`;
   CLASS_TIMES.forEach((_,tIdx)=>{
@@ -1339,7 +1336,7 @@ function renderCoachAvail(){
     DAYS.forEach((_,dIdx)=>{
       if(isBk(dIdx,tIdx)){html+='<td><div class="avail-slot bk"></div></td>';return;}
       const av=isAvail(coach.name,dIdx,tIdx);
-      html+=`<td><div class="avail-slot ${av?'yes':'no'}" onclick="toggleSlot('${coach.name}',${dIdx},${tIdx});renderCoachAvail()"></div></td>`;
+      html+=`<td><div class="avail-slot ${av?'yes':'no'}" onclick="toggleSlot(${esc(JSON.stringify(coach.name))},${dIdx},${tIdx});renderCoachAvail()"></div></td>`;
     });
     html+='</tr>';
   });
@@ -1372,7 +1369,7 @@ function renderHcAvail(){
       const labels=availCoaches.map(c=>{
         const hex=c.color.replace('#','');
         const r=parseInt(hex.slice(0,2),16),gr=parseInt(hex.slice(2,4),16),b=parseInt(hex.slice(4,6),16);
-        return`<span class="coach-label" style="background:rgba(${r},${gr},${b},0.12);color:${c.color}"><span class="cl-dot" style="background:${c.color}"></span>${c.name}</span>`;
+        return`<span class="coach-label" style="background:rgba(${r},${gr},${b},0.12);color:${c.color}"><span class="cl-dot" style="background:${c.color}"></span>${esc(c.name)}</span>`;
       }).join('');
       html+=`<td><div class="hc-slot">${labels||'<span style="font-size:9px;color:var(--text3)">—</span>'}</div></td>`;
     });
@@ -1391,14 +1388,14 @@ function renderCoaches(){
     // PERF: pass weekData to avoid repeated wKey() lookups inside coachClassCount
     const weekClasses=coachClassCount(c.name,weekData);
     const monthClasses=S.monthlyClassCounts?S.monthlyClassCounts[c.name]||0:0;
-    const ac=Object.values(ensureAvail(c.name)).filter(Boolean).length;
+    const ac=Object.values(S.availability[wKey()]?.[c.name]||{}).filter(Boolean).length;
     const inactive=c.active===false;
     const mColor=monthClasses===0?'var(--text3)':(monthClasses>=10?c.color:'var(--text2)');
     return`<div class="coach-card" style="${inactive?'opacity:.72;':''}">
       <div class="coach-card-bar" style="background:${c.color}"></div>
-      <div class="coach-card-name" style="color:${c.color}">${c.name}</div>
+      <div class="coach-card-name" style="color:${c.color}">${esc(c.name)}</div>
       ${inactive?'<div class="inactive-pill">Inactive</div>':''}
-      <div class="coach-card-role">${c.role||'Coach'}</div>
+      <div class="coach-card-role">${esc(c.role||'Coach')}</div>
       <div class="coach-mini-stats">
         <div class="cm-stat"><div class="cm-num" style="color:${c.color}">${weekClasses}</div><div class="cm-lbl">This Week</div></div>
         <div class="cm-stat"><div class="cm-num" style="color:${mColor}">${monthClasses}</div><div class="cm-lbl">${monthName} Total</div></div>
@@ -1421,7 +1418,7 @@ function renderCoverageBoard(){
     g('coverageBoardTitle').textContent='Coverage Board';
     if(items.length===0){list.innerHTML='<div class="health-empty">No coverage requests this week.</div>';return;}
     list.innerHTML=items.map(req=>
-      `<div class="coverage-item"><div class="coverage-main"><div class="coverage-title">${DAY_SHORT[req.day_index]} ${CLASS_TIMES[req.time_index]}</div><div class="coverage-sub">${req.requested_by} needs coverage${req.volunteer_name?` • ${req.volunteer_name} volunteered`:''}</div></div><div class="coverage-actions">${req.volunteer_name?`<button class="btn" style="padding:6px 10px;font-size:11px;" onclick="approveCoverage(${req.day_index},${req.time_index})">Approve</button>`:'<span class="cover-chip waiting">Waiting</span>'}</div></div>`
+      `<div class="coverage-item"><div class="coverage-main"><div class="coverage-title">${DAY_SHORT[req.day_index]} ${CLASS_TIMES[req.time_index]}</div><div class="coverage-sub">${esc(req.requested_by)} needs coverage${req.volunteer_name?` • ${esc(req.volunteer_name)} volunteered`:''}</div></div><div class="coverage-actions">${req.volunteer_name?`<button class="btn" style="padding:6px 10px;font-size:11px;" onclick="approveCoverage(${req.day_index},${req.time_index})">Approve</button>`:'<span class="cover-chip waiting">Waiting</span>'}</div></div>`
     ).join('');
     return;
   }
@@ -1436,10 +1433,10 @@ function renderCoverageBoard(){
     const someoneElse=req.volunteer_name&&req.volunteer_name!==me.name;
     let action='';
     if(already) action=`<button class="btn ghost" style="padding:6px 10px;font-size:11px;" onclick="removeVolunteer(${req.day_index},${req.time_index})">Undo Cover</button>`;
-    else if(someoneElse) action=`<span class="cover-chip ready">${req.volunteer_name} offered</span>`;
+    else if(someoneElse) action=`<span class="cover-chip ready">${esc(req.volunteer_name)} offered</span>`;
     else if(canCover) action=`<button class="btn" style="padding:6px 10px;font-size:11px;" onclick="volunteerForCoverage(${req.day_index},${req.time_index})">I Can Cover</button>`;
     else action='<span class="cover-chip waiting">Unavailable</span>';
-    return`<div class="coverage-item"><div class="coverage-main"><div class="coverage-title">${DAY_SHORT[req.day_index]} ${CLASS_TIMES[req.time_index]}</div><div class="coverage-sub">${req.requested_by} needs coverage</div></div><div class="coverage-actions">${action}</div></div>`;
+    return`<div class="coverage-item"><div class="coverage-main"><div class="coverage-title">${DAY_SHORT[req.day_index]} ${CLASS_TIMES[req.time_index]}</div><div class="coverage-sub">${esc(req.requested_by)} needs coverage</div></div><div class="coverage-actions">${action}</div></div>`;
   }).join('');
 }
 
@@ -1600,7 +1597,7 @@ function renderAnalytics(){
       <div class="analytics-coach-top">
         <div class="analytics-coach-name">
           <span style="width:9px;height:9px;border-radius:50%;background:${c.color};flex-shrink:0;display:inline-block;"></span>
-          ${c.name}
+          ${esc(c.name)}
         </div>
         <div class="analytics-coach-right">
           ${avgLabel}
@@ -1708,7 +1705,7 @@ function renderPtView(){
     const dateStr=d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
     return`<div class="pt-entry-row">
       <div class="pt-entry-main">
-        <div class="pt-entry-member">${r.member_name}</div>
+        <div class="pt-entry-member">${esc(r.member_name)}</div>
         <div class="pt-entry-meta">${dateStr}</div>
       </div>
       <div style="display:flex;align-items:center;gap:10px;">
@@ -1765,7 +1762,7 @@ function renderPtSummary(){
         <div class="pt-coach-row">
           <div class="pt-coach-name">
             <span style="width:9px;height:9px;border-radius:50%;background:${c.color};flex-shrink:0;display:inline-block;"></span>
-            <span style="font-size:13px;font-weight:700;color:var(--accent)">${c.name}</span>
+            <span style="font-size:13px;font-weight:700;color:var(--accent)">${esc(c.name)}</span>
           </div>
           <div class="pt-coach-stats">
             <div class="pt-coach-stat"><div class="pt-coach-stat-num">${wS}</div></div>
@@ -1818,10 +1815,10 @@ function openCellModal(dIdx,tIdx){
   const rec=ranked.find(r=>r.available);
   g('assignList').innerHTML=ranked.map(({c,available,load},idx)=>{
     const sel=c.name===current;
-    return`<div class="assign-item ${sel?'selected':''} ${rec&&rec.c.name===c.name?'recommended':''}" onclick="selAssign('${c.name}',this)">
+    return`<div class="assign-item ${sel?'selected':''} ${rec&&rec.c.name===c.name?'recommended':''}" onclick="selAssign(${esc(JSON.stringify(c.name))},this)">
       <span class="assign-rank">${idx+1}</span>
       <span class="chip-dot" style="background:${c.color};width:12px;height:12px;border-radius:50%;flex-shrink:0"></span>
-      <span class="assign-name">${c.name}</span>
+      <span class="assign-name">${esc(c.name)}</span>
       <div class="assign-meta">
         <span class="assign-avail" style="color:${available?'var(--green)':'var(--text3)'}">${available?'✓ available':'Unavailable'}</span>
         <span class="assign-load">${load} classes this week</span>
@@ -1844,6 +1841,8 @@ async function doAssign(){
 }
 async function doRemove(){
   if(!assignTarget) return;
+  const slot=DAYS[assignTarget.dIdx]+' · '+CLASS_TIMES[assignTarget.tIdx];
+  if(!confirm('Remove the assigned coach from '+slot+'?')) return;
   closeOverlay('assignOverlay');
   await saveScheduleSlot(assignTarget.dIdx,assignTarget.tIdx,'');
   renderSchedule();
@@ -1896,7 +1895,7 @@ function openCoverageModal(dIdx,tIdx){
   const req=getAnyCoverageRecord(dIdx,tIdx);
   g('coverageModalTitle').textContent=`${DAYS[dIdx]} · ${CLASS_TIMES[tIdx]}`;
   g('coverageModalHint').textContent=req?'You can leave this request open or cancel it.':'Put this class up for coverage if you need someone to take it.';
-  g('coverageModalBody').innerHTML=`<div class="ops-row"><div class="ops-meta"><strong>${me.name}</strong><span class="ops-sub">Assigned coach for this class</span></div><span class="cover-chip ${req&&req.volunteer_name?'ready':(req?'waiting':'')}">${req?coverageStatusLabel(req):'No request yet'}</span></div>${req&&req.volunteer_name?`<div class="ops-row"><div class="ops-meta"><strong>${req.volunteer_name}</strong><span class="ops-sub">Volunteer waiting on head coach approval</span></div><span class="cover-chip ready">Volunteer ready</span></div>`:''}`;
+  g('coverageModalBody').innerHTML=`<div class="ops-row"><div class="ops-meta"><strong>${esc(me.name)}</strong><span class="ops-sub">Assigned coach for this class</span></div><span class="cover-chip ${req&&req.volunteer_name?'ready':(req?'waiting':'')}">${req?coverageStatusLabel(req):'No request yet'}</span></div>${req&&req.volunteer_name?`<div class="ops-row"><div class="ops-meta"><strong>${esc(req.volunteer_name)}</strong><span class="ops-sub">Volunteer waiting on head coach approval</span></div><span class="cover-chip ready">Volunteer ready</span></div>`:''}`;
   g('coverageModalActions').innerHTML=req
     ?`<button class="btn ghost" onclick="closeOverlay('coverageOverlay')">Close</button><button class="btn red-btn" onclick="cancelCoverageRequest()">Cancel Request</button>`
     :`<button class="btn ghost" onclick="closeOverlay('coverageOverlay')">Close</button><button class="btn" onclick="createCoverageRequest()">Request Coverage</button>`;
@@ -1979,11 +1978,12 @@ async function changeWeek(dir){
 
 // ─── CSV EXPORT ──────────────────────────────────────
 function exportCSV(){
+  const csvField=v=>`"${String(v).replace(/"/g,'""')}"`;
   const dates=wDates();
-  let csv='Time,'+dates.map((d,i)=>DAYS[i]+' '+fmt(d)).join(',')+'\n';
+  let csv=csvField('Time')+','+dates.map((d,i)=>csvField(DAYS[i]+' '+fmt(d))).join(',')+'\n';
   CLASS_TIMES.forEach((_,t)=>{
-    csv+=CLASS_TIMES[t];
-    DAYS.forEach((_,d)=>{csv+=isBk(d,t)?',':(','+(getSlot(d,t)||''));});
+    csv+=csvField(CLASS_TIMES[t]);
+    DAYS.forEach((_,d)=>{csv+=isBk(d,t)?',':(','+ csvField(getSlot(d,t)||''));});
     csv+='\n';
   });
   const a=Object.assign(document.createElement('a'),{href:URL.createObjectURL(new Blob([csv],{type:'text/csv'})),download:'schedule_'+wKey()+'.csv'});
@@ -1993,11 +1993,17 @@ function exportCSV(){
 
 // ─── UI HELPERS ──────────────────────────────────────
 function g(id){return document.getElementById(id);}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
 function openOverlay(id){g(id).classList.add('open');}
 function closeOverlay(id){g(id).classList.remove('open');}
 // Single delegated event listener for all overlays instead of one per overlay
 document.addEventListener('click',e=>{
   if(e.target.classList.contains('overlay')) closeOverlay(e.target.id);
+});
+document.addEventListener('keydown',e=>{
+  if(e.key!=='Escape') return;
+  const open=document.querySelector('.overlay.open');
+  if(open) closeOverlay(open.id);
 });
 function showToast(msg,type='ok'){
   const t=g('toast');
@@ -2099,7 +2105,7 @@ async function saveCoachNote(){
     showToast('Note sent ✓','ok');
   }catch(err){
     console.error(err); setSyncing('err','Error');
-    showToast(err.message.includes('notes')?'Notes table not set up yet — run SQL in Supabase first':'Save error: '+err.message,'err');
+    showToast('Could not save note — try again later','err');
   }
   g('saveNoteBtn').disabled=false;
 }
@@ -2123,8 +2129,8 @@ function renderHcNotes(){
     const c=byName(n.coach_name);
     const color=c?c.color:'var(--accent)';
     return`<div class="note-card" style="border-left:4px solid ${color}">
-      <div class="note-card-name" style="color:${color}">${n.coach_name}</div>
-      <div class="note-card-text">${n.note}</div>
+      <div class="note-card-name" style="color:${color}">${esc(n.coach_name)}</div>
+      <div class="note-card-text">${esc(n.note)}</div>
       <div class="note-card-week">Week of ${fmtF(wDates()[0])}</div>
     </div>`;
   }).join('');
