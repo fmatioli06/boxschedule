@@ -1073,12 +1073,12 @@ function ensureAvail(name){
   if(!S.availability[k][name]){
     S.availability[k][name]={};
     CLASS_TIMES.forEach((_,t)=>DAYS.forEach((_,d)=>{
-      if(!isBk(d,t)) S.availability[k][name][`${d}_${t}`]=true;
+      if(!isBk(d,t)) S.availability[k][name][`${d}_${t}`]=false;
     }));
   }
   return S.availability[k][name];
 }
-function isAvail(name,d,t){return ensureAvail(name)[`${d}_${t}`]!==false;}
+function isAvail(name,d,t){return ensureAvail(name)[`${d}_${t}`]===true;}
 function toggleSlot(name,d,t){const av=ensureAvail(name);av[`${d}_${t}`]=!av[`${d}_${t}`];}
 function isDayOff(name,dIdx){
   return CLASS_TIMES.map((_,t)=>t).filter(t=>!isBk(dIdx,t)).every(t=>ensureAvail(name)[`${dIdx}_${t}`]===false);
