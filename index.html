@@ -1938,7 +1938,8 @@ async function loadAttendance(){
 }
 
 function getAttRec(dIdx,tIdx,coachName){
-  return AT.records.find(r=>r.day_index===dIdx&&r.time_index===tIdx&&r.coach_name===coachName)||null;
+  const key=wKey();
+  return AT.records.find(r=>r.week===key&&r.day_index===dIdx&&r.time_index===tIdx&&r.coach_name===coachName)||null;
 }
 
 function nowTimeStr(){
@@ -2433,6 +2434,7 @@ async function changeWeek(dir){
     const fetches=[loadWeekFromDB()];
     if(newMonth!==prevMonth||activeTab==='ops'||activeTab==='coaches') fetches.push(loadMonthlyClassCounts());
     if(activeTab==='pt'||activeTab==='pt-hc') fetches.push(loadPtSessions());
+    if(activeTab==='attendance') fetches.push(loadAttendance());
     await Promise.all(fetches);
   }catch(e){console.error(e);}
   finally{hideLoader();}
