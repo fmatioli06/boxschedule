@@ -339,6 +339,35 @@ select{width:100%;background:var(--surface2);border:1.5px solid var(--border);co
 ::-webkit-scrollbar{width:4px;height:4px;}
 ::-webkit-scrollbar-track{background:transparent;}
 ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
+
+/* ── Attendance / Clock In ── */
+.attendance-day{background:var(--surface);border:1px solid var(--border);border-radius:12px;margin-bottom:10px;overflow:hidden;box-shadow:var(--shadow);}
+.attendance-day-head{padding:11px 14px;border-bottom:1px solid var(--border);background:var(--surface2);display:flex;align-items:center;justify-content:space-between;}
+.attendance-day-head.today-head{background:var(--accent);}
+.attendance-day-head.today-head .att-day-label,.attendance-day-head.today-head .att-day-date{color:#fff;}
+.att-day-label{font-family:'Bebas Neue',cursive;font-size:16px;letter-spacing:1px;color:var(--text2);}
+.att-day-date{font-family:'DM Mono',monospace;font-size:10px;color:var(--text3);}
+.attendance-slot{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--border);gap:10px;}
+.attendance-slot:last-child{border-bottom:none;}
+.att-slot-info{display:flex;flex-direction:column;gap:2px;min-width:0;}
+.att-slot-time{font-weight:700;font-size:13px;color:var(--text);}
+.att-slot-note{font-size:11px;color:var(--text3);}
+.att-slot-actions{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.clock-in-btn{background:var(--green);color:#fff;border:none;padding:7px 14px;border-radius:8px;font-family:'Figtree',sans-serif;font-size:12px;font-weight:700;cursor:pointer;transition:filter .15s;}
+.clock-in-btn:hover{filter:brightness(1.1);}
+.clock-out-btn{background:var(--accent);color:#fff;border:none;padding:7px 12px;border-radius:8px;font-family:'Figtree',sans-serif;font-size:12px;font-weight:700;cursor:pointer;transition:filter .15s;}
+.clock-out-btn:hover{filter:brightness(1.1);}
+.att-in-time{font-family:'DM Mono',monospace;font-size:11px;color:var(--text3);}
+.att-done-chip{background:var(--green-bg);color:var(--green);border:1px solid var(--green-bdr);border-radius:6px;padding:4px 10px;font-size:11px;font-weight:700;white-space:nowrap;}
+/* ── HC Hours ── */
+.hours-coach-row{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid var(--border);}
+.hours-coach-row:last-child{border-bottom:none;}
+.hours-stat{text-align:center;min-width:52px;}
+.hours-stat-num{font-family:'Bebas Neue',cursive;font-size:20px;color:var(--accent);line-height:1;}
+.hours-stat-lbl{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;font-weight:600;}
+.hours-log-row{display:grid;grid-template-columns:60px 1fr 80px 1fr 54px;align-items:center;padding:8px 14px;border-bottom:1px solid var(--border);font-size:12px;gap:6px;}
+.hours-log-row:last-child{border-bottom:none;}
+.hours-log-head{font-weight:700;color:var(--text2);background:var(--surface2);font-size:10px;text-transform:uppercase;letter-spacing:.4px;}
 </style>
 </head>
 <body>
@@ -560,6 +589,25 @@ select{width:100%;background:var(--surface2);border:1.5px solid var(--border);co
         <div id="ptEntriesList"></div>
       </div>
     </div>
+
+    <!-- Coach: Attendance / Clock In -->
+    <div class="view" id="view-attendance">
+      <div class="section-head">
+        <span class="section-title">Attendance</span>
+        <button class="btn ghost" style="font-size:12px;padding:6px 12px;" onclick="openRetroAttModal()">+ Log Past Class</button>
+      </div>
+      <div id="attendanceContent"></div>
+    </div>
+
+    <!-- HC: Coach Hours -->
+    <div class="view" id="view-hours-hc">
+      <div class="section-head">
+        <span class="section-title">Coach Hours</span>
+        <span class="week-chip" id="hoursHcChip"></span>
+      </div>
+      <div id="hoursHcContent"></div>
+    </div>
+
   </main>
 
   <nav class="bottom-tabs" id="bottomTabs"></nav>
@@ -600,6 +648,26 @@ select{width:100%;background:var(--surface2);border:1.5px solid var(--border);co
     <div class="quick-hint" id="coverageModalHint">Put your class up for coverage or cancel the request.</div>
     <div id="coverageModalBody"></div>
     <div class="modal-actions" id="coverageModalActions"></div>
+  </div>
+</div>
+
+<div class="overlay" id="retroAttOverlay">
+  <div class="modal">
+    <span class="modal-handle"></span>
+    <div class="modal-title">Log Past Class</div>
+    <div class="quick-hint">Record attendance for a class you already taught.</div>
+    <div class="form-row"><label>Date</label><input type="date" id="retroAttDate" style="width:100%;background:var(--surface2);border:1.5px solid var(--border);color:var(--text);font-family:'Figtree',sans-serif;font-size:14px;padding:10px 12px;border-radius:8px;outline:none;-webkit-appearance:none;"></div>
+    <div class="form-row"><label>Day</label><select id="retroAttDay" style="width:100%;background:var(--surface2);border:1.5px solid var(--border);color:var(--text);font-family:'Figtree',sans-serif;font-size:14px;padding:10px 12px;border-radius:8px;outline:none;-webkit-appearance:none;"></select></div>
+    <div class="form-row"><label>Class Time</label><select id="retroAttTime" style="width:100%;background:var(--surface2);border:1.5px solid var(--border);color:var(--text);font-family:'Figtree',sans-serif;font-size:14px;padding:10px 12px;border-radius:8px;outline:none;-webkit-appearance:none;"></select></div>
+    <div class="form-row" id="retroCoachRow" style="display:none"><label>Coach</label><select id="retroAttCoach" style="width:100%;background:var(--surface2);border:1.5px solid var(--border);color:var(--text);font-family:'Figtree',sans-serif;font-size:14px;padding:10px 12px;border-radius:8px;outline:none;-webkit-appearance:none;"></select></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+      <div class="form-row" style="margin-bottom:0"><label>Clock In</label><input type="time" id="retroAttIn" style="width:100%;background:var(--surface2);border:1.5px solid var(--border);color:var(--text);font-family:'Figtree',sans-serif;font-size:14px;padding:10px 12px;border-radius:8px;outline:none;-webkit-appearance:none;"></div>
+      <div class="form-row" style="margin-bottom:0"><label>Clock Out</label><input type="time" id="retroAttOut" style="width:100%;background:var(--surface2);border:1.5px solid var(--border);color:var(--text);font-family:'Figtree',sans-serif;font-size:14px;padding:10px 12px;border-radius:8px;outline:none;-webkit-appearance:none;"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn ghost" onclick="closeOverlay('retroAttOverlay')">Cancel</button>
+      <button class="btn" onclick="saveRetroAtt()">Save</button>
+    </div>
   </div>
 </div>
 
@@ -662,6 +730,8 @@ const S={
   monthlyClassCounts:null,
   ptSessions:[],
 };
+const AT={records:[], loading:false};   // attendance records
+const ATH={records:[], period:'week'};  // HC hours view
 
 // ─── WEEK HELPERS ─────────────────────────────────────
 // getMon: returns Monday Date for a given week offset.
@@ -910,9 +980,16 @@ async function loadMonthlyClassCounts(){
   const monthStart=new Date(y,m,1).toISOString().slice(0,10);
   const monthEnd=new Date(y,m+1,0).toISOString().slice(0,10);
   try{
-    const rows=await sb.select('schedule',`week=gte.${monthStart}&week=lte.${monthEnd}&select=coach_name`);
+    const fetchFrom=new Date(monthStart); fetchFrom.setDate(fetchFrom.getDate()-6);
+    const fetchFromStr=fetchFrom.toISOString().slice(0,10);
+    const rows=await sb.select('schedule',`week=gte.${fetchFromStr}&week=lte.${monthEnd}&select=coach_name,week,day_index`);
+    const startD=new Date(monthStart),endD=new Date(monthEnd);
     const counts={};
-    rows.forEach(r=>{if(r.coach_name) counts[r.coach_name]=(counts[r.coach_name]||0)+1;});
+    rows.forEach(r=>{
+      if(!r.coach_name) return;
+      const d=new Date(r.week); d.setDate(d.getDate()+(r.day_index||0));
+      if(d>=startD&&d<=endD) counts[r.coach_name]=(counts[r.coach_name]||0)+1;
+    });
     S.monthlyClassCounts=counts;
   }catch(e){
     console.warn('Monthly counts failed:',e.message);
@@ -1111,6 +1188,7 @@ const COACH_TABS=[
   {id:'schedule',label:'Schedule',icon:'📅'},
   {id:'availability',label:'Availability',icon:'✋'},
   {id:'pt',label:'PT Hours',icon:'💪'},
+  {id:'attendance',label:'Clock In',icon:'⏱'},
 ];
 const HC_TABS=[
   {id:'schedule',label:'Schedule',icon:'📅'},
@@ -1119,6 +1197,7 @@ const HC_TABS=[
   {id:'coaches',label:'Coaches',icon:'⚡'},
   {id:'analytics',label:'Stats',icon:'📊'},
   {id:'pt-hc',label:'PT',icon:'💪'},
+  {id:'hours-hc',label:'Hours',icon:'⏱'},
 ];
 let activeTab='schedule';
 
@@ -1144,6 +1223,8 @@ async function switchTab(id,btn){
     if(id==='coaches'||id==='ops') await loadMonthlyClassCounts();
     if(id==='pt'||id==='pt-hc') await loadPtSessions();
     if(id==='analytics') await loadAnalyticsData();
+    if(id==='attendance') await loadAttendance();
+    if(id==='hours-hc'){ await loadHCHoursData(); }
   }catch(e){console.error(e);}
   renderActiveTab();
 }
@@ -1160,6 +1241,8 @@ function renderActiveTab(){
     case 'analytics':  renderAnalytics(); break;
     case 'pt':         renderPtView(); break;
     case 'pt-hc':      renderPtSummary(); break;
+    case 'attendance': renderAttendance(); break;
+    case 'hours-hc':   renderHoursHC(); break;
   }
 }
 
@@ -1502,9 +1585,18 @@ async function loadAnalyticsData(){
 
   AN.loading=true;
   try{
-    const rows=await sb.select('schedule',`week=gte.${range.start}&week=lte.${range.end}&select=coach_name`);
+    // Fetch 6 days earlier to catch weeks that start before the period but have days inside it.
+    // Then filter by actual class date (week Monday + day_index) client-side.
+    const fetchFrom=new Date(range.start); fetchFrom.setDate(fetchFrom.getDate()-6);
+    const fetchFromStr=fetchFrom.toISOString().slice(0,10);
+    const rows=await sb.select('schedule',`week=gte.${fetchFromStr}&week=lte.${range.end}&select=coach_name,week,day_index`);
+    const startD=new Date(range.start), endD=new Date(range.end);
     const counts={};
-    rows.forEach(r=>{if(r.coach_name) counts[r.coach_name]=(counts[r.coach_name]||0)+1;});
+    rows.forEach(r=>{
+      if(!r.coach_name) return;
+      const d=new Date(r.week); d.setDate(d.getDate()+(r.day_index||0));
+      if(d>=startD&&d<=endD) counts[r.coach_name]=(counts[r.coach_name]||0)+1;
+    });
     AN.data[AN.period]=counts;
   }catch(e){
     console.warn('Analytics load failed:',e.message);
@@ -1796,6 +1888,294 @@ function exportPtCSV(){
   const a=Object.assign(document.createElement('a'),{href:URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8;'})),download:`PT_Hours_${monthName}_${year}.csv`});
   a.click(); URL.revokeObjectURL(a.href);
   showToast('Exported ✓','ok');
+}
+
+// ─── ATTENDANCE / CLOCK IN ────────────────────────────
+
+function fmtTimestamp(iso){
+  if(!iso) return '';
+  const d=new Date(iso);
+  const h=d.getHours(),m=d.getMinutes();
+  return`${h%12||12}:${String(m).padStart(2,'0')} ${h>=12?'PM':'AM'}`;
+}
+
+function calcDuration(inIso,outIso){
+  if(!inIso||!outIso) return null;
+  const mins=Math.round((new Date(outIso)-new Date(inIso))/60000);
+  if(mins<=0) return null;
+  const h=Math.floor(mins/60),m=mins%60;
+  return h>0?`${h}h ${m}m`:`${m}m`;
+}
+
+async function loadAttendance(){
+  const key=wKey();
+  AT.loading=true;
+  try{
+    const coach=byId(S.curCoachId);
+    const q=S.isHC
+      ?`week=eq.${key}&order=day_index.asc,time_index.asc`
+      :`week=eq.${key}&coach_name=eq.${encodeURIComponent(coach?.name||'')}&order=day_index.asc,time_index.asc`;
+    AT.records=await sb.select('attendance',q);
+  }catch(e){
+    console.warn('Attendance table not ready:',e.message);
+    AT.records=[];
+  }finally{
+    AT.loading=false;
+  }
+}
+
+function getAttRec(dIdx,tIdx,coachName){
+  return AT.records.find(r=>r.day_index===dIdx&&r.time_index===tIdx&&r.coach_name===coachName)||null;
+}
+
+async function clockIn(dIdx,tIdx){
+  const coach=byId(S.curCoachId); if(!coach) return;
+  const key=wKey();
+  if(getAttRec(dIdx,tIdx,coach.name)?.clocked_in){showToast('Already clocked in','err');return;}
+  setSyncing('syncing','Saving…');
+  try{
+    const row={coach_name:coach.name,week:key,day_index:dIdx,time_index:tIdx,clocked_in:new Date().toISOString()};
+    const res=await sb.upsertReturn('attendance',[row]);
+    const saved=res&&res[0]?res[0]:{...row,id:Date.now()};
+    AT.records=AT.records.filter(r=>!(r.day_index===dIdx&&r.time_index===tIdx&&r.coach_name===coach.name));
+    AT.records.push(saved);
+    setSyncing('ok','Saved');
+    renderAttendance();
+  }catch(e){
+    console.warn('Clock in failed:',e.message);
+    setSyncing('err','Error');
+    showToast('Clock in failed','err');
+  }
+}
+
+async function clockOut(dIdx,tIdx){
+  const coach=byId(S.curCoachId); if(!coach) return;
+  const rec=getAttRec(dIdx,tIdx,coach.name);
+  if(!rec?.clocked_in){showToast('Not clocked in','err');return;}
+  setSyncing('syncing','Saving…');
+  try{
+    const updated={...rec,clocked_out:new Date().toISOString()};
+    await sb.upsert('attendance',[updated]);
+    AT.records=AT.records.map(r=>r.id===rec.id?updated:r);
+    setSyncing('ok','Saved');
+    renderAttendance();
+  }catch(e){
+    console.warn('Clock out failed:',e.message);
+    setSyncing('err','Error');
+    showToast('Clock out failed','err');
+  }
+}
+
+function renderAttendance(){
+  const el=g('attendanceContent'); if(!el) return;
+  const coach=byId(S.curCoachId);
+  const dates=wDates();
+  const today=new Date(); today.setHours(0,0,0,0);
+  const weekData=S.schedule[wKey()]||{};
+
+  if(AT.loading){
+    el.innerHTML='<div class="health-empty" style="padding:20px 0">Loading…</div>';
+    return;
+  }
+
+  el.innerHTML=DAYS.map((day,dIdx)=>{
+    const d=dates[dIdx];
+    const isToday=d.getTime()===today.getTime();
+    const slots=CLASS_TIMES.map((time,tIdx)=>{
+      if(isBk(dIdx,tIdx)) return '';
+      const assigned=weekData[dIdx]?.[tIdx]||null;
+      const rec=coach?getAttRec(dIdx,tIdx,coach.name):null;
+      let action='';
+      if(rec?.clocked_in&&rec?.clocked_out){
+        const dur=calcDuration(rec.clocked_in,rec.clocked_out);
+        action=`<span class="att-done-chip">✓ Done${dur?' · '+dur:''}</span>`;
+      }else if(rec?.clocked_in){
+        action=`<div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
+          <span class="att-in-time">In at ${fmtTimestamp(rec.clocked_in)}</span>
+          <button class="clock-out-btn" onclick="clockOut(${dIdx},${tIdx})">Clock Out</button>
+        </div>`;
+      }else{
+        action=`<button class="clock-in-btn" onclick="clockIn(${dIdx},${tIdx})">Clock In</button>`;
+      }
+      const noteHTML=assigned&&coach&&assigned!==coach.name
+        ?`<span class="att-slot-note">${esc(assigned)}'s class</span>`
+        :assigned?''
+        :'<span class="att-slot-note">Unassigned</span>';
+      return`<div class="attendance-slot">
+        <div class="att-slot-info"><span class="att-slot-time">${time}</span>${noteHTML}</div>
+        <div class="att-slot-actions">${action}</div>
+      </div>`;
+    }).filter(Boolean).join('');
+    if(!slots) return '';
+    return`<div class="attendance-day">
+      <div class="attendance-day-head${isToday?' today-head':''}">
+        <span class="att-day-label">${day}</span>
+        <span class="att-day-date">${fmt(d)}${isToday?' · Today':''}</span>
+      </div>
+      ${slots}
+    </div>`;
+  }).join('');
+}
+
+function openRetroAttModal(){
+  // Populate day select
+  const dayEl=g('retroAttDay');
+  dayEl.innerHTML=DAYS.map((d,i)=>`<option value="${i}">${d}</option>`).join('');
+  // Populate time select (filtered for selected day)
+  const timeEl=g('retroAttTime');
+  timeEl.innerHTML=CLASS_TIMES.map((t,i)=>`<option value="${i}">${t}</option>`).join('');
+  // Show coach select only for HC
+  const coachRow=g('retroCoachRow');
+  if(S.isHC){
+    coachRow.style.display='block';
+    g('retroAttCoach').innerHTML=activeCoaches().map(c=>`<option value="${esc(c.name)}">${esc(c.name)}</option>`).join('');
+  }else{
+    coachRow.style.display='none';
+  }
+  // Default date to today
+  g('retroAttDate').value=new Date().toISOString().slice(0,10);
+  g('retroAttIn').value='';
+  g('retroAttOut').value='';
+  openOverlay('retroAttOverlay');
+}
+
+async function saveRetroAtt(){
+  const dateVal=g('retroAttDate').value;
+  const dIdx=parseInt(g('retroAttDay').value);
+  const tIdx=parseInt(g('retroAttTime').value);
+  const inVal=g('retroAttIn').value;
+  const outVal=g('retroAttOut').value;
+  if(!dateVal){showToast('Pick a date','err');return;}
+  if(!inVal){showToast('Enter clock-in time','err');return;}
+  const coachName=S.isHC?g('retroAttCoach').value:byId(S.curCoachId)?.name;
+  if(!coachName){showToast('No coach selected','err');return;}
+  // Compute the Monday of the week for the given date
+  const d=new Date(dateVal+'T12:00:00');
+  const dow=d.getDay();
+  const mon=new Date(d); mon.setDate(d.getDate()-dow+(dow===0?-6:1)); mon.setHours(0,0,0,0);
+  const weekKey=mon.toISOString().slice(0,10);
+  // Build timestamps from date + time
+  const cinIso=`${dateVal}T${inVal}:00`;
+  const coutIso=outVal?`${dateVal}T${outVal}:00`:null;
+  setSyncing('syncing','Saving…');
+  try{
+    const row={coach_name:coachName,week:weekKey,day_index:dIdx,time_index:tIdx,clocked_in:cinIso,clocked_out:coutIso};
+    await sb.upsert('attendance',[row]);
+    setSyncing('ok','Saved');
+    showToast('Attendance logged ✓','ok');
+    closeOverlay('retroAttOverlay');
+    if(activeTab==='attendance') await loadAttendance().then(renderAttendance);
+    if(activeTab==='hours-hc') await loadHCHoursData().then(renderHoursHC);
+  }catch(e){
+    console.warn('Retro attendance save failed:',e.message);
+    setSyncing('err','Error');
+    showToast('Save failed','err');
+  }
+}
+
+// ─── HC HOURS ────────────────────────────────────────
+
+async function loadHCHoursData(){
+  let start,end;
+  if(ATH.period==='week'){
+    const{weekStart,weekEnd}=ptWeekRange();
+    start=weekStart; end=weekEnd;
+  }else{
+    const{monthStart,monthEnd}=ptMonthRange();
+    start=monthStart; end=monthEnd;
+  }
+  // Fetch 6 days earlier to catch cross-month weeks
+  const fetchFrom=new Date(start); fetchFrom.setDate(fetchFrom.getDate()-6);
+  const fetchFromStr=fetchFrom.toISOString().slice(0,10);
+  try{
+    const rows=await sb.select('attendance',
+      `week=gte.${fetchFromStr}&week=lte.${end}&order=week.asc,day_index.asc,time_index.asc`);
+    const startD=new Date(start),endD=new Date(end);
+    ATH.records=rows.filter(r=>{
+      const d=new Date(r.week); d.setDate(d.getDate()+(r.day_index||0));
+      return d>=startD&&d<=endD;
+    });
+  }catch(e){
+    console.warn('HC hours load failed:',e.message);
+    ATH.records=[];
+  }
+}
+
+async function switchHoursPeriod(p){
+  ATH.period=p;
+  ATH.records=[];
+  renderHoursHC();
+  await loadHCHoursData();
+  renderHoursHC();
+}
+
+function renderHoursHC(){
+  const el=g('hoursHcContent'); if(!el) return;
+  const chip=g('hoursHcChip');
+  const mon=getMon(S.weekOffset);
+  const dates=wDates();
+  if(chip) chip.textContent=ATH.period==='week'?'Week of '+fmtF(dates[0]):mon.toLocaleString('default',{month:'long'})+' '+mon.getFullYear();
+
+  const toggleHTML=`<div style="display:flex;gap:8px;margin-bottom:14px;">
+    <button class="btn${ATH.period==='week'?'':' ghost'}" onclick="switchHoursPeriod('week')" style="font-size:12px;padding:6px 14px;">This Week</button>
+    <button class="btn${ATH.period==='month'?'':' ghost'}" onclick="switchHoursPeriod('month')" style="font-size:12px;padding:6px 14px;">This Month</button>
+  </div>`;
+
+  if(!ATH.records.length){
+    el.innerHTML=toggleHTML+'<div class="health-empty" style="padding:20px 0">No attendance records for this period.</div>';
+    return;
+  }
+
+  // Per-coach aggregation
+  const coachMap={};
+  ATH.records.forEach(r=>{
+    if(!coachMap[r.coach_name]) coachMap[r.coach_name]={classes:0,totalMins:0};
+    coachMap[r.coach_name].classes++;
+    if(r.clocked_in&&r.clocked_out){
+      const mins=Math.round((new Date(r.clocked_out)-new Date(r.clocked_in))/60000);
+      if(mins>0) coachMap[r.coach_name].totalMins+=mins;
+    }
+  });
+
+  const summaryRows=Object.entries(coachMap)
+    .sort((a,b)=>b[1].classes-a[1].classes)
+    .map(([name,stats])=>{
+      const c=byName(name)||{name,color:'#888'};
+      const hrs=stats.totalMins>0?(stats.totalMins/60).toFixed(1):'—';
+      return`<div class="hours-coach-row">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="width:9px;height:9px;border-radius:50%;background:${c.color};display:inline-block;flex-shrink:0;"></span>
+          <span style="font-weight:600;font-size:14px;">${esc(name)}</span>
+        </div>
+        <div style="display:flex;gap:16px;align-items:center;">
+          <div class="hours-stat"><div class="hours-stat-num">${stats.classes}</div><div class="hours-stat-lbl">Classes</div></div>
+          <div class="hours-stat"><div class="hours-stat-num">${hrs}</div><div class="hours-stat-lbl">Hours</div></div>
+        </div>
+      </div>`;
+    }).join('');
+
+  const logRows=ATH.records.map(r=>{
+    const d=new Date(r.week); d.setDate(d.getDate()+(r.day_index||0));
+    const dur=calcDuration(r.clocked_in,r.clocked_out)||'—';
+    return`<div class="hours-log-row">
+      <span style="color:var(--text3)">${fmt(d)}</span>
+      <span style="font-weight:600">${esc(r.coach_name)}</span>
+      <span style="color:var(--text3)">${CLASS_TIMES[r.time_index]||'—'}</span>
+      <span>${r.clocked_in?fmtTimestamp(r.clocked_in):'—'} → ${r.clocked_out?fmtTimestamp(r.clocked_out):'—'}</span>
+      <span style="color:var(--text3)">${dur}</span>
+    </div>`;
+  }).join('');
+
+  el.innerHTML=`${toggleHTML}
+    <div class="coverage-board" style="margin-bottom:14px;">
+      <div class="coverage-board-head"><span class="section-title" style="font-size:16px;">Summary</span></div>
+      ${summaryRows}
+    </div>
+    <div class="coverage-board">
+      <div class="coverage-board-head"><span class="section-title" style="font-size:16px;">Detailed Log</span></div>
+      <div class="hours-log-row hours-log-head"><span>Date</span><span>Coach</span><span>Class</span><span>In → Out</span><span>Dur</span></div>
+      ${logRows}
+    </div>`;
 }
 
 // ─── ASSIGN MODAL ────────────────────────────────────
