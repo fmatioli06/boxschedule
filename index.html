@@ -670,8 +670,7 @@ select{width:100%;background:var(--surface2);border:1.5px solid var(--border);co
     <span class="modal-handle"></span>
     <div class="modal-title">Log a Class</div>
     <div class="quick-hint">Log a past class or a class you covered for someone else.</div>
-    <div class="form-row"><label>Date</label><input type="date" id="retroAttDate" style="width:100%;background:var(--surface2);border:1.5px solid var(--border);color:var(--text);font-family:'Figtree',sans-serif;font-size:14px;padding:10px 12px;border-radius:8px;outline:none;-webkit-appearance:none;"></div>
-    <div class="form-row"><label>Day</label><select id="retroAttDay" style="width:100%;background:var(--surface2);border:1.5px solid var(--border);color:var(--text);font-family:'Figtree',sans-serif;font-size:14px;padding:10px 12px;border-radius:8px;outline:none;-webkit-appearance:none;"></select></div>
+    <div class="form-row"><label>Date</label><input type="date" id="retroAttDate" onchange="retroAttDateChanged()" style="width:100%;background:var(--surface2);border:1.5px solid var(--border);color:var(--text);font-family:'Figtree',sans-serif;font-size:14px;padding:10px 12px;border-radius:8px;outline:none;-webkit-appearance:none;"></div>
     <div class="form-row"><label>Class Time</label><select id="retroAttTime" style="width:100%;background:var(--surface2);border:1.5px solid var(--border);color:var(--text);font-family:'Figtree',sans-serif;font-size:14px;padding:10px 12px;border-radius:8px;outline:none;-webkit-appearance:none;"></select></div>
     <div class="form-row" id="retroCoachRow" style="display:none"><label>Coach</label><select id="retroAttCoach" style="width:100%;background:var(--surface2);border:1.5px solid var(--border);color:var(--text);font-family:'Figtree',sans-serif;font-size:14px;padding:10px 12px;border-radius:8px;outline:none;-webkit-appearance:none;"></select></div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
@@ -1979,12 +1978,11 @@ async function saveAttEntry(dIdx,tIdx){
   try{
     const existing=getAttRec(dIdx,tIdx,coach.name);
     const row={...(existing||{}),coach_name:coach.name,week:key,day_index:dIdx,time_index:tIdx,clocked_in:cinIso,clocked_out:coutIso};
-    const res=await sb.upsertReturn('attendance',[row]);
-    const saved=res&&res[0]?res[0]:row;
-    AT.records=AT.records.filter(r=>!(r.day_index===dIdx&&r.time_index===tIdx&&r.coach_name===coach.name));
-    AT.records.push(saved);
+    await sb.upsertReturn('attendance',[row]);
     AT.editing=null;
     setSyncing('ok','Saved');
+    // Reload from DB so duplicate saves don't create phantom records
+    await loadAttendance();
     renderAttendance();
   }catch(e){
     console.warn('Save attendance failed:',e.message);
@@ -2091,11 +2089,20 @@ function renderAttendance(){
   el.innerHTML=dayCards.join('');
 }
 
+function retroAttDateChanged(){
+  const dateVal=g('retroAttDate').value; if(!dateVal) return;
+  const d=new Date(dateVal+'T12:00:00');
+  const dow=d.getDay(); // 0=Sun,1=Mon,...,6=Sat
+  const dIdx=dow===0?-1:dow-1; // map to 0=Mon…5=Sat; -1=invalid
+  // Filter class times: Saturday (dIdx=5) has blackouts
+  const timeEl=g('retroAttTime');
+  timeEl.innerHTML=CLASS_TIMES.map((t,i)=>{
+    if(dIdx===5&&isBk(5,i)) return '';
+    return`<option value="${i}">${t}</option>`;
+  }).filter(Boolean).join('');
+}
+
 function openRetroAttModal(){
-  // Populate day select
-  const dayEl=g('retroAttDay');
-  dayEl.innerHTML=DAYS.map((d,i)=>`<option value="${i}">${d}</option>`).join('');
-  // Populate time select (filtered for selected day)
   const timeEl=g('retroAttTime');
   timeEl.innerHTML=CLASS_TIMES.map((t,i)=>`<option value="${i}">${t}</option>`).join('');
   // Show coach select only for HC
@@ -2106,8 +2113,9 @@ function openRetroAttModal(){
   }else{
     coachRow.style.display='none';
   }
-  // Default date to today
+  // Default date to today and populate time options for today's day
   g('retroAttDate').value=new Date().toISOString().slice(0,10);
+  retroAttDateChanged();
   g('retroAttIn').value='';
   g('retroAttOut').value='';
   openOverlay('retroAttOverlay');
@@ -2115,7 +2123,6 @@ function openRetroAttModal(){
 
 async function saveRetroAtt(){
   const dateVal=g('retroAttDate').value;
-  const dIdx=parseInt(g('retroAttDay').value);
   const tIdx=parseInt(g('retroAttTime').value);
   const inVal=g('retroAttIn').value;
   const outVal=g('retroAttOut').value;
@@ -2123,12 +2130,14 @@ async function saveRetroAtt(){
   if(!inVal){showToast('Enter clock-in time','err');return;}
   const coachName=S.isHC?g('retroAttCoach').value:byId(S.curCoachId)?.name;
   if(!coachName){showToast('No coach selected','err');return;}
-  // Compute the Monday of the week for the given date
+  // Derive day index from the date (0=Mon…5=Sat) — eliminates date/day mismatch
   const d=new Date(dateVal+'T12:00:00');
   const dow=d.getDay();
+  const dIdx=dow===0?-1:dow-1;
+  if(dIdx<0||dIdx>5){showToast('Classes are Monday – Saturday only','err');return;}
+  // Compute Monday of that week for the week key
   const mon=new Date(d); mon.setDate(d.getDate()-dow+(dow===0?-6:1)); mon.setHours(0,0,0,0);
   const weekKey=mon.toISOString().slice(0,10);
-  // Build timestamps from date + time
   const cinIso=`${dateVal}T${inVal}:00`;
   const coutIso=outVal?`${dateVal}T${outVal}:00`:null;
   setSyncing('syncing','Saving…');
@@ -2138,8 +2147,8 @@ async function saveRetroAtt(){
     setSyncing('ok','Saved');
     showToast('Attendance logged ✓','ok');
     closeOverlay('retroAttOverlay');
-    if(activeTab==='attendance') await loadAttendance().then(renderAttendance);
-    if(activeTab==='hours-hc') await loadHCHoursData().then(renderHoursHC);
+    if(activeTab==='attendance') await loadAttendance().then(()=>renderAttendance());
+    if(activeTab==='hours-hc') await loadHCHoursData().then(()=>renderHoursHC());
   }catch(e){
     console.warn('Retro attendance save failed:',e.message);
     setSyncing('err','Error');
