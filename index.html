@@ -359,6 +359,17 @@ select{width:100%;background:var(--surface2);border:1.5px solid var(--border);co
 .clock-out-btn:hover{filter:brightness(1.1);}
 .att-in-time{font-family:'DM Mono',monospace;font-size:11px;color:var(--text3);}
 .att-done-chip{background:var(--green-bg);color:var(--green);border:1px solid var(--green-bdr);border-radius:6px;padding:4px 10px;font-size:11px;font-weight:700;white-space:nowrap;}
+.att-log-btn{background:var(--surface2);color:var(--text2);border:1.5px solid var(--border);padding:6px 14px;border-radius:8px;font-family:'Figtree',sans-serif;font-size:12px;font-weight:700;cursor:pointer;transition:all .15s;}
+.att-log-btn:hover{border-color:var(--accent);color:var(--accent);}
+.att-time-form{display:flex;align-items:center;gap:6px;flex-wrap:wrap;justify-content:flex-end;}
+.att-time-field{display:flex;flex-direction:column;gap:2px;align-items:center;}
+.att-time-lbl{font-size:9px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:.5px;}
+.att-time-input{background:var(--surface2);border:1.5px solid var(--border);color:var(--text);font-family:'Figtree',sans-serif;font-size:13px;padding:6px 8px;border-radius:7px;outline:none;width:86px;-webkit-appearance:none;}
+.att-time-input:focus{border-color:var(--accent);}
+.att-record{display:flex;align-items:center;gap:8px;}
+.att-record-times{font-family:'DM Mono',monospace;font-size:12px;color:var(--text2);}
+.att-icon-btn{background:none;border:none;font-size:16px;cursor:pointer;padding:3px 5px;border-radius:5px;line-height:1;color:var(--text3);transition:color .15s;}
+.att-icon-btn:hover{color:var(--red);}
 /* ── HC Hours ── */
 .hours-coach-row{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid var(--border);}
 .hours-coach-row:last-child{border-bottom:none;}
@@ -730,7 +741,7 @@ const S={
   monthlyClassCounts:null,
   ptSessions:[],
 };
-const AT={records:[], loading:false};   // attendance records
+const AT={records:[], loading:false, editing:null};   // attendance records
 const ATH={records:[], period:'week'};  // HC hours view
 
 // ─── WEEK HELPERS ─────────────────────────────────────
@@ -1928,41 +1939,73 @@ function getAttRec(dIdx,tIdx,coachName){
   return AT.records.find(r=>r.day_index===dIdx&&r.time_index===tIdx&&r.coach_name===coachName)||null;
 }
 
-async function clockIn(dIdx,tIdx){
+function nowTimeStr(){
+  const d=new Date();
+  return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+}
+function isoToTimeStr(iso){
+  if(!iso) return '';
+  const d=new Date(iso);
+  return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+}
+function timeStrToIso(dateStr,timeStr){
+  if(!timeStr) return null;
+  return new Date(dateStr+'T'+timeStr+':00').toISOString();
+}
+
+function openAttEntry(dIdx,tIdx){
+  AT.editing={dIdx,tIdx};
+  renderAttendance();
+  // Focus the In input after render
+  setTimeout(()=>{const el=g(`attIn-${dIdx}-${tIdx}`);if(el)el.focus();},50);
+}
+function cancelAttEntry(){AT.editing=null;renderAttendance();}
+
+async function saveAttEntry(dIdx,tIdx){
   const coach=byId(S.curCoachId); if(!coach) return;
   const key=wKey();
-  if(getAttRec(dIdx,tIdx,coach.name)?.clocked_in){showToast('Already clocked in','err');return;}
+  const dates=wDates();
+  const dateStr=dates[dIdx].toISOString().slice(0,10);
+  const inVal=g(`attIn-${dIdx}-${tIdx}`)?.value;
+  const outVal=g(`attOut-${dIdx}-${tIdx}`)?.value||'';
+  if(!inVal){showToast('Enter a clock-in time','err');return;}
+  const cinIso=timeStrToIso(dateStr,inVal);
+  const coutIso=outVal?timeStrToIso(dateStr,outVal):null;
+  if(coutIso&&new Date(coutIso)<=new Date(cinIso)){showToast('Clock-out must be after clock-in','err');return;}
   setSyncing('syncing','Saving…');
   try{
-    const row={coach_name:coach.name,week:key,day_index:dIdx,time_index:tIdx,clocked_in:new Date().toISOString()};
+    const existing=getAttRec(dIdx,tIdx,coach.name);
+    const row={...(existing||{}),coach_name:coach.name,week:key,day_index:dIdx,time_index:tIdx,clocked_in:cinIso,clocked_out:coutIso};
     const res=await sb.upsertReturn('attendance',[row]);
-    const saved=res&&res[0]?res[0]:{...row,id:Date.now()};
+    const saved=res&&res[0]?res[0]:row;
     AT.records=AT.records.filter(r=>!(r.day_index===dIdx&&r.time_index===tIdx&&r.coach_name===coach.name));
     AT.records.push(saved);
+    AT.editing=null;
     setSyncing('ok','Saved');
     renderAttendance();
   }catch(e){
-    console.warn('Clock in failed:',e.message);
+    console.warn('Save attendance failed:',e.message);
     setSyncing('err','Error');
-    showToast('Clock in failed','err');
+    showToast('Save failed','err');
   }
 }
 
-async function clockOut(dIdx,tIdx){
+async function deleteAttRec(dIdx,tIdx){
   const coach=byId(S.curCoachId); if(!coach) return;
   const rec=getAttRec(dIdx,tIdx,coach.name);
-  if(!rec?.clocked_in){showToast('Not clocked in','err');return;}
+  if(!rec) return;
+  if(!confirm('Delete this attendance record?')) return;
   setSyncing('syncing','Saving…');
   try{
-    const updated={...rec,clocked_out:new Date().toISOString()};
-    await sb.upsert('attendance',[updated]);
-    AT.records=AT.records.map(r=>r.id===rec.id?updated:r);
+    if(rec.id) await sb.del('attendance',`id=eq.${rec.id}`);
+    AT.records=AT.records.filter(r=>r!==rec);
+    AT.editing=null;
     setSyncing('ok','Saved');
     renderAttendance();
   }catch(e){
-    console.warn('Clock out failed:',e.message);
+    console.warn('Delete attendance failed:',e.message);
     setSyncing('err','Error');
-    showToast('Clock out failed','err');
+    showToast('Delete failed','err');
   }
 }
 
@@ -1978,7 +2021,7 @@ function renderAttendance(){
     return;
   }
 
-  // Build slot cards only for: classes assigned to this coach OR classes they've clocked into
+  // Build slot cards: assigned classes + any clocked-in records for this coach
   const dayCards=DAYS.map((day,dIdx)=>{
     const d=dates[dIdx];
     const isToday=d.getTime()===today.getTime();
@@ -1986,25 +2029,45 @@ function renderAttendance(){
       if(isBk(dIdx,tIdx)) return '';
       const assigned=weekData[dIdx]?.[tIdx]||null;
       const rec=coach?getAttRec(dIdx,tIdx,coach.name):null;
-      // Only show if this coach is assigned OR they have a clock-in record for it
       const isMyClass=coach&&assigned===coach.name;
       if(!isMyClass&&!rec) return '';
+      const isEditing=AT.editing&&AT.editing.dIdx===dIdx&&AT.editing.tIdx===tIdx;
+      const coverNote=!isMyClass&&rec?`<span class="att-slot-note">Covered${assigned?' ('+esc(assigned)+')':''}</span>`:'';
       let action='';
-      if(rec?.clocked_in&&rec?.clocked_out){
-        const dur=calcDuration(rec.clocked_in,rec.clocked_out);
-        action=`<span class="att-done-chip">✓ Done${dur?' · '+dur:''}</span>`;
+      if(isEditing){
+        // Inline time-entry form
+        const defaultIn=rec?isoToTimeStr(rec.clocked_in):nowTimeStr();
+        const defaultOut=rec?isoToTimeStr(rec.clocked_out):'';
+        action=`<div class="att-time-form">
+          <div class="att-time-field">
+            <span class="att-time-lbl">In</span>
+            <input class="att-time-input" type="time" id="attIn-${dIdx}-${tIdx}" value="${defaultIn}">
+          </div>
+          <div class="att-time-field">
+            <span class="att-time-lbl">Out</span>
+            <input class="att-time-input" type="time" id="attOut-${dIdx}-${tIdx}" value="${defaultOut}">
+          </div>
+          <button class="clock-in-btn" onclick="saveAttEntry(${dIdx},${tIdx})">Save</button>
+          <button class="att-icon-btn" onclick="cancelAttEntry()" title="Cancel">✕</button>
+        </div>`;
       }else if(rec?.clocked_in){
-        action=`<div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
-          <span class="att-in-time">In at ${fmtTimestamp(rec.clocked_in)}</span>
-          <button class="clock-out-btn" onclick="clockOut(${dIdx},${tIdx})">Clock Out</button>
+        // Show recorded times + edit/delete
+        const inT=fmtTimestamp(rec.clocked_in);
+        const outT=rec.clocked_out?fmtTimestamp(rec.clocked_out):'—';
+        const dur=calcDuration(rec.clocked_in,rec.clocked_out);
+        action=`<div class="att-record">
+          <div style="text-align:right;">
+            <div class="att-record-times">${inT} → ${outT}</div>
+            ${dur?`<div style="font-size:10px;color:var(--text3);margin-top:1px;">${dur}</div>`:''}
+          </div>
+          <button class="att-log-btn" onclick="openAttEntry(${dIdx},${tIdx})" style="padding:5px 10px;">Edit</button>
+          <button class="att-icon-btn" onclick="deleteAttRec(${dIdx},${tIdx})" title="Delete">🗑</button>
         </div>`;
       }else{
-        action=`<button class="clock-in-btn" onclick="clockIn(${dIdx},${tIdx})">Clock In</button>`;
+        action=`<button class="att-log-btn" onclick="openAttEntry(${dIdx},${tIdx})">Log Time</button>`;
       }
-      // Note for covered classes (clocked in but not assigned)
-      const noteHTML=!isMyClass&&rec?`<span class="att-slot-note">Covered${assigned?' ('+esc(assigned)+')':''}</span>`:'';
       return`<div class="attendance-slot">
-        <div class="att-slot-info"><span class="att-slot-time">${time}</span>${noteHTML}</div>
+        <div class="att-slot-info"><span class="att-slot-time">${time}</span>${coverNote}</div>
         <div class="att-slot-actions">${action}</div>
       </div>`;
     }).filter(Boolean).join('');
