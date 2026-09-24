@@ -594,7 +594,7 @@ select{width:100%;background:var(--surface2);border:1.5px solid var(--border);co
     <div class="view" id="view-attendance">
       <div class="section-head">
         <span class="section-title">Attendance</span>
-        <button class="btn ghost" style="font-size:12px;padding:6px 12px;" onclick="openRetroAttModal()">+ Log Past Class</button>
+        <button class="btn ghost" style="font-size:12px;padding:6px 12px;" onclick="openRetroAttModal()">+ Log a Class</button>
       </div>
       <div id="attendanceContent"></div>
     </div>
@@ -654,8 +654,8 @@ select{width:100%;background:var(--surface2);border:1.5px solid var(--border);co
 <div class="overlay" id="retroAttOverlay">
   <div class="modal">
     <span class="modal-handle"></span>
-    <div class="modal-title">Log Past Class</div>
-    <div class="quick-hint">Record attendance for a class you already taught.</div>
+    <div class="modal-title">Log a Class</div>
+    <div class="quick-hint">Log a past class or a class you covered for someone else.</div>
     <div class="form-row"><label>Date</label><input type="date" id="retroAttDate" style="width:100%;background:var(--surface2);border:1.5px solid var(--border);color:var(--text);font-family:'Figtree',sans-serif;font-size:14px;padding:10px 12px;border-radius:8px;outline:none;-webkit-appearance:none;"></div>
     <div class="form-row"><label>Day</label><select id="retroAttDay" style="width:100%;background:var(--surface2);border:1.5px solid var(--border);color:var(--text);font-family:'Figtree',sans-serif;font-size:14px;padding:10px 12px;border-radius:8px;outline:none;-webkit-appearance:none;"></select></div>
     <div class="form-row"><label>Class Time</label><select id="retroAttTime" style="width:100%;background:var(--surface2);border:1.5px solid var(--border);color:var(--text);font-family:'Figtree',sans-serif;font-size:14px;padding:10px 12px;border-radius:8px;outline:none;-webkit-appearance:none;"></select></div>
@@ -1223,7 +1223,7 @@ async function switchTab(id,btn){
     if(id==='coaches'||id==='ops') await loadMonthlyClassCounts();
     if(id==='pt'||id==='pt-hc') await loadPtSessions();
     if(id==='analytics') await loadAnalyticsData();
-    if(id==='attendance') await loadAttendance();
+    if(id==='attendance'){ if(!S.schedule[wKey()]) await loadWeekFromDB(); await loadAttendance(); }
     if(id==='hours-hc'){ await loadHCHoursData(); }
   }catch(e){console.error(e);}
   renderActiveTab();
@@ -1978,13 +1978,17 @@ function renderAttendance(){
     return;
   }
 
-  el.innerHTML=DAYS.map((day,dIdx)=>{
+  // Build slot cards only for: classes assigned to this coach OR classes they've clocked into
+  const dayCards=DAYS.map((day,dIdx)=>{
     const d=dates[dIdx];
     const isToday=d.getTime()===today.getTime();
     const slots=CLASS_TIMES.map((time,tIdx)=>{
       if(isBk(dIdx,tIdx)) return '';
       const assigned=weekData[dIdx]?.[tIdx]||null;
       const rec=coach?getAttRec(dIdx,tIdx,coach.name):null;
+      // Only show if this coach is assigned OR they have a clock-in record for it
+      const isMyClass=coach&&assigned===coach.name;
+      if(!isMyClass&&!rec) return '';
       let action='';
       if(rec?.clocked_in&&rec?.clocked_out){
         const dur=calcDuration(rec.clocked_in,rec.clocked_out);
@@ -1997,10 +2001,8 @@ function renderAttendance(){
       }else{
         action=`<button class="clock-in-btn" onclick="clockIn(${dIdx},${tIdx})">Clock In</button>`;
       }
-      const noteHTML=assigned&&coach&&assigned!==coach.name
-        ?`<span class="att-slot-note">${esc(assigned)}'s class</span>`
-        :assigned?''
-        :'<span class="att-slot-note">Unassigned</span>';
+      // Note for covered classes (clocked in but not assigned)
+      const noteHTML=!isMyClass&&rec?`<span class="att-slot-note">Covered${assigned?' ('+esc(assigned)+')':''}</span>`:'';
       return`<div class="attendance-slot">
         <div class="att-slot-info"><span class="att-slot-time">${time}</span>${noteHTML}</div>
         <div class="att-slot-actions">${action}</div>
@@ -2014,7 +2016,13 @@ function renderAttendance(){
       </div>
       ${slots}
     </div>`;
-  }).join('');
+  }).filter(Boolean);
+
+  if(!dayCards.length){
+    el.innerHTML='<div class="health-empty" style="padding:20px 0">No classes scheduled for you this week.</div>';
+    return;
+  }
+  el.innerHTML=dayCards.join('');
 }
 
 function openRetroAttModal(){
