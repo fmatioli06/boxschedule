@@ -744,7 +744,7 @@ const S={
   ptSessions:[],
 };
 const AT={records:[], loading:false, editing:null};   // attendance records
-const ATH={records:[], period:'week'};  // HC hours view
+const ATH={records:[], period:'week', offset:0};  // HC hours view; offset = weeks back (week mode) or months back (month mode)
 
 // ─── WEEK HELPERS ─────────────────────────────────────
 // getMon: returns Monday Date for a given week offset.
@@ -2159,13 +2159,25 @@ async function saveRetroAtt(){
 
 // ─── HC HOURS ────────────────────────────────────────
 
+function athWeekRange(){
+  const mon=getMon(ATH.offset);
+  const sun=new Date(mon); sun.setDate(sun.getDate()+6);
+  return{weekStart:mon.toISOString().slice(0,10),weekEnd:sun.toISOString().slice(0,10)};
+}
+function athMonthRange(){
+  // ATH.offset in month mode = months back from today's month
+  const today=new Date();
+  const y=today.getFullYear(),m=today.getMonth()-ATH.offset;
+  const first=new Date(y,m,1),last=new Date(y,m+1,0);
+  return{monthStart:first.toISOString().slice(0,10),monthEnd:last.toISOString().slice(0,10)};
+}
 async function loadHCHoursData(){
   let start,end;
   if(ATH.period==='week'){
-    const{weekStart,weekEnd}=ptWeekRange();
+    const{weekStart,weekEnd}=athWeekRange();
     start=weekStart; end=weekEnd;
   }else{
-    const{monthStart,monthEnd}=ptMonthRange();
+    const{monthStart,monthEnd}=athMonthRange();
     start=monthStart; end=monthEnd;
   }
   // Fetch 6 days earlier to catch cross-month weeks
@@ -2187,6 +2199,15 @@ async function loadHCHoursData(){
 
 async function switchHoursPeriod(p){
   ATH.period=p;
+  ATH.offset=0;
+  ATH.records=[];
+  renderHoursHC();
+  await loadHCHoursData();
+  renderHoursHC();
+}
+async function changeHoursOffset(delta){
+  ATH.offset+=delta;
+  if(ATH.offset<0) ATH.offset=0;  // don't go into future
   ATH.records=[];
   renderHoursHC();
   await loadHCHoursData();
@@ -2196,17 +2217,34 @@ async function switchHoursPeriod(p){
 function renderHoursHC(){
   const el=g('hoursHcContent'); if(!el) return;
   const chip=g('hoursHcChip');
-  const mon=getMon(S.weekOffset);
-  const dates=wDates();
-  if(chip) chip.textContent=ATH.period==='week'?'Week of '+fmtF(dates[0]):mon.toLocaleString('default',{month:'long'})+' '+mon.getFullYear();
 
-  const toggleHTML=`<div style="display:flex;gap:8px;margin-bottom:14px;">
-    <button class="btn${ATH.period==='week'?'':' ghost'}" onclick="switchHoursPeriod('week')" style="font-size:12px;padding:6px 14px;">This Week</button>
-    <button class="btn${ATH.period==='month'?'':' ghost'}" onclick="switchHoursPeriod('month')" style="font-size:12px;padding:6px 14px;">This Month</button>
+  // Compute period label and range for display
+  let periodLabel='';
+  if(ATH.period==='week'){
+    const{weekStart}=athWeekRange();
+    const d=new Date(weekStart+'T12:00:00');
+    periodLabel='Week of '+fmtF(d);
+  }else{
+    const today=new Date();
+    const y=today.getFullYear(),m=today.getMonth()-ATH.offset;
+    const dt=new Date(y,m,1);
+    periodLabel=dt.toLocaleString('default',{month:'long'})+' '+dt.getFullYear();
+  }
+  if(chip) chip.textContent=periodLabel;
+
+  const isCurrentPeriod=ATH.offset===0;
+  const navHTML=`<div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
+    <button class="btn${ATH.period==='week'?'':' ghost'}" onclick="switchHoursPeriod('week')" style="font-size:12px;padding:6px 14px;">Week</button>
+    <button class="btn${ATH.period==='month'?'':' ghost'}" onclick="switchHoursPeriod('month')" style="font-size:12px;padding:6px 14px;">Month</button>
+    <div style="display:flex;align-items:center;gap:4px;margin-left:auto;">
+      <button class="btn ghost" onclick="changeHoursOffset(1)" style="font-size:14px;padding:4px 10px;">‹</button>
+      <span style="font-size:12px;font-weight:600;min-width:120px;text-align:center;color:var(--text2);">${periodLabel}</span>
+      <button class="btn ghost" onclick="changeHoursOffset(-1)" style="font-size:14px;padding:4px 10px;${isCurrentPeriod?'opacity:.4;cursor:default;':''}" ${isCurrentPeriod?'disabled':''}>›</button>
+    </div>
   </div>`;
 
   if(!ATH.records.length){
-    el.innerHTML=toggleHTML+'<div class="health-empty" style="padding:20px 0">No attendance records for this period.</div>';
+    el.innerHTML=navHTML+'<div class="health-empty" style="padding:20px 0">No attendance records for this period.</div>';
     return;
   }
 
@@ -2250,7 +2288,7 @@ function renderHoursHC(){
     </div>`;
   }).join('');
 
-  el.innerHTML=`${toggleHTML}
+  el.innerHTML=`${navHTML}
     <div class="coverage-board" style="margin-bottom:14px;">
       <div class="coverage-board-head"><span class="section-title" style="font-size:16px;">Summary</span></div>
       ${summaryRows}
